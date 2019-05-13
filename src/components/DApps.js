@@ -21,7 +21,7 @@ class DApps extends React.Component {
       const bootstrap = await this.trustClient.stakingNetworks()
       this.setState({ data: bootstrap.data.docs });
     } catch (error) {
-      console.log(`Error at fetch()`, error)
+      console.log(`Error at fetch()`, error.message)
     }
   }
 
