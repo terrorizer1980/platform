@@ -1,16 +1,13 @@
 import React from 'react';
-import { osName } from 'react-device-detect';
 import '../App.css';
 import DAppItems from './DAppItems';
 import { TrustClient } from '../network/TrustClient';
-import { TrustWeb3 } from "../network/TrustWeb3";
 
 class DAppsCategory extends React.Component {
   constructor(props) {
     super(props);
     this.state = { list: [], category: {} };
     this.trustClient = new TrustClient();
-    this.trustWeb3 = new TrustWeb3();
     console.log(props);
   }
 
@@ -20,8 +17,7 @@ class DAppsCategory extends React.Component {
 
   async fetch() {
     try {
-      const network = await this.trustWeb3.getNetwork();
-      const dapps = await this.trustClient.fetchDAppsByCategoryID(this.props.id, network, osName)
+      const dapps = await this.trustClient.stakingProviders(this.props.id)
       const list = dapps.data.docs;
       const category = dapps.data.category;
       

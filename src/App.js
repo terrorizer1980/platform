@@ -9,7 +9,7 @@ import './App.css';
 import DApps from './components/DApps.js';
 import DAppsCategory from './components/DAppsCategory.js';
 import ContactUs from './components/ContactUs.js';
-import Staking from './components/Staking/index';
+import Staking from './components/staking/index.js';
 
 const StakingElement = ({ match }) => (
   <div>

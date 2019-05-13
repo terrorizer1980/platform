@@ -1,19 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { osName, isIOS } from 'react-device-detect';
 import '../App.css';
 import DAppItems from './DAppItems';
 import DAppTopCards from './DAppTopCards';
 import { TrustClient } from '../network/TrustClient';
-import { TrustWeb3 } from "../network/TrustWeb3";
-import DAppsDisabled from './DAppsDisabled';
-import { getTrsutBrowserVersion } from "../components/systemchecks/BrowserVersion";
+
 class DApps extends React.Component {
   constructor(props) {
     super(props);
     this.state = { data: [] };
     this.trustClient = new TrustClient();
-    this.trustWeb3 = new TrustWeb3();
   }
 
   componentWillMount() {
@@ -22,8 +18,7 @@ class DApps extends React.Component {
 
   fetch = async() => {
     try {
-      const networkId = await this.trustWeb3.getNetwork();
-      const bootstrap = await this.trustClient.fetchBootstrap(networkId, osName);
+      const bootstrap = await this.trustClient.stakingNetworks()
       this.setState({ data: bootstrap.data.docs });
     } catch (error) {
       console.log(`Error at fetch()`, error)
@@ -31,12 +26,6 @@ class DApps extends React.Component {
   }
 
   render() {
-    const browserVersion = getTrsutBrowserVersion()
-    if (browserVersion >= 1.136 && isIOS) {
-      return (
-        <DAppsDisabled />
-      )
-    }
     const elements = this.state.data || [];
     const categoryID = '5abcceb4682db901241a0636';
     const newDApp = elements.filter((item) => {
