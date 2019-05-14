@@ -1,12 +1,13 @@
 import React from 'react';
 import { Media } from 'reactstrap';
 
-class DAppItem extends React.Component {
+class ProviderItem extends React.Component {
   render() {
     const item = this.props.item;
-    const url = item.url;
+    const url = `/staking/${item.id}`
     return (
       <Media className="dappItem" tag="a" href={url}>
+        <span>ProviderItem</span>
         <Media className="mt-1 align media-block">
           <Media bottom>
             <img src={item.image} alt="logo" className="media-logo" />
@@ -23,4 +24,4 @@ class DAppItem extends React.Component {
   }
 }
 
-export default DAppItem;
+export default ProviderItem;

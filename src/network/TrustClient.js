@@ -10,8 +10,4 @@ export class TrustClient {
   stakingProviders(network) {
     return axios.get(`${url}/staking/${network}`);
   }
-
-  stakingProviders(network) {
-    return axios.get(`${url}/staking/${network}`);
-  }
 }

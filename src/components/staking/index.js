@@ -3,20 +3,28 @@ import {
   Row,
   Col,
 } from 'reactstrap';
-import DAppItem from '../DAppItem';
+import ProviderItems from './components/ProviderItems';
 
 class Staking extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { elements: [{
+      id: "123",
+      url: "urasd",
+      title: "qdasa",
+      description: "12312312"
+    },
+    {
+      id: "123",
+      url: "urasd",
+      title: "qdasa",
+      description: "12312312"
+    }] };
+  }
+
   render() {
     return (
-      <div>
-        <Row>
-          {this.props.items.map((dapp, index) => (
-            <Col xs="12" sm="6" md="4" key={index}>
-              <DAppItem item={dapp} key={index} />
-            </Col>
-          ))}
-        </Row>
-      </div>
+      <ProviderItems elements={this.state.elements} />
     );
   }
 }
