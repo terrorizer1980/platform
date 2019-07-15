@@ -4,5 +4,9 @@
   "scripts": {
     "test": "test"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^12.6.2",
+    "typescript": "^3.5.3"
+  }
 }
