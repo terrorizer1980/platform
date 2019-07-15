@@ -2,6 +2,8 @@
   "name": "trust-platform",
   "version": "0.0.1",
   "scripts": {
+    "prettify": "prettier --parser typescript --single-quote --write \"src/**/*.{ts,tsx}\"",
+    "check-prettier": "prettier --parser typescript --single-quote --list-different \"src/**/*.{ts,tsx}\"",
     "lint": "eslint src config --max-warnings 0",
     "test": "test"
   },
@@ -13,6 +15,7 @@
     "@typescript-eslint/parser": "^1.12.0",
     "@typescript-eslint/typescript-estree": "^1.12.0",
     "eslint": "^6.0.1",
+    "prettier": "^1.18.2",
     "typescript": "^3.5.3"
   }
 }
