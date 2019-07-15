@@ -7,6 +7,7 @@ module.exports = {
     extends: [
         'plugin:react/recommended',
         'plugin:@typescript-eslint/recommended',
+        'prettier'
     ],
     rules:  {
         "no-unused-vars": [
@@ -19,5 +20,10 @@ module.exports = {
         ],
         "no-use-before-define": ["off"],
         "no-useless-constructor": ["off"],
+        "@typescript-eslint/explicit-function-return-type": ["error", {
+            "allowTypedFunctionExpressions": true
+        }],
+        "indent": "off",
+        "@typescript-eslint/indent": ["error", 2]
     }
 }
