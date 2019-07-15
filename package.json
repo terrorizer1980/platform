@@ -1,0 +1,8 @@
+{
+  "name": "trust-platform",
+  "version": "0.0.1",
+  "scripts": {
+    "test": "test"
+  },
+  "license": "MIT"
+}
