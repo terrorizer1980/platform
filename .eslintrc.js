@@ -20,10 +20,18 @@ module.exports = {
         ],
         "no-use-before-define": ["off"],
         "no-useless-constructor": ["off"],
+        "@typescript-eslint/camelcase": "off",
+        "@typescript-eslint/explicit-member-accessibility": "off",
         "@typescript-eslint/explicit-function-return-type": ["error", {
             "allowTypedFunctionExpressions": true
         }],
         "indent": "off",
-        "@typescript-eslint/indent": ["error", 2]
-    }
-}
+        "@typescript-eslint/indent": ["error", 2],
+
+    },
+    settings: {
+        react: {
+            version: require('./package.json').dependencies.react,
+        },
+    },
+};
