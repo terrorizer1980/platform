@@ -7,15 +7,12 @@ export class BlockAtlas {
   static async getValidators(): Promise<Validator[]> {
     let data, resp;
     try {
-      resp = await fetch(
-        `${BlockAtlas.apiURL}/v2/cosmos/staking/validators`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      resp = await fetch(`${BlockAtlas.apiURL}/v2/cosmos/staking/validators`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
       data = await resp.json();
     } catch (e) {
       throw new Error('Could not get validators from BlockAtlas');
@@ -23,18 +20,6 @@ export class BlockAtlas {
     if (!resp.ok || data.error) {
       // TODO Handle errors
       throw new Error('Could not get validators from BlockAtlas');
-    }
-    let validators: Validator[] = [];
-    for (let v of data['docs']) {
-      const validator: Validator = {
-        status: v.status,
-        name: v.info.name,
-        description: v.info.description,
-        website: v.info.website,
-        address: {value: v.address},
-        pubkey: {value: v.pubkey, type: pubKeyType.secp256k1}, // TODO switch to ed15529
-      };
-      validators.push(validator);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,7 +50,7 @@ export class BlockAtlas {
       throw new Error('Could not get transactions from BlockAtlas');
     }
 
-    if (!resp.ok ||data.error) {
+    if (!resp.ok || data.error) {
       throw new Error('Could not get transactions from BlockAtlas');
     }
 
