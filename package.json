@@ -8,8 +8,10 @@
     "test": "node config/test.js",
     "unit": "yarn jest --colors",
     "coverage": "yarn unit --coverage && open coverage/lcov-report/index.html || xdg-open coverage/lcov-report/index.html",
-    "dev": "webpack-dev-server --open --config webpack.dev.ts",
-    "build": "webpack --mode production --config webpack.prod.ts",
+    "dev": "NODE_ENV=development webpack-dev-server --open --config webpack.dev.ts",
+    "build": "NODE_ENV=production webpack --mode production --progress --config webpack.prod.ts",
+    "start:prod": "NODE_ENV=production node ./server.js $PORT",
+    "heroku-prebuild": "yarn install --dev",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -57,6 +59,7 @@
   },
   "dependencies": {
     "bignumber.js": "^9.0.0",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.0",
+    "express": "latest"
   }
 }

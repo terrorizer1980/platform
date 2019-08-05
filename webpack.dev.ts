@@ -19,7 +19,8 @@ const config: webpack.Configuration = {
       { test: /\.tsx?$/, loader: "awesome-typescript-loader" }
     ]
   },
-  plugins: [htmlPlugin]
+  plugins: [htmlPlugin],
+  devtool: 'inline-source-map'
 };
 
 export default config;
