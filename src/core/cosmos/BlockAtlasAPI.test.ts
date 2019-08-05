@@ -1,5 +1,8 @@
 import {BlockAtlas} from './BlockAtlasAPI';
 import {pubKeyType, Validator} from './types';
+import {FetchMock} from 'jest-fetch-mock';
+
+const fetchMock = fetch as FetchMock;
 
 describe('getValidators', () => {
   beforeEach(() => {

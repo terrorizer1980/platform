@@ -1,7 +1,9 @@
 import {CosmosRPCService} from './CosmosRPCService';
 import {Address, pubKeyType, PublicKey, Signature, TxHash} from './types';
 import BigNumber from 'bignumber.js';
+import {FetchMock} from 'jest-fetch-mock';
 
+const fetchMock = fetch as FetchMock;
 describe('getDelegations', () => {
   beforeEach(() => {
     jest.resetModules();
