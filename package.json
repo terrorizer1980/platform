@@ -48,6 +48,7 @@
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-react": "^7.14.2",
     "html-webpack-plugin": "^3.2.0",
+    "image-webpack-loader": "^5.0.0",
     "jest": "^24.8.0",
     "jest-fetch-mock": "^2.1.2",
     "prettier": "^1.18.2",
@@ -63,8 +64,11 @@
     "webpack-dev-server": "^3.7.2"
   },
   "dependencies": {
+    "@trustwallet/types": "^0.0.16",
+    "@trustwallet/walletconnect": "^0.0.16",
+    "@walletconnect/qrcode-modal": "^1.0.0-beta.32",
     "bignumber.js": "^9.0.0",
-    "node-fetch": "^2.6.0",
-    "express": "latest"
+    "express": "latest",
+    "node-fetch": "^2.6.0"
   }
 }

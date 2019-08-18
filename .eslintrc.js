@@ -10,14 +10,7 @@ module.exports = {
         'prettier'
     ],
     rules:  {
-        "no-unused-vars": [
-            "warn",
-            {
-                argsIgnorePattern: "^_$|^_unused_",
-                varsIgnorePattern: "^_$|^_unused_",
-                caughtErrorsIgnorePattern: "^_$|^_unused_",
-            },
-        ],
+        "no-unused-vars": ["off"],
         "no-use-before-define": ["off"],
         "no-useless-constructor": ["off"],
         "@typescript-eslint/camelcase": "off",

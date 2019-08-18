@@ -3,7 +3,7 @@ import React from 'react';
 
 const StyledButton = styled.div`
   display: flex;
-  width: 345px;
+  width: 80%;
   height: 50px;
   justify-content: center;
   align-items: center;
@@ -16,6 +16,8 @@ const StyledButton = styled.div`
     Ubuntu, sans-serif;
   :hover {
     background: #2566ab;
+    -webkit-filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.1));
+    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.1));
   }
 `;
 
