@@ -25,6 +25,9 @@
     "@storybook/addon-links": "^5.1.9",
     "@storybook/addons": "^5.1.9",
     "@storybook/react": "^5.1.9",
+    "@trustwallet/ui": "^0.0.14",
+    "@types/enzyme": "^3.10.3",
+    "@types/enzyme-adapter-react-16": "^1.0.5",
     "@types/html-webpack-plugin": "^3.2.1",
     "@types/jest": "^24.0.15",
     "@types/node": "^12.6.2",
@@ -39,10 +42,13 @@
     "@typescript-eslint/typescript-estree": "^1.12.0",
     "awesome-typescript-loader": "^5.2.1",
     "babel-loader": "^8.0.6",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.14.0",
     "eslint": "^6.0.1",
     "eslint-config-prettier": "^6.0.0",
     "eslint-plugin-react": "^7.14.2",
     "html-webpack-plugin": "^3.2.0",
+    "image-webpack-loader": "^5.0.0",
     "jest": "^24.8.0",
     "jest-fetch-mock": "^2.1.2",
     "prettier": "^1.18.2",
@@ -58,8 +64,11 @@
     "webpack-dev-server": "^3.7.2"
   },
   "dependencies": {
+    "@trustwallet/types": "^0.0.16",
+    "@trustwallet/walletconnect": "^0.0.16",
+    "@walletconnect/qrcode-modal": "^1.0.0-beta.32",
     "bignumber.js": "^9.0.0",
-    "node-fetch": "^2.6.0",
-    "express": "latest"
+    "express": "latest",
+    "node-fetch": "^2.6.0"
   }
 }
