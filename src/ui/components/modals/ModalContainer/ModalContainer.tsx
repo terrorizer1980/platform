@@ -8,18 +8,6 @@ import StakeInputModal from '../StakeInputModal/StakeInputModal';
 import StakeConfirmModal from '../StakeConfirmModal/StakeConfirmModal';
 import WithdrawListModal from '../WithdrawListModal/WithdrawListModal';
 
-// TODO REMOVE
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const sesameseed = require('../../../assets/mocks/sesameseed.svg');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const tezos = require('../../../assets/mocks/tezos.svg');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fish = require('../../../assets/mocks/fish.svg');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ztake = require('../../../assets/mocks/ztake.svg');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const zbeos = require('../../../assets/mocks/zbeos.svg');
-
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const exit = require('../../../assets/exit.svg');
 
@@ -310,33 +298,9 @@ class ModalContainer extends React.Component<
                 validators={[
                   {
                     id: 'Sesameseed',
-                    imgSrc: sesameseed,
+                    imgSrc: '',
                     name: 'Sesameseed',
                     apr: 22,
-                  },
-                  {
-                    id: 'Tezos Capital',
-                    imgSrc: tezos,
-                    name: 'Tezos Capital',
-                    apr: 17.8,
-                  },
-                  {
-                    id: 'StakeFish',
-                    imgSrc: fish,
-                    name: 'stake.fish | bitfish',
-                    apr: 21,
-                  },
-                  {
-                    id: 'Ztake',
-                    imgSrc: ztake,
-                    name: 'Ztake.org',
-                    apr: 16,
-                  },
-                  {
-                    id: 'zbeos',
-                    imgSrc: zbeos,
-                    name: 'zbeosbp11111',
-                    apr: 7.3,
                   },
                 ]}
               ></ValidatorModal>
@@ -367,7 +331,7 @@ class ModalContainer extends React.Component<
                 onValidatorDetail={this.onValidatorDetail}
                 validator={{
                   id: '1',
-                  imgSrc: tezos,
+                  imgSrc: '',
                   name: 'Polychain Labs',
                   apr: 5,
                   detail:
@@ -402,7 +366,7 @@ class ModalContainer extends React.Component<
                 balance={this.state.balance}
                 validator={{
                   id: '1',
-                  imgSrc: tezos,
+                  imgSrc: '',
                   name: 'Polychain Labs',
                   apr: 5,
                   detail:
@@ -464,30 +428,9 @@ class ModalContainer extends React.Component<
                 delegations={[
                   {
                     id: '1',
-                    imgSrc: tezos,
+                    imgSrc: '',
                     validatorName: 'Polychain Labs',
                     amount: 600,
-                    denom: 'ATOM',
-                  },
-                  {
-                    id: '2',
-                    imgSrc: sesameseed,
-                    validatorName: 'Sesemeseed',
-                    amount: 398.18,
-                    denom: 'ATOM',
-                  },
-                  {
-                    id: '3',
-                    imgSrc: zbeos,
-                    validatorName: 'ZBEOS',
-                    amount:2348.92347,
-                    denom: 'ATOM',
-                  },
-                  {
-                    id: '4',
-                    imgSrc: ztake,
-                    validatorName: 'ZTAKE',
-                    amount: 1238.18237,
                     denom: 'ATOM',
                   },
                 ]}

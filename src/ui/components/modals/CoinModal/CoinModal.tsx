@@ -1,23 +1,8 @@
 import styled from '../../../theme/index';
 import {css} from '../../../theme/index';
-import React from 'react';
+import {AssetsImage} from '../../../../core/AssetsImage'
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const cosmos = require('../../../assets/CoinImg/cosmos.svg');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const binance = require('../../../assets/CoinImg/binance.png');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ethereum_classic = require('../../../assets/CoinImg/ethereum_classic.png');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ethereum = require('../../../assets/CoinImg/ethereum.png');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const ripple = require('../../../assets/CoinImg/ripple.png');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const stellar = require('../../../assets/CoinImg/stellar.png');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const tezos = require('../../../assets/CoinImg/tezos.png');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const tron = require('../../../assets/CoinImg/tron.png');
+import React from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 // const exit = require('../../../assets/exit.svg');
@@ -190,52 +175,10 @@ class CoinModal extends React.Component<CoinModalProps, CoinModalState> {
     this.state = {
       assets: [
         {
-          id: 1,
-          imgSrc: cosmos,
+          id: 118,
+          imgSrc: new AssetsImage().getCoinImage('cosmos'),
           name: 'Cosmos',
           symbol: 'ATOM',
-        },
-        {
-          id: 2,
-          imgSrc: ethereum,
-          name: 'Ethereum',
-          symbol: 'ETH',
-        },
-        {
-          id: 3,
-          imgSrc: tezos,
-          name: 'Tezos',
-          symbol: 'XTZ',
-        },
-        {
-          id: 4,
-          imgSrc: binance,
-          name: 'Binance',
-          symbol: 'BNB',
-        },
-        {
-          id: 5,
-          imgSrc: ripple,
-          name: 'Ripple',
-          symbol: 'XRP',
-        },
-        {
-          id: 6,
-          imgSrc: tron,
-          name: 'Tron',
-          symbol: 'TRX',
-        },
-        {
-          id: 7,
-          imgSrc: stellar,
-          name: 'Stellar Lumens',
-          symbol: 'XLM',
-        },
-        {
-          id: 8,
-          imgSrc: ethereum_classic,
-          name: 'Ethereum Classic',
-          symbol: 'ETC',
         },
       ],
       showCoinModal: false,
