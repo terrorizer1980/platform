@@ -4,16 +4,13 @@ import {storiesOf} from '@storybook/react';
 
 import StakeInputModal from './StakeInputModal';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const tezos = require('../../../assets/mocks/tezos.svg');
-
 storiesOf('Stake Input Modal', module).add('Renders', () => (
   <StakeInputModal
     balance={1000}
     onStakeInput={() => null}
     validator={{
       id: '1',
-      imgSrc: tezos,
+      imgSrc: '',
       name: 'Polychain Labs',
       apr: 5,
       detail:

@@ -4,15 +4,12 @@ import {storiesOf} from '@storybook/react';
 
 import ValidatorDetailModal from './ValidatorDetailModal';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const tezos = require('../../../assets/mocks/tezos.svg');
-
 storiesOf('Validator Detail Modal', module).add('Renders', () => (
   <ValidatorDetailModal
     onValidatorDetail={() => null}
     validator={{
       id: '1',
-      imgSrc: tezos,
+      imgSrc: '',
       name: 'Polychain Labs',
       apr: 5,
       detail:
