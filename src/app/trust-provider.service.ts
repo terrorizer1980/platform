@@ -42,7 +42,7 @@ export class TrustProviderService {
         amounts: [
           {
             denom: 'uatom',
-            amount: '5000',
+            amount: '0',
           },
         ],
         gas: '200000',
@@ -81,7 +81,7 @@ export class TrustProviderService {
           amounts: [
             {
               denom: 'uatom',
-              amount: '5000',
+              amount: '0',
             },
           ],
           gas: '200000',
