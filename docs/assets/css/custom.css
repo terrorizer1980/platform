@@ -1,0 +1,90 @@
+body {
+    background-color: #f5f7f8;
+}
+
+.blue-custom {
+  background: #2a63a0;
+}
+
+.blue-brand {
+    background: #2a63a0;
+}
+
+/*.icon-trust {*/
+/*    background-size: 100% 100%;*/
+/*    border: 0;*/
+/*    width: 1.7rem;*/
+/*    height: 1.7rem;*/
+/*    min-width: 1.7rem !important;*/
+/*    min-height: 1.7rem !important;*/
+/*    margin-bottom: 1.89em;*/
+/*}*/
+
+.icon {
+    background-size: 100% 100%;
+    border: 0;
+    width: 1.8rem;
+    height: 1.8rem;
+    min-width: 1.8rem;
+    min-height: 1.8rem;
+}
+
+.icon-chosen {
+    vertical-align: middle;
+    margin-bottom: 4px;
+    text-align: center;
+    background-size: 100% 100%;
+    border: 0;
+    width: 1rem;
+    height: 1rem;
+    min-width: 1rem;
+    min-height: 1rem;
+}
+
+.navigation-icons {
+    color: white;
+}
+
+.btn-stake {
+    text-decoration: underline;
+    padding-right: 1em;
+    width: 6.2em;
+}
+
+.table td, .table th {
+    font-size: 16px;
+    padding: .49rem;
+    vertical-align: middle;
+}
+
+.metric {
+    font-size: 19px;
+}
+
+.description {
+    font-size: 17px;
+    margin-left: 0.2em;
+    margin-right: 0.2em;
+}
+
+.balances-box {
+    font-size: 17px;
+    vertical-align: middle;
+}
+
+.balances-box > * > * {
+  font-size: 17px;
+  vertical-align: middle;
+  margin: 0.5em;
+  margin-top: 0 !important;
+  margin-bottom: 1em;
+}
+
+.left {
+  text-align: left;
+}
+/*.supply-balance-details {*/
+/*    margin-top: -17em;*/
+/*    box-shadow: none;*/
+/*    height: 50px;*/
+/*}*/
