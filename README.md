@@ -1,5 +1,5 @@
-# Platform
 
+# Platform
 And open source staking platform for multiple POS blockchains 
 
 ### Running
