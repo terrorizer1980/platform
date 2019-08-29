@@ -7,6 +7,12 @@ import {map, switchMap} from 'rxjs/operators';
 import {CoinType} from '@trustwallet/types/lib/CoinType';
 import {IPriceResponse, IValidators} from './dto';
 import {formatLikeEthAddress, toAtom} from './helpers';
+import {BlockatlasRPC, BlockatlasValidatorResult} from '@trustwallet/rpc/lib';
+import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
+
+const priceUri = 'https://api.trustwallet.com/prices';
+const cosmosEndpoint = 'https://cosmos-rpc.trustwalletapp.com';
+const blockatlasEndpoint = 'http://blockatlas.trustwalletapp.com';
 
 @Injectable({
   providedIn: 'root'
@@ -18,9 +24,11 @@ export class CosmosService {
   }
 
   getInstance(address: string): CosmosServiceInstance {
+
     if (this.mapping[address]) {
       return this.mapping[address];
     }
+
     const instance = new CosmosServiceInstance(this.http, address);
     this.mapping[address] = instance;
     return instance;
@@ -28,14 +36,13 @@ export class CosmosService {
 }
 
 export class CosmosServiceInstance {
-  rpc: CosmosRPC;
+  cosmosRpc: CosmosRPC;
+  blockatlasRpc: BlockatlasRPC;
   currentAccount: string;
   balance$: Observable<number | BigNumber>;
 
   constructor(private http: HttpClient, private account: string) {
-    this.rpc = new CosmosRPC('https://cosmos-rpc.trustwalletapp.com');
-    // this.rpc = new CosmosRPC('https://stargate.cosmos.network');
-
+    this.blockatlasRpc = new BlockatlasRPC(blockatlasEndpoint, 'cosmos');
     this.currentAccount = account;
 
     this.balance$ = timer(0, 5000).pipe(
@@ -49,10 +56,9 @@ export class CosmosServiceInstance {
   }
 
   getBalanceOnce$(address: string): Observable<any> {
-    return from(this.rpc.getAccount(address)).pipe(
+    return from(this.cosmosRpc.getAccount(address)).pipe(
       map((account: CosmosAccount) => {
         const balances = (account as CosmosAccount).coins;
-        // @ts-ignore
         const result = balances.find((coin) => coin.denom.toUpperCase() === 'UATOM');
         return result.amount;
       })
@@ -70,7 +76,7 @@ export class CosmosServiceInstance {
       ]
     };
 
-    return this.http.post('https://api.trustwallet.com/prices', body).pipe(
+    return this.http.post(priceUri, body).pipe(
       map((result: IPriceResponse) => {
         const coins = result.docs;
         const cosmos = coins.find((coin) => coin.contract === addr);
@@ -79,69 +85,25 @@ export class CosmosServiceInstance {
     );
   }
 
-  getLargestRate(): Observable<string> {
-    const url = 'https://blockatlas.trustwalletapp.com/v2/cosmos/staking/validators';
-    // const url = ' http://142.93.172.157:9000/blockatlas//v2/cosmos/staking/validators';
-    return this.http.get(url).pipe(
-      map((x) => {
-        return x;
-      }),
-
-      map((docs: IValidators) => {
-        const annualRates = [];
-        // console.log(docs);
-        // @ts-ignore
-        docs.forEach((i) => {
-          // @ts-ignore
-          annualRates.push(docs[i].reward.annual);
-        });
-        return annualRates;
-      }),
-
-      map((annualRates: number[]) => {
-        // @ts-ignore
-        const largestRateToDisplay = Math.max.apply(annualRates);
-        return largestRateToDisplay.toFixed(2);
-      })
-    );
-  }
-
   getStakedAmount(): Observable<number> {
-    return from(this.rpc.listDelegations(this.account)).pipe(
-      map((delegations: any[]) => {
-
-        const sums = [];
-
-        if (!delegations) {
-          return 0;
-        }
-
-        for (let i = 0; i < delegations.length; i++) {
-          sums.push(delegations[i].shares);
-        }
-
-        return (BigNumber.sum(...sums).toNumber() / 1000000);
+    return from(this.cosmosRpc.listDelegations(this.account)).pipe(
+      map((delegations: CosmosDelegation[]) => {
+        const shares = delegations && delegations.map((d: CosmosDelegation) => d.shares) || [];
+        return (BigNumber.sum(...shares).toNumber() / 1000000);
       })
     );
   }
 
   getDelegations(): Observable<any> {
-    return from(this.rpc.listDelegations(this.account));
+    return from(this.cosmosRpc.listDelegations(this.account));
   }
 
-  getValidators(): Observable<IValidators> {
-    const url = 'https://blockatlas.trustwalletapp.com/v2/cosmos/staking/validators';
-    // const url = 'http://142.93.172.157:9000/blockatlas/v2/cosmos/staking/validators';
-    return this.http.get(url).pipe(
-      map((response: IValidators) => {
-        // console.log(response);
-        return response;
-      })
-    );
+  getValidators(): Observable<BlockatlasValidatorResult> {
+    return from(this.blockatlasRpc.listValidators());
   }
 
   getTransactionInfo(address: string): Observable<any> {
-    return from(this.rpc.getAccount(address)).pipe(
+    return from(this.cosmosRpc.getAccount(address)).pipe(
       map((account: CosmosAccount) => {
         const accountNumber = ((account as CosmosAccount).accountNumber).toString();
         const sequence = ((account as CosmosAccount).sequence);

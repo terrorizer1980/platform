@@ -14,14 +14,13 @@ interface IFiatDetails {
   templateUrl: './account-info.component.html',
   styleUrls: ['./account-info.component.scss']
 })
-export class AccountInfoComponent implements OnInit {
+export class AccountInfoComponent {
   cosmosInstance: CosmosServiceInstance;
   subscription: Subscription;
   fiatDetails$: Observable<IFiatDetails>;
 
   constructor(private trustProvider: TrustProviderService, private cosmos: CosmosService) {
 
-    // this.subscription = this.trustProvider.currentAccount$.subscribe(( account ) => {
     this.cosmosInstance = this.cosmos.getInstance('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
     this.fiatDetails$ =
       combineLatest(
@@ -35,10 +34,5 @@ export class AccountInfoComponent implements OnInit {
         }),
         shareReplay(1)
       );
-    // });
   }
-
-  ngOnInit() {
-  }
-
 }

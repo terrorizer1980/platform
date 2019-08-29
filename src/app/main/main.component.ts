@@ -2,7 +2,7 @@ import {combineLatest, Observable, of, timer} from 'rxjs';
 import {IBlockchainDto, IValidator} from '../dto';
 import {Router} from '@angular/router';
 import {CosmosService, CosmosServiceInstance} from '../cosmos.service';
-import {find, map, shareReplay, switchMap} from 'rxjs/operators';
+import {map, shareReplay, switchMap} from 'rxjs/operators';
 import {Component} from '@angular/core';
 import {CosmosDelegation} from '@trustwallet/rpc/lib';
 import {toAtom} from '../helpers';
@@ -54,9 +54,7 @@ export class MainComponent {
       this.cosmosInstance.getDelegations()
     ];
 
-    // this.blockchains$ = of({
-    //
-    // });
+//
     this.blockchains = [
       {
         blockchainId: 'cosmos',
