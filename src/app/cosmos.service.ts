@@ -5,7 +5,7 @@ import {CosmosRPC, CosmosAccount} from '@trustwallet/rpc';
 import BigNumber from 'bignumber.js';
 import {map, switchMap} from 'rxjs/operators';
 
-
+// TODO: use TrustWallet types instead
 export interface CoinPrice {
   price: string;
   contract: string;
@@ -71,6 +71,7 @@ export class CosmosServiceInstance {
   rpc: CosmosRPC;
 
   constructor(private http: HttpClient, private account: string) {
+    // TODO: remove to env
     this.rpc = new CosmosRPC('https://cosmos-rpc.trustwalletapp.com');
     // this.rpc = new CosmosRPC('https://stargate.cosmos.network');
 
@@ -106,7 +107,7 @@ export class CosmosServiceInstance {
         }
       ]
     };
-
+    // TODO: remove to env
     return this.http.post('https://api.trustwallet.com/prices', body).pipe(
       map((result: PriceResponse) => {
         const coins = result.docs;
@@ -117,6 +118,7 @@ export class CosmosServiceInstance {
   }
 
   getLargestRate(): Observable<string> {
+    // TODO: remove to env
     const url = 'https://blockatlas.trustwalletapp.com/v2/cosmos/staking/validators';
     // const url = ' http://142.93.172.157:9000/blockatlas//v2/cosmos/staking/validators';
     return this.http.get(url).pipe(
@@ -167,6 +169,7 @@ export class CosmosServiceInstance {
   }
 
   getValidators(): Observable<Validators> {
+    // TODO: remove to env
     const url = 'https://blockatlas.trustwalletapp.com/v2/cosmos/staking/validators';
     // const url = 'http://142.93.172.157:9000/blockatlas/v2/cosmos/staking/validators';
     return this.http.get(url).pipe(
