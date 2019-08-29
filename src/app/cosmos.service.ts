@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
-import {from, Observable, timer} from 'rxjs';
+import {combineLatest, from, Observable, timer} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
-import {CosmosAccount, CosmosRPC} from '@trustwallet/rpc';
+import {CosmosRPC, CosmosAccount} from '@trustwallet/rpc';
 import BigNumber from 'bignumber.js';
 import {map, switchMap} from 'rxjs/operators';
 import {CoinType} from '@trustwallet/types/lib/CoinType';
@@ -110,5 +110,9 @@ export class CosmosServiceInstance {
         return {sequence, accountNumber};
       })
     );
+  }
+
+  broadcastTx(tx: string): Observable<CosmosBroadcastResult> {
+    return from(this.rpc.broadcastTransaction(tx))
   }
 }
