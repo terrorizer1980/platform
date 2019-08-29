@@ -1,0 +1,28 @@
+<div class="row small">
+  <div class="col-12 pt-4">
+    <div class="card">
+      <div class="card-body p-2">
+        <h6 class="card-title"> All {{blockchain}} delegators</h6>
+        <table class="table">
+          <tbody>
+
+          <ng-template ngFor let-item [ngForOf]="(validators$ | async)" let-i="index">
+            <tr (click)="navigateToMyStakeHoldersList(item)">
+              <th scope="row">
+                <img class="icon" src="{{item.info.image}}" alt="{{item.info.name}}">
+              </th>
+              <td>
+                {{item.info.name}}
+              </td>
+              <td>{{item.reward.annual.toFixed(2)}}%</td>
+              <td><i class="fas fa-chevron-right"></i></td>
+            </tr>
+            <tr>
+          </ng-template>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

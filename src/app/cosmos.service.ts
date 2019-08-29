@@ -9,10 +9,7 @@ import {IPriceResponse} from './dto';
 import {formatLikeEthAddress, toAtom} from './helpers';
 import {BlockatlasRPC, BlockatlasValidatorResult, CosmosBroadcastResult} from '@trustwallet/rpc/lib';
 import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
-
-const priceUri = 'https://api.trustwallet.com/prices';
-const cosmosEndpoint = 'https://cosmos-rpc.trustwalletapp.com';
-const blockatlasEndpoint = 'http://blockatlas.trustwalletapp.com';
+import {blockatlasEndpoint, cosmosEndpoint, priceUri} from './endpoints';
 
 @Injectable({
   providedIn: 'root'

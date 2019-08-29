@@ -1,30 +1,26 @@
 import {combineLatest, Observable, of, timer} from 'rxjs';
-import {IBlockchainDto, IValidator} from '../dto';
+import {IBlockchainDto} from '../dto';
 import {Router} from '@angular/router';
 import {CosmosService, CosmosServiceInstance} from '../cosmos.service';
 import {map, shareReplay, switchMap} from 'rxjs/operators';
 import {Component} from '@angular/core';
 import {CosmosDelegation} from '@trustwallet/rpc/lib';
 import {toAtom} from '../helpers';
+import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
 
 interface IAggregatedDelegationMap {
   // TODO: Use BN or native browser BigInt() + polyfill
+  // https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-2.html
   [address: string]: number;
 }
 
-interface IStakeAmount {
-  address: string;
-  amount: number;
-}
-
-interface IValidatorInfo extends IValidator {
+interface IValidatorWithAmount extends BlockatlasValidator {
   amount: number; // TODO: Use big number or BigInt, show on UI using pipe
 }
 
-type StakeHolderList = Array<IValidatorInfo>;
+type StakeHolderList = Array<IValidatorWithAmount>;
 
-function map2List(address2stake: IAggregatedDelegationMap, validators: Array<IValidator>): Array<IValidatorInfo> {
-
+function map2List(address2stake: IAggregatedDelegationMap, validators: Array<IValidatorWithAmount>): Array<IValidatorWithAmount> {
   return Object.keys(address2stake).map((address) => {
     const validator = validators.find(v => v.id === address);
     return {
@@ -74,7 +70,7 @@ export class MainComponent {
           }
 
 
-          const bestCosmosInterestRate = approvedValidators.docs.reduce((bestRate: number, validator: IValidator) => {
+          const bestCosmosInterestRate = approvedValidators.docs.reduce((bestRate: number, validator: BlockatlasValidator) => {
             return bestRate < validator.reward.annual
               ? validator.reward.annual
               : bestRate;
@@ -114,8 +110,8 @@ export class MainComponent {
     this.router.navigate([`/delegators/${item.blockchainId}`]);
   }
 
-  navigateToMyStakeHoldersList(item: IValidator) {
-    this.router.navigate([`/details/${item.id}`]);
+  navigateToMyStakeHoldersList(validator: BlockatlasValidator) {
+    this.router.navigate([`/details/${validator.id}`]);
   }
 
 }

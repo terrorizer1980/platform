@@ -1,16 +1,22 @@
 <div class="container-fluid pt-2 blue-custom">
   <div class="row small pt-2">
+
     <div class="text-center col-12 d-flex justify-content-around mb-2">
-      <div *ngIf="!showBack" style="width: 50px;display: inline-block; height: 40px">
-        <img src="assets/images/trust_logo.svg" alt="trust">
-      </div>
-      <div *ngIf="showBack" >
-        <div style=" height: 40px; margin-left: -5px" class="text-center col-12 d-flex justify-content-around pb-2 pt-1">
+      <div *ngIf="showBackButton$ | async; else logo">
+        <div style=" height: 40px; margin-left: -5px"
+             class="text-center col-12 d-flex justify-content-around pb-2 pt-1">
           <div (click)="goBack()"><i class="fas fa-arrow-left fa-2x navigation-icons"></i></div>
         </div>
       </div>
+
+      <ng-template #logo>
+        <div style="width: 50px;display: inline-block; height: 40px">
+          <img src="assets/images/trust_logo.svg" alt="trust">
+        </div>
+      </ng-template>
     </div>
   </div>
+
   <div class="container p-0 pt-2 pb-3">
     <div class="container ">
       <div class="row small">
@@ -20,8 +26,9 @@
       </div>
     </div>
   </div>
+
 </div>
+
 <div class="container pt-3">
   <router-outlet></router-outlet>
 </div>
-

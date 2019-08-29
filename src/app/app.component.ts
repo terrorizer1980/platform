@@ -3,7 +3,7 @@ import {environment} from '../environments/environment';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
-import {distinctUntilChanged} from 'rxjs/operators';
+import {distinctUntilChanged, filter, map, shareReplay, startWith} from 'rxjs/operators';
 import {Location} from '@angular/common';
 
 @Component({
@@ -12,36 +12,18 @@ import {Location} from '@angular/common';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'staking';
+  showBackButton$: Observable<boolean>;
 
-  endpoint: string;
-  showBack: boolean;
-
-  constructor(private http: HttpClient, private activatedRoute: ActivatedRoute, private router: Router, private location: Location) {
-
-    // activatedRoute.url.subscribe((url) => {
-    //   console.log(url);
-    // });
-
-    // TODO: do without subscription
-    this.router.events.pipe().subscribe((event: any) => {
-      if (!event.url) {
-        return;
-      }
-
-      this.showBack = event.url !== '/';
-    });
-
-    this.endpoint = environment.production
-      ? 'https://blockatlas.trustwalletapp.com/'
-      : 'http://142.93.172.157:9000/blockatlas/'; // http://localhost:9000/blockatlas/
+  constructor(private http: HttpClient, private router: Router, private location: Location) {
+    this.showBackButton$ = this.router.events.pipe(
+      filter((event: any) => event.url),
+      map((event: any) => event.url !== '/' && event.url !== '/main'),
+      startWith(false),
+    );
   }
 
   goBack() {
     this.location.back();
   }
-
-  getValidatorsOnce$(): Observable<Object> {
-    return this.http.get(`${this.endpoint}v2/cosmos/staking/validators`);
-  }
 }
+

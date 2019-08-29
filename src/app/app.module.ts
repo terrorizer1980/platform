@@ -4,18 +4,18 @@ import {AppRoutingModule} from './app-routing.module';
 import {AppComponent} from './app.component';
 import {MainComponent} from './main/main.component';
 import {HttpClientModule} from '@angular/common/http';
-import {PosDelegatorsComponent} from './pos-delegators/pos-delegators.component';
-import {DetailsComponent} from './details/details.component';
 import {CommonModule} from '@angular/common';
 import {TestComponent} from './test/test.component';
 import {AccountInfoComponent} from './account-info/account-info.component';
+import {AllDelegatorsComponent} from './all-delegators/all-delegators.component';
+import {DetailsComponent} from './details/details.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AccountInfoComponent,
     MainComponent,
-    PosDelegatorsComponent,
+    AllDelegatorsComponent,
     DetailsComponent,
     TestComponent
   ],

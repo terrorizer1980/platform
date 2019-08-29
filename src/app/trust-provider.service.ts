@@ -9,12 +9,11 @@ import {CoinType} from '@trustwallet/types/lib/CoinType';
 })
 export class TrustProviderService {
 
-  readonly network = 118; // Cosmos
   currentAccount$: Observable<string>;
 
   constructor() {
     if (TrustProvider.isAvailable) {
-      this.currentAccount$ = this.getAddressOnce$(this.network);
+      this.currentAccount$ = this.getAddressOnce$(CoinType.cosmos);
     } else {
       // For dev purposes only
       this.currentAccount$ = of('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
@@ -126,8 +125,7 @@ export class TrustProviderService {
   }
 
 
-  getAddressOnce$(network: number): Observable<string> {
-
+  getAddressOnce$(network: CoinType): Observable<string> {
     return from(TrustProvider.getAccounts()).pipe(
       map((accounts: any) => {
         const accountRaw = accounts.find((account) => account.network === network);
