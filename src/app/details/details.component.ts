@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from "@angular/router";
-import {CosmosService, CosmosServiceInstance, Validators, Validator} from "../cosmos.service";
+import {CosmosService, CosmosServiceInstance} from "../cosmos.service";
 import {find, map, take} from "rxjs/operators";
 import {HttpClient} from "@angular/common/http";
 import {Observable, of} from "rxjs";
+import {IValidator, IValidators} from '../dto';
 
 @Component({
   selector: 'app-details',
@@ -12,7 +13,7 @@ import {Observable, of} from "rxjs";
 })
 export class DetailsComponent implements OnInit {
   validatorId : string;
-  validator : Validator;
+  validator : IValidator;
   cosmosInstance : CosmosServiceInstance;
   stakedSum : Observable<string>;
   constructor( activatedRoute : ActivatedRoute, private http : HttpClient, private cosmos : CosmosService ) {
@@ -22,13 +23,13 @@ export class DetailsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.getValidator(this.validatorId).subscribe(( validator : Validator ) => {
+    this.getValidator(this.validatorId).subscribe(( validator : IValidator ) => {
       this.validator = validator;
     });
     this.stakedSum = this.getStakedAmount(this.validatorId);
   }
 
-  getValidator( validatorId : string ) : Observable<Validator> {
+  getValidator( validatorId : string ) : Observable<IValidator> {
 
     // @ts-ignore
     return this.cosmosInstance.getValidators().pipe(

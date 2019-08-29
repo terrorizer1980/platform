@@ -7,9 +7,6 @@ import {TrustProvider} from '@trustwallet/provider';
   providedIn: 'root'
 })
 export class TrustProviderService {
-  // TODO: use trustwallet types without hardcoding
-  readonly network = 118;
-  currentAccount$ : Observable<string>;
 
   constructor() {
     if (TrustProvider.isAvailable) {
@@ -18,10 +15,13 @@ export class TrustProviderService {
       );
       this.currentAccount$.subscribe();
     }
+
+
   }
 
+  readonly network = 118; // Cosmos
+  currentAccount$ : Observable<string>;
 
-  // TODO: remove
   async transactionSign(
     message : string,
     coin : number,
@@ -104,5 +104,23 @@ export class TrustProviderService {
           .replace('"', '');
       })
     )
+
+    // return interval(2000).pipe(
+    //   // @ts-ignore
+    //   filter(() => !!(window as any).trustProvider),
+    //   take(1),
+    //   switchMap(() => {
+    //     // @ts-ignore
+    //     return from((window as any).trustProvider.getAccounts());
+    //   }),
+    //   // @ts-ignore
+    //   map((accounts: Array<any>) => {
+    //     const accountRaw = accounts.find((account) => account.network === network);
+    //     // @ts-ignore
+    //     return JSON.stringify(accountRaw.address)
+    //       .replace('"', '')
+    //       .replace('"', '');
+    //   })
+    // );
   }
 }

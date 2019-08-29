@@ -1,44 +1,12 @@
 import {Injectable} from '@angular/core';
-import {combineLatest, from, Observable, timer} from 'rxjs';
+import {from, Observable, timer} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
-import {CosmosRPC, CosmosAccount} from '@trustwallet/rpc';
+import {CosmosAccount, CosmosRPC} from '@trustwallet/rpc';
 import BigNumber from 'bignumber.js';
 import {map, switchMap} from 'rxjs/operators';
-
-// TODO: use TrustWallet types instead
-export interface CoinPrice {
-  price: string;
-  contract: string;
-  percent_change_24h: string;
-}
-
-export interface PriceResponse {
-  status: boolean;
-  docs: CoinPrice[];
-  currency: string;
-}
-
-export interface ValidatorInfo {
-  name: string;
-  description: string;
-  image: string;
-  website: string;
-}
-
-export interface Reward {
-  annual: number;
-}
-
-export interface Validator {
-  id: string;
-  status: boolean;
-  info: ValidatorInfo;
-  reward: Reward;
-}
-
-export interface Validators {
-  docs: Validator[];
-}
+import {CoinType} from '@trustwallet/types/lib/CoinType';
+import {IPriceResponse, IValidators} from './dto';
+import {formatLikeEthAddress, toAtom} from './helpers';
 
 @Injectable({
   providedIn: 'root'
@@ -59,19 +27,12 @@ export class CosmosService {
   }
 }
 
-// TODO: use BigInt and polyfill
-export function toAtom(microatom: any): number {
-  const denominator = new BigNumber(1000000) as any;
-  return Number(microatom / denominator);
-}
-
 export class CosmosServiceInstance {
+  rpc: CosmosRPC;
   currentAccount: string;
   balance$: Observable<number | BigNumber>;
-  rpc: CosmosRPC;
 
   constructor(private http: HttpClient, private account: string) {
-    // TODO: remove to env
     this.rpc = new CosmosRPC('https://cosmos-rpc.trustwalletapp.com');
     // this.rpc = new CosmosRPC('https://stargate.cosmos.network');
 
@@ -99,26 +60,26 @@ export class CosmosServiceInstance {
   }
 
   getPrice(): Observable<string> {
+    const addr = formatLikeEthAddress(CoinType.cosmos);
     const body = {
       'currency': 'USD',
       'tokens': [
         {
-          'contract': '0x0000000000000000000000000000000000000076' // TODO: use CoinType
+          'contract': addr
         }
       ]
     };
-    // TODO: remove to env
+
     return this.http.post('https://api.trustwallet.com/prices', body).pipe(
-      map((result: PriceResponse) => {
+      map((result: IPriceResponse) => {
         const coins = result.docs;
-        const cosmos = coins.find((coin) => coin.contract === '0x0000000000000000000000000000000000000076');
+        const cosmos = coins.find((coin) => coin.contract === addr);
         return cosmos.price;
       })
     );
   }
 
   getLargestRate(): Observable<string> {
-    // TODO: remove to env
     const url = 'https://blockatlas.trustwalletapp.com/v2/cosmos/staking/validators';
     // const url = ' http://142.93.172.157:9000/blockatlas//v2/cosmos/staking/validators';
     return this.http.get(url).pipe(
@@ -126,7 +87,7 @@ export class CosmosServiceInstance {
         return x;
       }),
 
-      map((docs: Validators) => {
+      map((docs: IValidators) => {
         const annualRates = [];
         // console.log(docs);
         // @ts-ignore
@@ -168,12 +129,11 @@ export class CosmosServiceInstance {
     return from(this.rpc.listDelegations(this.account));
   }
 
-  getValidators(): Observable<Validators> {
-    // TODO: remove to env
+  getValidators(): Observable<IValidators> {
     const url = 'https://blockatlas.trustwalletapp.com/v2/cosmos/staking/validators';
     // const url = 'http://142.93.172.157:9000/blockatlas/v2/cosmos/staking/validators';
     return this.http.get(url).pipe(
-      map((response: Validators) => {
+      map((response: IValidators) => {
         // console.log(response);
         return response;
       })

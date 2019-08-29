@@ -19,6 +19,10 @@ export class AppComponent {
 
   constructor(private http: HttpClient, private activatedRoute: ActivatedRoute, private router: Router, private location: Location) {
 
+    // activatedRoute.url.subscribe((url) => {
+    //   console.log(url);
+    // });
+
     // TODO: do without subscription
     this.router.events.pipe().subscribe((event: any) => {
       if (!event.url) {
@@ -28,21 +32,15 @@ export class AppComponent {
       this.showBack = event.url !== '/';
     });
 
-    // TODO: remove to ENV all urls
-    this.endpoint = 'https://blockatlas.trustwalletapp.com/';
-
-    this.getValidatorsOnce$().subscribe(
-      (resp: any) => {
-      }
-    );
+    this.endpoint = environment.production
+      ? 'https://blockatlas.trustwalletapp.com/'
+      : 'http://142.93.172.157:9000/blockatlas/'; // http://localhost:9000/blockatlas/
   }
 
   goBack() {
     this.location.back();
   }
 
-  // TODO: add to service
-  // @ts-ignore
   getValidatorsOnce$(): Observable<Object> {
     return this.http.get(`${this.endpoint}v2/cosmos/staking/validators`);
   }

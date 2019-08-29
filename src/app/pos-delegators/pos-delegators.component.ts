@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {HttpClient} from '@angular/common/http';
-import {CosmosService, CosmosServiceInstance, Validator} from '../cosmos.service';
+import {CosmosService, CosmosServiceInstance} from '../cosmos.service';
 import {Observable} from 'rxjs';
 import {map, take} from 'rxjs/operators';
+import {IValidator} from '../dto';
 
 @Component({
   selector: 'app-pos-delegators',
@@ -13,20 +14,20 @@ import {map, take} from 'rxjs/operators';
 export class PosDelegatorsComponent {
 
   blockchain: string;
-  validators: Array<Validator> = [];
+  validators: Array<IValidator> = [];
   cosmosInstance: CosmosServiceInstance;
 
   constructor(activatedRoute: ActivatedRoute, private http: HttpClient, private cosmos: CosmosService, private router: Router,) {
     this.blockchain = activatedRoute.snapshot.params.blockchainId;
     this.cosmosInstance = this.cosmos.getInstance('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
 
-    this.getValidators().subscribe((validators: Array<Validator>) => {
+    this.getValidators().subscribe((validators: Array<IValidator>) => {
       this.validators = validators;
     });
   }
 
   // @ts-ignore
-  getValidators(): Observable<Array<Validator>> {
+  getValidators(): Observable<Array<IValidator>> {
     // @ts-ignore
     return this.cosmosInstance.getValidators().pipe(
       map((x) => {
@@ -37,7 +38,7 @@ export class PosDelegatorsComponent {
     );
   }
 
-  navigateToMyStakeHoldersList(item: Validator) {
+  navigateToMyStakeHoldersList(item: IValidator) {
     this.router.navigate([`/details/${item.id}`]);
   }
 
