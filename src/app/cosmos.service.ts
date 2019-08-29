@@ -4,6 +4,7 @@ import {HttpClient} from '@angular/common/http';
 import {CosmosRPC, CosmosAccount} from '@trustwallet/rpc';
 import BigNumber from 'bignumber.js';
 import {map, switchMap} from 'rxjs/operators';
+import {CosmosBroadcastResult} from "@trustwallet/rpc/src/cosmos/models/CosmosBroadcastResult";
 
 // TODO: use TrustWallet types instead
 export interface CoinPrice {
@@ -188,5 +189,9 @@ export class CosmosServiceInstance {
         return {sequence, accountNumber};
       })
     );
+  }
+
+  broadcastTx(tx: string): Observable<CosmosBroadcastResult> {
+    return from(this.rpc.broadcastTransaction(tx))
   }
 }

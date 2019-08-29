@@ -1,10 +1,10 @@
-import {Injectable} from '@angular/core';
-import {from, interval, Observable} from 'rxjs';
-import {filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
-import {TrustProvider} from '@trustwallet/provider';
+import {Injectable} from "@angular/core";
+import {from, interval, Observable} from "rxjs";
+import {filter, map, shareReplay, switchMap, take} from "rxjs/operators";
+import {TrustProvider} from "@trustwallet/provider";
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: "root",
 })
 export class TrustProviderService {
   // TODO: use trustwallet types without hardcoding
@@ -14,7 +14,7 @@ export class TrustProviderService {
   constructor() {
     if (TrustProvider.isAvailable) {
       this.currentAccount$ = this.getAddressOnce(this.network).pipe(
-        shareReplay(1)
+        shareReplay(1),
       );
       this.currentAccount$.subscribe();
     }
@@ -22,72 +22,69 @@ export class TrustProviderService {
 
 
   // TODO: remove
-  async transactionSign(
+  transactionSign(
     message : string,
     coin : number,
     addressTo : string,
     addressFrom : string,
     amount : string,
     sequence : string,
-    accountNumber : string ) : Promise<any> {
+    accountNumber : string ) : Observable<string> {
 
-    let network = coin; // Cosmos
+    let network = coin;
     let transaction;
 
-    if (message == 'stake') {
+    if (message == "stake") {
       transaction = {
-        typePrefix: 'auth/StdTx',
+        typePrefix: "auth/StdTx",
         accountNumber: accountNumber,
-        chainId: 'cosmoshub-2',
+        chainId: "cosmoshub-2",
         fee: {
           amounts: [
             {
-              denom: 'uatom',
-              amount: '5000',
+              denom: "uatom",
+              amount: "5000",
             },
           ],
-          gas: '200000',
+          gas: "200000",
         },
         sequence: sequence,
         stakeMessage: {
           delegatorAddress: addressFrom,
           validatorAddress: addressTo,
           amount: {
-            denom: 'uatom',
+            denom: "uatom",
             amount: amount,
           },
         },
       };
-    } else if (message == 'unstake') {
+    } else if (message == "unstake") {
       transaction = {
-        typePrefix: 'auth/StdTx',
+        typePrefix: "auth/StdTx",
         accountNumber: accountNumber,
-        chainId: 'cosmoshub-2',
+        chainId: "cosmoshub-2",
         fee: {
           amounts: [
             {
-              denom: 'uatom',
-              amount: '5000',
+              denom: "uatom",
+              amount: "5000",
             },
           ],
-          gas: '200000',
+          gas: "200000",
         },
         sequence: sequence,
         unstakeMessage: {
           delegatorAddress: addressFrom,
           validatorAddress: addressTo,
           amount: {
-            denom: 'uatom',
+            denom: "uatom",
             amount: amount,
           },
         },
       };
     }
-
-    let result = await TrustProvider.signTransaction(network, transaction);
-    alert(result);
     // @ts-ignore
-    return result;
+    return TrustProvider.signTransaction(network, transaction);
   }
 
 
@@ -100,9 +97,9 @@ export class TrustProviderService {
         alert(JSON.stringify(accountRaw.address));
         // @ts-ignore
         return JSON.stringify(accountRaw.address)
-          .replace('"', '')
-          .replace('"', '');
-      })
-    )
+          .replace("\"", "")
+          .replace("\"", "");
+      }),
+    );
   }
 }
