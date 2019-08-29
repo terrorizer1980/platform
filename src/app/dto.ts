@@ -43,7 +43,3 @@ export interface IValidators {
   docs: IValidator[];
 }
 
-export interface ITransactionInfo {
-  sequence: string;
-  accountNumber: string;
-}
