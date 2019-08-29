@@ -1,9 +1,9 @@
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
 import {MainComponent} from './main/main.component';
-import {PosDelegatorsComponent} from './pos-delegators/pos-delegators.component';
-import {DetailsComponent} from './details/details.component';
 import {TestComponent} from './test/test.component';
+import {AllDelegatorsComponent} from './all-delegators/all-delegators.component';
+import {DetailsComponent} from './details/details.component';
 
 const routes: Routes = [
   {
@@ -12,12 +12,12 @@ const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: '',
-    component: TestComponent,
+    path: 'main',
+    component: MainComponent,
   },
   {
     path: 'delegators/:blockchainId',
-    component: PosDelegatorsComponent,
+    component: AllDelegatorsComponent,
   },
   {
     path: 'details/:validatorId',
