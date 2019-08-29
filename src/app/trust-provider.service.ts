@@ -1,15 +1,12 @@
-import {Injectable} from "@angular/core";
-import {from, interval, Observable} from "rxjs";
-import {filter, map, shareReplay, switchMap, take} from "rxjs/operators";
-import {TrustProvider} from "@trustwallet/provider";
+import {Injectable} from '@angular/core';
+import {from, interval, Observable} from 'rxjs';
+import {filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
+import {TrustProvider} from '@trustwallet/provider';
 
 @Injectable({
-  providedIn: "root",
+  providedIn: 'root'
 })
 export class TrustProviderService {
-  // TODO: use trustwallet types without hardcoding
-  readonly network = 118;
-  currentAccount$ : Observable<string>;
 
   constructor() {
     if (TrustProvider.isAvailable) {
@@ -18,8 +15,12 @@ export class TrustProviderService {
       );
       this.currentAccount$.subscribe();
     }
+
+
   }
 
+  readonly network = 118; // Cosmos
+  currentAccount$ : Observable<string>;
 
   // TODO: remove
   transactionSign(
@@ -97,8 +98,8 @@ export class TrustProviderService {
         alert(JSON.stringify(accountRaw.address));
         // @ts-ignore
         return JSON.stringify(accountRaw.address)
-          .replace("\"", "")
-          .replace("\"", "");
+          .replace('"', "")
+          .replace('"', "");
       }),
     );
   }
