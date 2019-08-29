@@ -1,84 +1,121 @@
 import {Injectable} from '@angular/core';
-import {from, interval, Observable} from 'rxjs';
-import {filter, map, shareReplay, switchMap, take} from 'rxjs/operators';
+import {from, Observable, of} from 'rxjs';
+import {map, shareReplay, take} from 'rxjs/operators';
 import {TrustProvider} from '@trustwallet/provider';
+import {CoinType} from '@trustwallet/types/lib/CoinType';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TrustProviderService {
 
+  readonly network = 118; // Cosmos
+  currentAccount$: Observable<string>;
+
   constructor() {
     if (TrustProvider.isAvailable) {
-      this.currentAccount$ = this.getAddressOnce(this.network).pipe(
-        shareReplay(1),
-      );
-      this.currentAccount$.subscribe();
+      this.currentAccount$ = this.getAddressOnce$(this.network);
+    } else {
+      // For dev purposes only
+      this.currentAccount$ = of('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
     }
 
-
+    this.currentAccount$.pipe(
+      take(1),
+      shareReplay(1)
+    ).subscribe();
   }
 
-  readonly network = 118; // Cosmos
-  currentAccount$ : Observable<string>;
+  signStake(
+    coin: CoinType,
+    addressTo: string,
+    addressFrom: string,
+    amount: string,
+    sequence: string,
+    accountNumber: string): Observable<string> {
 
-  // TODO: remove
+    const transaction = {
+      typePrefix: 'auth/StdTx',
+      accountNumber: accountNumber,
+      chainId: 'cosmoshub-2',
+      fee: {
+        amounts: [
+          {
+            denom: 'uatom',
+            amount: '5000',
+          },
+        ],
+        gas: '200000',
+      },
+      sequence: sequence,
+      stakeMessage: {
+        delegatorAddress: addressFrom,
+        validatorAddress: addressTo,
+        amount: {
+          denom: 'uatom',
+          amount: amount,
+        },
+      },
+    };
+
+    return from(TrustProvider.signTransaction(coin, transaction));
+  }
+
   transactionSign(
-    message : string,
-    coin : number,
-    addressTo : string,
-    addressFrom : string,
-    amount : string,
-    sequence : string,
-    accountNumber : string ) : Observable<string> {
+    message: string,
+    coin: CoinType,
+    addressTo: string,
+    addressFrom: string,
+    amount: string,
+    sequence: string,
+    accountNumber: string): Observable<string> {
 
-    let network = coin;
     let transaction;
 
-    if (message == "stake") {
+    if (message === 'stake') {
       transaction = {
-        typePrefix: "auth/StdTx",
+        typePrefix: 'auth/StdTx',
         accountNumber: accountNumber,
-        chainId: "cosmoshub-2",
+        chainId: 'cosmoshub-2',
         fee: {
           amounts: [
             {
-              denom: "uatom",
-              amount: "5000",
+              denom: 'uatom',
+              amount: '5000',
             },
           ],
-          gas: "200000",
+          gas: '200000',
         },
         sequence: sequence,
         stakeMessage: {
           delegatorAddress: addressFrom,
           validatorAddress: addressTo,
           amount: {
-            denom: "uatom",
+            denom: 'uatom',
             amount: amount,
           },
         },
       };
-    } else if (message == "unstake") {
+    } else if (message === 'unstake') {
       transaction = {
-        typePrefix: "auth/StdTx",
+        typePrefix: 'auth/StdTx',
         accountNumber: accountNumber,
-        chainId: "cosmoshub-2",
+        chainId: 'cosmoshub-2',
         fee: {
           amounts: [
             {
-              denom: "uatom",
-              amount: "5000",
+              denom: 'uatom',
+              amount: '5000',
             },
           ],
-          gas: "200000",
+          gas: '200000',
         },
         sequence: sequence,
         unstakeMessage: {
           delegatorAddress: addressFrom,
           validatorAddress: addressTo,
           amount: {
-            denom: "uatom",
+            denom: 'uatom',
             amount: amount,
           },
         },
@@ -89,17 +126,14 @@ export class TrustProviderService {
   }
 
 
-  getAddressOnce( network : number ) : Observable<string> {
+  getAddressOnce$(network: number): Observable<string> {
 
     return from(TrustProvider.getAccounts()).pipe(
-      map(( accounts : any ) => {
-        const accountRaw = accounts.find(( account ) => account.network === network);
-        // @ts-ignore
-        alert(JSON.stringify(accountRaw.address));
-        // @ts-ignore
+      map((accounts: any) => {
+        const accountRaw = accounts.find((account) => account.network === network);
         return JSON.stringify(accountRaw.address)
-          .replace('"', "")
-          .replace('"', "");
+          .replace('"', '')
+          .replace('"', '');
       }),
     );
   }

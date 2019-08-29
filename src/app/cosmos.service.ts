@@ -5,9 +5,9 @@ import {CosmosRPC, CosmosAccount} from '@trustwallet/rpc';
 import BigNumber from 'bignumber.js';
 import {map, switchMap} from 'rxjs/operators';
 import {CoinType} from '@trustwallet/types/lib/CoinType';
-import {IPriceResponse, IValidators} from './dto';
+import {IPriceResponse, ITransactionInfo, IValidators} from './dto';
 import {formatLikeEthAddress, toAtom} from './helpers';
-import {BlockatlasRPC, BlockatlasValidatorResult} from '@trustwallet/rpc/lib';
+import {BlockatlasRPC, BlockatlasValidatorResult, CosmosBroadcastResult} from '@trustwallet/rpc/lib';
 import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
 
 const priceUri = 'https://api.trustwallet.com/prices';
@@ -43,6 +43,7 @@ export class CosmosServiceInstance {
 
   constructor(private http: HttpClient, private account: string) {
     this.blockatlasRpc = new BlockatlasRPC(blockatlasEndpoint, 'cosmos');
+    this.cosmosRpc = new CosmosRPC(cosmosEndpoint);
     this.currentAccount = account;
 
     this.balance$ = timer(0, 5000).pipe(
@@ -102,17 +103,11 @@ export class CosmosServiceInstance {
     return from(this.blockatlasRpc.listValidators());
   }
 
-  getTransactionInfo(address: string): Observable<any> {
-    return from(this.cosmosRpc.getAccount(address)).pipe(
-      map((account: CosmosAccount) => {
-        const accountNumber = ((account as CosmosAccount).accountNumber).toString();
-        const sequence = ((account as CosmosAccount).sequence);
-        return {sequence, accountNumber};
-      })
-    );
+  getAccountOnce$(address: string): Observable<CosmosAccount> {
+    return from(this.cosmosRpc.getAccount(address));
   }
 
   broadcastTx(tx: string): Observable<CosmosBroadcastResult> {
-    return from(this.rpc.broadcastTransaction(tx))
+    return from(this.cosmosRpc.broadcastTransaction(tx));
   }
 }

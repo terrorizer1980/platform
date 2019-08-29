@@ -1,66 +1,59 @@
-import {Component, ElementRef, OnInit, ViewChild} from "@angular/core";
-import {TrustProviderService} from "../trust-provider.service";
-import {from, Subscription} from "rxjs";
-import {CosmosService, CosmosServiceInstance} from "../cosmos.service";
-import {HttpClient} from "@angular/common/http";
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {TrustProviderService} from '../trust-provider.service';
+import {Subscription} from 'rxjs';
+import {CosmosService, CosmosServiceInstance} from '../cosmos.service';
+import {HttpClient} from '@angular/common/http';
+import {CoinType} from '@trustwallet/types/lib/CoinType';
+import {switchMap} from 'rxjs/operators';
+import {CosmosAccount} from '@trustwallet/rpc/lib';
 
 @Component({
-  selector: "app-test",
-  templateUrl: "./test.component.html",
-  styleUrls: ["./test.component.scss"],
+  selector: 'app-test',
+  templateUrl: './test.component.html',
+  styleUrls: ['./test.component.scss'],
 })
-export class TestComponent implements OnInit {
-  subscription : Subscription;
-  cosmosInstance : CosmosServiceInstance;
-  account : string;
-  x : any;
-  // @ts-ignore
-  @ViewChild("input")
-  inputElement : ElementRef;
+export class TestComponent {
+  subscription: Subscription;
+  cosmosInstance: CosmosServiceInstance;
+  account: string;
 
+  @ViewChild('input')
+  inputElement: ElementRef;
 
-  constructor( private trustProvider : TrustProviderService, private cosmos : CosmosService, private http : HttpClient ) {
-    this.subscription = this.trustProvider.currentAccount$.subscribe(( account ) => {
-      // @ts-ignore
-      this.account = account;
-      this.cosmosInstance = this.cosmos.getInstance(account);
-      //  this.cosmosInstance.getTransactionInfo(this.account).subscribe(( info : any ) => {
-      //   // coin : number, addressTo : string, addressFrom : string, amount : string, sequence: string, accountNumber: string
-      //   const a = this.trustProvider.transactionSign(
-      //     'unstake',
-      //     118,
-      //     'cosmosvaloper102ruvpv2srmunfffxavttxnhezln6fnc54at8c',
-      //     this.account,
-      //     '10000',
-      //     info.sequence, info.accountNumber
-      //   ).then(( r ) => (r))
-      // })
-    });
-  }
-
-  ngOnInit() {
+  constructor(private trustProvider: TrustProviderService, private cosmos: CosmosService, private http: HttpClient) {
+    // TODO: fix at service level
+    this.subscription = this.trustProvider.currentAccount$
+      .subscribe((account) => {
+        this.account = account;
+        this.cosmosInstance = this.cosmos.getInstance(account);
+      });
   }
 
   stake() {
-    const tmp = this.cosmosInstance.getTransactionInfo(this.account).subscribe(( info : any ) => {
-      // coin : number, addressTo : string, addressFrom : string, amount : string, sequence: string, accountNumber: string
-      from(this.trustProvider.transactionSign(
-        "stake",
-        118,
-        "cosmosvaloper102ruvpv2srmunfffxavttxnhezln6fnc54at8c",
-        this.account,
-        "1",
-        info.sequence, info.accountNumber,
-      )).subscribe(( result ) => {
-        this.x = result;
-        this.cosmosInstance.broadcastTx(result.substring(9, result.length - 2)).subscribe(( answer ) => {
-          alert(answer);
-        }, ( err ) => {
-          alert(err);
-        });
-      });
+    this.cosmosInstance.getAccountOnce$(this.account).pipe(
+      switchMap((account: CosmosAccount) => {
+        // const {accountNumber, sequence} = account;
+        // TODO: use validator address here
+        const addressTo = 'cosmosvaloper102ruvpv2srmunfffxavttxnhezln6fnc54at8c';
+        // TODO: take it from input
+        const amount = '1';
+        return this.trustProvider.signStake(CoinType.cosmos, addressTo, this.account, '1',
+          account.sequence.toString(),
+          account.accountNumber.toString(),
+        );
+      }),
+      switchMap((result) => {
+        const fixedResult = result.substring(9, result.length - 2);
+        return this.cosmosInstance.broadcastTx(fixedResult);
+      })).subscribe(
+      (answer) => {
+        alert(JSON.stringify(answer));
+      }
+    );
+  }
 
-    });
+  unStake() {
+
   }
 }
 
