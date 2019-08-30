@@ -61,11 +61,8 @@ export class TestComponent {
     const amount = this.inputElement.nativeElement.value * 1000000;
     this.cosmosInstance.getAccountOnce$(this.account).pipe(
       switchMap((account: CosmosAccount) => {
-        // const {accountNumber, sequence} = account;
-        // TODO: use validator address here
         this.isLoaded = false;
-        const addressTo = 'cosmosvaloper102ruvpv2srmunfffxavttxnhezln6fnc54at8c';
-
+        const addressTo = this.validatorId;
         return this.trustProviderService.signStake(CoinType.cosmos, addressTo, this.account, amount.toString(),
           account.sequence.toString(),
           account.accountNumber.toString(),
@@ -73,7 +70,7 @@ export class TestComponent {
       }),
       map((result) => {
         try {
-          return (JSON.parse(result) as any).json;
+          return JSON.stringify((JSON.parse(result) as any).json);
         } catch (e) {
           // fix for iOS
           return result.substring(9, result.length - 2);
@@ -101,19 +98,22 @@ export class TestComponent {
     this.cosmosInstance.getAccountOnce$(this.account).pipe(
       switchMap((account: CosmosAccount) => {
         this.isLoaded = false;
-        const addressTo = 'cosmosvaloper102ruvpv2srmunfffxavttxnhezln6fnc54at8c';
-
+        const addressTo = this.validatorId;
         return this.trustProviderService.signUnstake(CoinType.cosmos, addressTo, this.account, amount.toString(),
           account.sequence.toString(),
           account.accountNumber.toString(),
         );
       }),
+      map((result) => {
+        try {
+          return JSON.stringify((JSON.parse(result) as any).json);
+        } catch (e) {
+          // fix for iOS
+          return result.substring(9, result.length - 2);
+        }
+      }),
       switchMap((result) => {
-        const fixedResult = result.substring(9, result.length - 2);
-        // alert('GOING TO NET');
-        // const url = cosmosEndpoint + '/txs';
-        return this.cosmosInstance.broadcastTx(fixedResult);
-        // return this.http.post(url, fixedResult);
+        return this.cosmosInstance.broadcastTx(result);
       }),
       catchError((error) => {
         alert('error');
