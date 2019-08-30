@@ -60,68 +60,39 @@ export class TrustProviderService {
     return from(TrustProvider.signTransaction(coin, transaction));
   }
 
-  transactionSign(
-    message: string,
-    coin: CoinType,
-    addressTo: string,
-    addressFrom: string,
-    amount: string,
-    sequence: string,
-    accountNumber: string ): Observable<string> {
+  signUnstake(
+      coin: CoinType,
+      addressTo: string,
+      addressFrom: string,
+      amount: string,
+      sequence: string,
+      accountNumber: string ): Observable<string> {
 
-    let transaction;
+      const transaction = {
+          typePrefix: 'auth/StdTx',
+          accountNumber: accountNumber,
+          chainId: 'cosmoshub-2',
+          fee: {
+              amounts: [
+                  {
+                      denom: 'uatom',
+                      amount: '5000',
+                  },
+              ],
+              gas: '200000',
+          },
+          sequence: sequence,
+          unstakeMessage: {
+              delegatorAddress: addressFrom,
+              validatorAddress: addressTo,
+              amount: {
+                  denom: 'uatom',
+                  amount: amount,
+              },
+          },
+      };
 
-    if (message === 'stake') {
-      transaction = {
-        typePrefix: 'auth/StdTx',
-        accountNumber: accountNumber,
-        chainId: 'cosmoshub-2',
-        fee: {
-          amounts: [
-            {
-              denom: 'uatom',
-              amount: '5000',
-            },
-          ],
-          gas: '200000',
-        },
-        sequence: sequence,
-        stakeMessage: {
-          delegatorAddress: addressFrom,
-          validatorAddress: addressTo,
-          amount: {
-            denom: 'uatom',
-            amount: amount,
-          },
-        },
-      };
-    } else if (message === 'unstake') {
-      transaction = {
-        typePrefix: 'auth/StdTx',
-        accountNumber: accountNumber,
-        chainId: 'cosmoshub-2',
-        fee: {
-          amounts: [
-            {
-              denom: 'uatom',
-              amount: '5000',
-            },
-          ],
-          gas: '200000',
-        },
-        sequence: sequence,
-        unstakeMessage: {
-          delegatorAddress: addressFrom,
-          validatorAddress: addressTo,
-          amount: {
-            denom: 'uatom',
-            amount: amount,
-          },
-        },
-      };
-    }
-    // @ts-ignore
-    return TrustProvider.signTransaction(network, transaction);
+      return from(TrustProvider.signTransaction(coin, transaction));
   }
 
 

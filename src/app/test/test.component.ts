@@ -20,6 +20,8 @@ export class TestComponent {
     account: string;
     @ViewChild('input')
     inputElement: ElementRef;
+    @ViewChild('input2')
+    inputElement2: ElementRef;
     loader: LoadersCSS = 'ball-beat';
     bgColor = 'white';
     color = 'rgb(42,99,160)';
@@ -63,16 +65,45 @@ export class TestComponent {
             })
         ).subscribe(( result ) => {
             // alert('data');
-            alert(JSON.stringify(result));
+            // alert(JSON.stringify(result));
             alert(result.txhash);
             this.isLoaded = true;
-            // alert(result.txhash);
-            // alert(JSON.stringify(result));
         });
     }
 
     unStake() {
-
+        // @ts-ignore
+        const amount = this.inputElement2.nativeElement.value * 1000000;
+        this.cosmosInstance.getAccountOnce$(this.account).pipe(
+            switchMap(( account: CosmosAccount ) => {
+                // const {accountNumber, sequence} = account;
+                // TODO: use validator address here
+                this.isLoaded = false;
+                const addressTo = 'cosmosvaloper102ruvpv2srmunfffxavttxnhezln6fnc54at8c';
+                return this.trustProvider.signUnstake(CoinType.cosmos, addressTo, this.account, amount.toString(),
+                    account.sequence.toString(),
+                    account.accountNumber.toString(),
+                );
+            }),
+            switchMap(( result ) => {
+                const fixedResult = result.substring(9, result.length - 2);
+                // alert('GOING TO NET');
+                // const url = cosmosEndpoint + '/txs';
+                return this.cosmosInstance.broadcastTx(fixedResult);
+                // return this.http.post(url, fixedResult);
+            }),
+            catchError(( error ) => {
+                alert('error');
+                alert(JSON.stringify(error));
+                alert(error);
+                return of(error);
+            })
+        ).subscribe(( result ) => {
+            // alert('data');
+            // alert(JSON.stringify(result));
+            alert(result.txhash);
+            this.isLoaded = true;
+        });
     }
 }
 

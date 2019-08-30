@@ -33,5 +33,38 @@
         </div>
       </div>
     </div>
+      <div class="col-12 pt-2">
+          <div class="card">
+              <div class="card-body p-2">
+                  <div class="col-12 text-center pt-2">
+                      <div style="height: 80px" class="row">
+                          <div *ngIf="inputElement2.nativeElement.value == 0" class="pb-3 col-12">
+                              <h5>Enter amount to unstake</h5>
+                          </div>
+                          <div *ngIf="inputElement2.nativeElement.value != 0" class="pb-3 col-12">
+                              <h5>You will unstake</h5>
+                              <h5>{{inputElement2.nativeElement.value + ' ATOMs'}}</h5>
+                          </div>
+                      </div>
+                      <div class="input-group input-group-lg">
+                          <input (input)="inputElement2.nativeElement.value = input2.value" #input2 placeholder="Amount in ATOM" type="number"
+                                 class="form-control" aria-label="Large"
+                                 aria-describedby="inputGroup-sizing-sm" aria-describedby="basic-addon1">
+                          <div class="input-group-append">
+      <span class="btn btn-default btn-icon">
+        MAX
+      </span>
+                          </div>
+                      </div>
+                      <div *ngIf="isLoaded" class="col-12 text-center pt-4 pb-4">
+                          <button (click)="unStake()" class="btn btn-info btn-lg col-12">UNSTAKE</button>
+                      </div>
+                      <div *ngIf="!isLoaded" class="col-12 text-center pt-4 pb-4">
+                          <loaders-css [loader]="loader" [scale]="1" [bgColor]="bgColor" [color]="color"></loaders-css>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </div>
   </div>
 </div>
