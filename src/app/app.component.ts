@@ -13,10 +13,10 @@ import {Location} from '@angular/common';
 export class AppComponent {
   showBackButton$: Observable<boolean>;
 
-  constructor(private http: HttpClient, private router: Router, private location: Location) {
+  constructor( private http: HttpClient, private router: Router, private location: Location ) {
     this.showBackButton$ = this.router.events.pipe(
-      filter((event: any) => event.url),
-      map((event: any) => event.url !== '/' && event.url !== '/main'),
+      filter(( event: any ) => event.url),
+      map(( event: any ) => event.url !== '/' && event.url !== '/main'),
       startWith(false),
     );
   }

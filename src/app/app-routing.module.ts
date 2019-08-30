@@ -5,7 +5,7 @@ import {TestComponent} from './test/test.component';
 import {AllDelegatorsComponent} from './all-delegators/all-delegators.component';
 import {DetailsComponent} from './details/details.component';
 
-const routes: Routes = [
+const routes : Routes = [
   {
     path: '',
     redirectTo: 'main',

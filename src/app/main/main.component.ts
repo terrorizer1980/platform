@@ -20,8 +20,8 @@ interface IValidatorWithAmount extends BlockatlasValidator {
 
 type StakeHolderList = Array<IValidatorWithAmount>;
 
-function map2List(address2stake: IAggregatedDelegationMap, validators: Array<IValidatorWithAmount>): Array<IValidatorWithAmount> {
-  return Object.keys(address2stake).map((address) => {
+function map2List( address2stake: IAggregatedDelegationMap, validators: Array<IValidatorWithAmount> ): Array<IValidatorWithAmount> {
+  return Object.keys(address2stake).map(( address ) => {
     const validator = validators.find(v => v.id === address);
     return {
       ...validator,
@@ -41,7 +41,7 @@ export class MainComponent {
   myStakeHolders$: Observable<StakeHolderList>;
   cosmosInstance: CosmosServiceInstance;
 
-  constructor(private router: Router, private cosmos: CosmosService) {
+  constructor( private router: Router, private cosmos: CosmosService ) {
 
     this.cosmosInstance = this.cosmos.getInstance('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
 
@@ -62,7 +62,7 @@ export class MainComponent {
     ];
 
     const address2StakeMap$: Observable<StakeHolderList> = combineLatest(validatorsAndDelegations).pipe(
-      map((data: any[]) => {
+      map(( data: any[] ) => {
           const [approvedValidators, myDelegations] = data;
 
           if (!approvedValidators || !myDelegations) {
@@ -70,22 +70,22 @@ export class MainComponent {
           }
 
 
-          const bestCosmosInterestRate = approvedValidators.docs.reduce((bestRate: number, validator: BlockatlasValidator) => {
+          const bestCosmosInterestRate = approvedValidators.docs.reduce(( bestRate: number, validator: BlockatlasValidator ) => {
             return bestRate < validator.reward.annual
               ? validator.reward.annual
               : bestRate;
           }, 0);
           this.blockchains[0].annualRate = bestCosmosInterestRate;
 
-          const addresses = approvedValidators.docs.map((d) => d.id);
+          const addresses = approvedValidators.docs.map(( d ) => d.id);
 
           // Ignore delegations to validators that isn't in a list of approved validators
-          const filteredDelegations = myDelegations.filter((delegation: CosmosDelegation) => {
+          const filteredDelegations = myDelegations.filter(( delegation: CosmosDelegation ) => {
             // TODO: use map(Object) in case we have more that 10 approved validators
             return addresses.includes(delegation.validatorAddress);
           });
 
-          const address2stakeMap = filteredDelegations.reduce((acc: IAggregatedDelegationMap, delegation: CosmosDelegation) => {
+          const address2stakeMap = filteredDelegations.reduce(( acc: IAggregatedDelegationMap, delegation: CosmosDelegation ) => {
             // TODO: Use BN or native browser BigInt() + polyfill
             const aggregatedAmount = acc[delegation.validatorAddress] || 0;
             const sharesAmount = +(delegation.shares) || 0;
@@ -106,11 +106,11 @@ export class MainComponent {
     );
   }
 
-  navigateToPosDelegatorsList(item: IBlockchainDto) {
+  navigateToPosDelegatorsList( item: IBlockchainDto ) {
     this.router.navigate([`/delegators/${item.blockchainId}`]);
   }
 
-  navigateToMyStakeHoldersList(validator: BlockatlasValidator) {
+  navigateToMyStakeHoldersList( validator: BlockatlasValidator ) {
     this.router.navigate([`/details/${validator.id}`]);
   }
 

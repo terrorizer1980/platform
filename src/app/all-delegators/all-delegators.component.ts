@@ -21,17 +21,17 @@ export class AllDelegatorsComponent {
   validators$: Observable<Array<BlockatlasValidator>> = of([]);
   blockatlasRpc: BlockatlasRPC;
 
-  constructor(activatedRoute: ActivatedRoute, private http: HttpClient, private cosmos: CosmosService, private router: Router) {
+  constructor( activatedRoute: ActivatedRoute, private http: HttpClient, private cosmos: CosmosService, private router: Router ) {
     this.blockchain = activatedRoute.snapshot.params.blockchainId;
     this.blockatlasRpc = new BlockatlasRPC(blockatlasEndpoint, this.blockchain);
     this.validators$ = from(this.blockatlasRpc.listValidators()).pipe(
-      map((resp: BlockatlasValidatorResult) => {
+      map(( resp: BlockatlasValidatorResult ) => {
         return resp.docs;
       })
     );
   }
 
-  navigateToMyStakeHoldersList(item: BlockatlasValidator) {
+  navigateToMyStakeHoldersList( item: BlockatlasValidator ) {
     this.router.navigate([`/details/${item.id}`]);
   }
 

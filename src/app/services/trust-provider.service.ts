@@ -31,7 +31,7 @@ export class TrustProviderService {
     addressFrom: string,
     amount: string,
     sequence: string,
-    accountNumber: string): Observable<string> {
+    accountNumber: string ): Observable<string> {
 
     const transaction = {
       typePrefix: 'auth/StdTx',
@@ -67,7 +67,7 @@ export class TrustProviderService {
     addressFrom: string,
     amount: string,
     sequence: string,
-    accountNumber: string): Observable<string> {
+    accountNumber: string ): Observable<string> {
 
     let transaction;
 
@@ -125,10 +125,10 @@ export class TrustProviderService {
   }
 
 
-  getAddressOnce$(network: CoinType): Observable<string> {
+  getAddressOnce$( network: CoinType ): Observable<string> {
     return from(TrustProvider.getAccounts()).pipe(
-      map((accounts: any) => {
-        const accountRaw = accounts.find((account) => account.network === network);
+      map(( accounts: any ) => {
+        const accountRaw = accounts.find(( account ) => account.network === network);
         return JSON.stringify(accountRaw.address)
           .replace('"', '')
           .replace('"', '');

@@ -17,10 +17,10 @@ import {blockatlasEndpoint, cosmosEndpoint, priceUri} from '../endpoints';
 export class CosmosService {
   readonly mapping: { [key: string]: CosmosServiceInstance } = {};
 
-  constructor(private http: HttpClient) {
+  constructor( private http: HttpClient ) {
   }
 
-  getInstance(address: string): CosmosServiceInstance {
+  getInstance( address: string ): CosmosServiceInstance {
 
     if (this.mapping[address]) {
       return this.mapping[address];
@@ -38,7 +38,7 @@ export class CosmosServiceInstance {
   currentAccount: string;
   balance$: Observable<number | BigNumber>;
 
-  constructor(private http: HttpClient, private account: string) {
+  constructor( private http: HttpClient, private account: string ) {
     this.blockatlasRpc = new BlockatlasRPC(blockatlasEndpoint, 'cosmos');
     this.cosmosRpc = new CosmosRPC(cosmosEndpoint);
     this.currentAccount = account;
@@ -47,17 +47,17 @@ export class CosmosServiceInstance {
       switchMap(() => {
         return this.getBalanceOnce$(account);
       }),
-      map((balance) => {
+      map(( balance ) => {
         return toAtom(balance);
       })
     );
   }
 
-  getBalanceOnce$(address: string): Observable<any> {
+  getBalanceOnce$( address: string ): Observable<any> {
     return from(this.cosmosRpc.getAccount(address)).pipe(
-      map((account: CosmosAccount) => {
+      map(( account: CosmosAccount ) => {
         const balances = (account as CosmosAccount).coins;
-        const result = balances.find((coin) => coin.denom.toUpperCase() === 'UATOM');
+        const result = balances.find(( coin ) => coin.denom.toUpperCase() === 'UATOM');
         return result.amount;
       })
     );
@@ -75,9 +75,9 @@ export class CosmosServiceInstance {
     };
 
     return this.http.post(priceUri, body).pipe(
-      map((result: IPriceResponse) => {
+      map(( result: IPriceResponse ) => {
         const coins = result.docs;
-        const cosmos = coins.find((coin) => coin.contract === addr);
+        const cosmos = coins.find(( coin ) => coin.contract === addr);
         return cosmos.price;
       })
     );
@@ -85,8 +85,8 @@ export class CosmosServiceInstance {
 
   getStakedAmount(): Observable<number> {
     return from(this.cosmosRpc.listDelegations(this.account)).pipe(
-      map((delegations: CosmosDelegation[]) => {
-        const shares = delegations && delegations.map((d: CosmosDelegation) => d.shares) || [];
+      map(( delegations: CosmosDelegation[] ) => {
+        const shares = delegations && delegations.map(( d: CosmosDelegation ) => d.shares) || [];
         return (BigNumber.sum(...shares).toNumber() / 1000000);
       })
     );
@@ -100,11 +100,11 @@ export class CosmosServiceInstance {
     return from(this.blockatlasRpc.listValidators());
   }
 
-  getAccountOnce$(address: string): Observable<CosmosAccount> {
+  getAccountOnce$( address: string ): Observable<CosmosAccount> {
     return from(this.cosmosRpc.getAccount(address));
   }
 
-  broadcastTx(tx: string): Observable<CosmosBroadcastResult> {
+  broadcastTx( tx: string ): Observable<CosmosBroadcastResult> {
     return from(this.cosmosRpc.broadcastTransaction(tx));
   }
 }
