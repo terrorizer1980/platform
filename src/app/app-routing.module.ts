@@ -1,7 +1,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {MainComponent} from './main/main.component';
-import {TestComponent} from './test/test.component';
+import {StakingComponent} from './staking/staking.component';
 import {AllDelegatorsComponent} from './all-delegators/all-delegators.component';
 import {DetailsComponent} from './details/details.component';
 
@@ -26,11 +26,11 @@ const routes: Routes = [
   },
   {
     path: 'details/:validatorId/:action',
-    component: TestComponent,
+    component: StakingComponent,
   },
   {
     path: 'test',
-    component: TestComponent,
+    component: StakingComponent,
   },
 ];
 
