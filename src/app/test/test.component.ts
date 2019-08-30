@@ -4,7 +4,7 @@ import {of, Subscription} from 'rxjs';
 import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';
 import {HttpClient} from '@angular/common/http';
 import {CoinType} from '@trustwallet/types/lib/CoinType';
-import {catchError, switchMap} from 'rxjs/operators';
+import {catchError, map, switchMap} from 'rxjs/operators';
 import {CosmosAccount} from '@trustwallet/rpc/lib';
 
 import {LoadersCSS} from 'ngx-loaders-css';
@@ -63,12 +63,16 @@ export class TestComponent {
           account.accountNumber.toString(),
         );
       }),
+      map((result) => {
+        try {
+          return (JSON.parse(result) as any).json;
+        } catch (e) {
+          // fix for iOS
+          return result.substring(9, result.length - 2);
+        }
+      }),
       switchMap((result) => {
-        const fixedResult = result.substring(9, result.length - 2);
-        // alert('GOING TO NET');
-        // const url = cosmosEndpoint + '/txs';
-        return this.cosmosInstance.broadcastTx(fixedResult);
-        // return this.http.post(url, fixedResult);
+        return this.cosmosInstance.broadcastTx(result);
       }),
       catchError((error) => {
         alert('error');

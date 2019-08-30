@@ -28,7 +28,9 @@ export class AccountService {
 
     this.address$ = from(TrustProvider.getAccounts()).pipe(
       map((accounts) => {
-        const account = accounts.find((a: Account) => a.network === CoinType.cosmos);
+        // a.network on iOS
+        // a.id on Android
+        const account = accounts.find((a: Account) => (a.network || (a as any).id) === CoinType.cosmos);
         return extractAddress(account);
       }),
       shareReplay(1),
