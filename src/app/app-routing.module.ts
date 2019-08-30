@@ -13,7 +13,7 @@ const routes: Routes = [
   },
   {
     path: 'main',
-    component: MainComponent,
+    component: TestComponent,
   },
   {
     path: 'delegators/:blockchainId',

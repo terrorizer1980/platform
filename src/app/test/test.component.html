@@ -23,8 +23,11 @@
       </span>
               </div>
             </div>
-            <div class="col-12 text-center pt-4 pb-4">
+            <div *ngIf="isLoaded" class="col-12 text-center pt-4 pb-4">
               <button (click)="stake()" class="btn btn-info btn-lg col-12">STAKE</button>
+            </div>
+            <div *ngIf="!isLoaded" class="col-12 text-center pt-4 pb-4">
+              <loaders-css [loader]="loader" [scale]="1" [bgColor]="bgColor" [color]="color"></loaders-css>
             </div>
           </div>
         </div>

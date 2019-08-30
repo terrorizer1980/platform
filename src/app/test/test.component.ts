@@ -6,8 +6,8 @@ import {HttpClient} from '@angular/common/http';
 import {CoinType} from '@trustwallet/types/lib/CoinType';
 import {catchError, switchMap} from 'rxjs/operators';
 import {CosmosAccount} from '@trustwallet/rpc/lib';
-import {tryCatch} from 'rxjs/internal-compatibility';
-import {cosmosEndpoint} from '../endpoints';
+
+import {LoadersCSS} from 'ngx-loaders-css';
 
 @Component({
     selector: 'app-test',
@@ -20,6 +20,10 @@ export class TestComponent {
     account: string;
     @ViewChild('input')
     inputElement: ElementRef;
+    loader: LoadersCSS = 'ball-beat';
+    bgColor = 'white';
+    color = 'rgb(42,99,160)';
+    isLoaded = true;
 
     constructor( private trustProvider: TrustProviderService, private cosmos: CosmosService, private http: HttpClient ) {
         // TODO: fix at service level
@@ -37,31 +41,33 @@ export class TestComponent {
             switchMap(( account: CosmosAccount ) => {
                 // const {accountNumber, sequence} = account;
                 // TODO: use validator address here
+                this.isLoaded = false;
                 const addressTo = 'cosmosvaloper102ruvpv2srmunfffxavttxnhezln6fnc54at8c';
                 return this.trustProvider.signStake(CoinType.cosmos, addressTo, this.account, amount.toString(),
                     account.sequence.toString(),
                     account.accountNumber.toString(),
                 );
             }),
-            switchMap((result) => {
+            switchMap(( result ) => {
                 const fixedResult = result.substring(9, result.length - 2);
                 // alert('GOING TO NET');
                 // const url = cosmosEndpoint + '/txs';
                 return this.cosmosInstance.broadcastTx(fixedResult);
                 // return this.http.post(url, fixedResult);
             }),
-            catchError((error) => {
-              alert('error');
-              alert(JSON.stringify(error));
-              alert(error);
-              return of(error);
+            catchError(( error ) => {
+                alert('error');
+                alert(JSON.stringify(error));
+                alert(error);
+                return of(error);
             })
-            ).subscribe((result) => {
-              // alert('data');
-              alert(JSON.stringify(result));
-              alert(result.txhash);
-              // alert(result.txhash);
-              // alert(JSON.stringify(result));
+        ).subscribe(( result ) => {
+            // alert('data');
+            alert(JSON.stringify(result));
+            alert(result.txhash);
+            this.isLoaded = true;
+            // alert(result.txhash);
+            // alert(JSON.stringify(result));
         });
     }
 
