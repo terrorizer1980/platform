@@ -5,12 +5,6 @@ import {CoinType} from '@trustwallet/types/lib/CoinType';
 import {from, Observable, of} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
 
-function extractAddress(account: Account): string {
-  return JSON.stringify(account.address)
-    .replace('"', '')
-    .replace('"', '');
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -25,14 +19,13 @@ export class AccountService {
       this.address$ = of('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
       return;
     }
-
     this.address$ = from(TrustProvider.getAccounts()).pipe(
       map((accounts) => {
         // a.network on iOS
         // a.id on Android
         try {
           const account = accounts.find((a: Account) => (a.network || (a as any).id) === CoinType.cosmos);
-          return extractAddress(account);
+          return account.address;
         } catch (err) {
           alert(err);
         }
