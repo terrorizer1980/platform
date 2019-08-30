@@ -1,9 +1,9 @@
 import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';
-import {map, take, tap} from 'rxjs/operators';
+import {map, tap} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
-import {BlockatlasValidator, BlockatlasValidatorResult} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
+import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
 import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
 
 @Component({
