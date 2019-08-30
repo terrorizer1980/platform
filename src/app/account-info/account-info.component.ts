@@ -32,12 +32,11 @@ export class AccountInfoComponent {
 
         this.fiatStaked$ = cosmosService.instance$.pipe(
             switchMap(( cosmos: CosmosServiceInstance ) => {
-
                 return combineLatest([exchangeRate$, cosmos.stakedAmount$]);
             }),
             map(( x: any[] ) => {
                 const [exchangeRate, rawStaked] = x;
-                return (Number(exchangeRate) * Number(rawStaked) * 1000000);
+                return (Number(exchangeRate) * Number(rawStaked));
             }),
             shareReplay(1)
         );

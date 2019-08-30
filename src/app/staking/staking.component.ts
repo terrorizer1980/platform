@@ -66,10 +66,11 @@ export class StakingComponent {
             }),
             map(( result ) => {
                 try {
-                    alert(JSON.parse((result) as any).json);
-                    return JSON.parse((result) as any).json;
+                    return JSON.stringify(JSON.parse((result) as any));
                 } catch (e) {
                     // fix for iOS
+                    alert('error with parsing');
+                    alert(e);
                     return result.substring(9, result.length - 2);
                 }
             }),
