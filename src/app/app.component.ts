@@ -1,9 +1,8 @@
 import {Component} from '@angular/core';
-import {environment} from '../environments/environment';
 import {HttpClient} from '@angular/common/http';
 import {Observable} from 'rxjs';
-import {ActivatedRoute, Router} from '@angular/router';
-import {distinctUntilChanged, filter, map, shareReplay, startWith} from 'rxjs/operators';
+import {Router} from '@angular/router';
+import {filter, map, startWith} from 'rxjs/operators';
 import {Location} from '@angular/common';
 
 @Component({

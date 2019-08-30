@@ -3,7 +3,7 @@ import {ActivatedRoute} from '@angular/router';
 import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';
 import {map, take} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
-import {Observable,} from 'rxjs';
+import {Observable} from 'rxjs';
 import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
 
 @Component({
@@ -55,7 +55,7 @@ export class DetailsComponent implements OnInit {
           return '0';
         }
 
-        let stakedSumArray = [];
+        const stakedSumArray = [];
         response.forEach((i) => {
           stakedSumArray.push(Number(i.shares) / 1000000);
         });

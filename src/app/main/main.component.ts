@@ -1,4 +1,4 @@
-import {combineLatest, Observable, of, timer} from 'rxjs';
+import {combineLatest, Observable, timer} from 'rxjs';
 import {IBlockchainDto} from '../dto';
 import {Router} from '@angular/router';
 import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';

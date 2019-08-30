@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
-import {combineLatest, from, Observable, timer} from 'rxjs';
+import {from, Observable, timer} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
-import {CosmosRPC, CosmosAccount} from '@trustwallet/rpc';
+import {CosmosAccount, CosmosRPC} from '@trustwallet/rpc';
 import BigNumber from 'bignumber.js';
 import {map, switchMap} from 'rxjs/operators';
 import {CoinType} from '@trustwallet/types/lib/CoinType';
