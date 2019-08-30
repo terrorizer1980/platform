@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {TrustProviderService} from '../trust-provider.service';
-import {CosmosService, CosmosServiceInstance} from '../cosmos.service';
+import {TrustProviderService} from '../services/trust-provider.service';
+import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';
 import {combineLatest, Observable, Subscription} from 'rxjs';
 import {map, shareReplay} from 'rxjs/operators';
 

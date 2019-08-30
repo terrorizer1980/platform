@@ -5,11 +5,11 @@ import {CosmosRPC, CosmosAccount} from '@trustwallet/rpc';
 import BigNumber from 'bignumber.js';
 import {map, switchMap} from 'rxjs/operators';
 import {CoinType} from '@trustwallet/types/lib/CoinType';
-import {IPriceResponse} from './dto';
-import {formatLikeEthAddress, toAtom} from './helpers';
+import {IPriceResponse} from '../dto';
+import {formatLikeEthAddress, toAtom} from '../helpers';
 import {BlockatlasRPC, BlockatlasValidatorResult, CosmosBroadcastResult} from '@trustwallet/rpc/lib';
 import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
-import {blockatlasEndpoint, cosmosEndpoint, priceUri} from './endpoints';
+import {blockatlasEndpoint, cosmosEndpoint, priceUri} from '../endpoints';
 
 @Injectable({
   providedIn: 'root'

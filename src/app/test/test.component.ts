@@ -1,7 +1,7 @@
 import {Component, ElementRef, OnInit, ViewChild} from "@angular/core";
-import {TrustProviderService} from "../trust-provider.service";
+import {TrustProviderService} from "../services/trust-provider.service";
 import {Subscription} from "rxjs";
-import {CosmosService, CosmosServiceInstance} from "../cosmos.service";
+import {CosmosService, CosmosServiceInstance} from "../services/cosmos.service";
 import {HttpClient} from "@angular/common/http";
 import {CoinType} from "@trustwallet/types/lib/CoinType";
 import {switchMap} from "rxjs/operators";

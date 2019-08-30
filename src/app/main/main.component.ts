@@ -1,7 +1,7 @@
 import {combineLatest, Observable, of, timer} from 'rxjs';
 import {IBlockchainDto} from '../dto';
 import {Router} from '@angular/router';
-import {CosmosService, CosmosServiceInstance} from '../cosmos.service';
+import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';
 import {map, shareReplay, switchMap} from 'rxjs/operators';
 import {Component} from '@angular/core';
 import {CosmosDelegation} from '@trustwallet/rpc/lib';

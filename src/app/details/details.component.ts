@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {CosmosService, CosmosServiceInstance} from '../cosmos.service';
+import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';
 import {map, take} from 'rxjs/operators';
 import {HttpClient} from '@angular/common/http';
 import {Observable,} from 'rxjs';

@@ -6,7 +6,7 @@ import {BlockatlasRPC} from '@trustwallet/rpc/lib';
 import {BlockatlasValidatorResult} from '@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator';
 import {map} from 'rxjs/operators';
 import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
-import {CosmosService} from '../cosmos.service';
+import {CosmosService} from '../services/cosmos.service';
 import {blockatlasEndpoint} from '../endpoints';
 
 
