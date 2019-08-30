@@ -14,7 +14,7 @@
               </div>
             </div>
             <div class="input-group input-group-lg">
-              <input #input placeholder="Amount in ATOM" type="number"
+              <input (input)="inputElement.nativeElement.value = input.value" #input placeholder="Amount in ATOM" type="number"
                      class="form-control" aria-label="Large"
                      aria-describedby="inputGroup-sizing-sm" aria-describedby="basic-addon1">
               <div class="input-group-append">
