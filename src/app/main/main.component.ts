@@ -20,8 +20,8 @@ interface IValidatorWithAmount extends BlockatlasValidator {
 
 type StakeHolderList = Array<IValidatorWithAmount>;
 
-function map2List( address2stake: IAggregatedDelegationMap, validators: Array<IValidatorWithAmount> ): Array<IValidatorWithAmount> {
-  return Object.keys(address2stake).map(( address ) => {
+function map2List(address2stake: IAggregatedDelegationMap, validators: Array<IValidatorWithAmount>): Array<IValidatorWithAmount> {
+  return Object.keys(address2stake).map((address) => {
     const validator = validators.find(v => v.id === address);
     return {
       ...validator,
@@ -36,67 +36,66 @@ function map2List( address2stake: IAggregatedDelegationMap, validators: Array<IV
   styleUrls: ['./main.component.scss']
 })
 export class MainComponent {
-
-  blockchains: Array<IBlockchainDto> = [];
   myStakeHolders$: Observable<StakeHolderList>;
-  cosmosInstance: CosmosServiceInstance;
+  cosmosInstance: Observable<CosmosServiceInstance>;
+  blockchains: Array<IBlockchainDto> = [
+    {
+      blockchainId: 'cosmos',
+      currencyName: 'Cosmos',
+      currencySymbol: 'ATOM',
+      annualRate: undefined,
+      iconUri: 'https://assets.trustwalletapp.com/blockchains/cosmos/info/logo.png'
+    }
+  ];
 
-  constructor( private router: Router, private cosmos: CosmosService ) {
+  constructor(private router: Router, cosmos: CosmosService) {
 
-    this.cosmosInstance = this.cosmos.getInstance('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
+    const address2StakeMap$: Observable<StakeHolderList> = cosmos.instance$.pipe(
+      switchMap((cosmos: CosmosServiceInstance) => {
 
-    const validatorsAndDelegations = [
-      this.cosmosInstance.getValidators(),
-      this.cosmosInstance.getDelegations()
-    ];
+        const validatorsAndDelegations = [
+          cosmos.getValidators(),
+          cosmos.getDelegations()
+        ];
 
-//
-    this.blockchains = [
-      {
-        blockchainId: 'cosmos',
-        currencyName: 'Cosmos',
-        currencySymbol: 'ATOM',
-        annualRate: undefined,
-        iconUri: 'https://assets.trustwalletapp.com/blockchains/cosmos/info/logo.png'
-      }
-    ];
+        return combineLatest(validatorsAndDelegations).pipe(
+          map((data: any[]) => {
+              const [approvedValidators, myDelegations] = data;
 
-    const address2StakeMap$: Observable<StakeHolderList> = combineLatest(validatorsAndDelegations).pipe(
-      map(( data: any[] ) => {
-          const [approvedValidators, myDelegations] = data;
-
-          if (!approvedValidators || !myDelegations) {
-            return [];
-          }
+              if (!approvedValidators || !myDelegations) {
+                return [];
+              }
 
 
-          const bestCosmosInterestRate = approvedValidators.docs.reduce(( bestRate: number, validator: BlockatlasValidator ) => {
-            return bestRate < validator.reward.annual
-              ? validator.reward.annual
-              : bestRate;
-          }, 0);
-          this.blockchains[0].annualRate = bestCosmosInterestRate;
+              const bestCosmosInterestRate = approvedValidators.docs.reduce((bestRate: number, validator: BlockatlasValidator) => {
+                return bestRate < validator.reward.annual
+                  ? validator.reward.annual
+                  : bestRate;
+              }, 0);
+              this.blockchains[0].annualRate = bestCosmosInterestRate;
 
-          const addresses = approvedValidators.docs.map(( d ) => d.id);
+              const addresses = approvedValidators.docs.map((d) => d.id);
 
-          // Ignore delegations to validators that isn't in a list of approved validators
-          const filteredDelegations = myDelegations.filter(( delegation: CosmosDelegation ) => {
-            // TODO: use map(Object) in case we have more that 10 approved validators
-            return addresses.includes(delegation.validatorAddress);
-          });
+              // Ignore delegations to validators that isn't in a list of approved validators
+              const filteredDelegations = myDelegations.filter((delegation: CosmosDelegation) => {
+                // TODO: use map(Object) in case we have more that 10 approved validators
+                return addresses.includes(delegation.validatorAddress);
+              });
 
-          const address2stakeMap = filteredDelegations.reduce(( acc: IAggregatedDelegationMap, delegation: CosmosDelegation ) => {
-            // TODO: Use BN or native browser BigInt() + polyfill
-            const aggregatedAmount = acc[delegation.validatorAddress] || 0;
-            const sharesAmount = +(delegation.shares) || 0;
-            acc[delegation.validatorAddress] = aggregatedAmount + sharesAmount;
-            return acc;
-          }, {});
+              const address2stakeMap = filteredDelegations.reduce((acc: IAggregatedDelegationMap, delegation: CosmosDelegation) => {
+                // TODO: Use BN or native browser BigInt() + polyfill
+                const aggregatedAmount = acc[delegation.validatorAddress] || 0;
+                const sharesAmount = +(delegation.shares) || 0;
+                acc[delegation.validatorAddress] = aggregatedAmount + sharesAmount;
+                return acc;
+              }, {});
 
-          return map2List(address2stakeMap, approvedValidators.docs);
-        }
-      ));
+              return map2List(address2stakeMap, approvedValidators.docs);
+            }
+          ));
 
+      })
+    );
 
     this.myStakeHolders$ = timer(0, 10000).pipe(
       switchMap(() => {
@@ -106,11 +105,11 @@ export class MainComponent {
     );
   }
 
-  navigateToPosDelegatorsList( item: IBlockchainDto ) {
+  navigateToPosDelegatorsList(item: IBlockchainDto) {
     this.router.navigate([`/delegators/${item.blockchainId}`]);
   }
 
-  navigateToMyStakeHoldersList( validator: BlockatlasValidator ) {
+  navigateToMyStakeHoldersList(validator: BlockatlasValidator) {
     this.router.navigate([`/details/${validator.id}`]);
   }
 

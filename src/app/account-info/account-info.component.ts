@@ -1,13 +1,9 @@
 import {Component} from '@angular/core';
-import {TrustProviderService} from '../services/trust-provider.service';
 import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';
 import {combineLatest, Observable, Subscription} from 'rxjs';
-import {map, shareReplay} from 'rxjs/operators';
-
-interface IFiatDetails {
-  balance: Number;
-  staked: Number;
-}
+import {map, shareReplay, switchMap} from 'rxjs/operators';
+import {ExchangeRateService} from '../services/exchange-rate.service';
+import {AccountService} from '../services/account.service';
 
 @Component({
   selector: 'app-account-info',
@@ -15,24 +11,34 @@ interface IFiatDetails {
   styleUrls: ['./account-info.component.scss']
 })
 export class AccountInfoComponent {
-  cosmosInstance: CosmosServiceInstance;
-  subscription: Subscription;
-  fiatDetails$: Observable<IFiatDetails>;
 
-  constructor(private trustProvider: TrustProviderService, private cosmos: CosmosService) {
+  fiatBalance$: Observable<number>;
+  fiatStaked$: Observable<number>;
 
-    this.cosmosInstance = this.cosmos.getInstance('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
-    this.fiatDetails$ =
-      combineLatest(
-        [this.cosmosInstance.getPrice(), this.cosmosInstance.balance$, this.cosmosInstance.getStakedAmount()]).pipe(
-        map((x: any[]) => {
-          const [price, rawBalance, rawStaked] = x;
-          const balance = (Number(price) * Number(rawBalance));
-          const staked = (Number(price) * Number(rawStaked));
-          const fiatDetails: IFiatDetails = {balance, staked};
-          return fiatDetails;
-        }),
-        shareReplay(1)
-      );
+  constructor(private accountService: AccountService, exchangeRateService: ExchangeRateService, cosmosService: CosmosService) {
+
+    const exchangeRate$ = exchangeRateService.exchangeRate$;
+
+    this.fiatBalance$ = cosmosService.instance$.pipe(
+      switchMap((cosmos: CosmosServiceInstance) => {
+        return combineLatest([exchangeRate$, cosmos.balance$]);
+      }),
+      map((x: any[]) => {
+        const [exchangeRate, rawBalance] = x;
+        return (Number(exchangeRate) * Number(rawBalance));
+      }),
+      shareReplay(1)
+    );
+
+    this.fiatStaked$ = cosmosService.instance$.pipe(
+      switchMap((cosmos: CosmosServiceInstance) => {
+        return combineLatest([exchangeRate$, cosmos.stakedAmount$]);
+      }),
+      map((x: any[]) => {
+        const [exchangeRate, rawStaked] = x;
+        return (Number(exchangeRate) * Number(rawStaked));
+      }),
+      shareReplay(1)
+    );
   }
 }

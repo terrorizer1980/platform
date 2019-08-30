@@ -4,18 +4,17 @@
     <div>Staked</div>
   </div>
 
-  <!-- TODO: *ngIf else -->
-  <div *ngIf="!(fiatDetails$ | async)">
-    <div>...</div>
-    <div>...</div>
+  <div>
+    <div *ngIf="!(fiatBalance$ | async)">...</div>
+    <div *ngIf="!(fiatStaked$ | async)">...</div>
   </div>
 
-  <div *ngIf="(fiatDetails$ | async)">
+  <div>
     <div>
-      {{ ((fiatDetails$ | async).balance | currency:'USD':'symbol':'4.2-2') || '...' }}
+      {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
     </div>
     <div>
-      {{ ((fiatDetails$ | async).staked  | currency:'USD':'symbol':'4.2-2') || '...' }}
+      {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
     </div>
   </div>
 </div>

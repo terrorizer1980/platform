@@ -3,108 +3,112 @@ import {from, Observable, timer} from 'rxjs';
 import {HttpClient} from '@angular/common/http';
 import {CosmosAccount, CosmosRPC} from '@trustwallet/rpc';
 import BigNumber from 'bignumber.js';
-import {map, switchMap} from 'rxjs/operators';
-import {CoinType} from '@trustwallet/types/lib/CoinType';
-import {IPriceResponse} from '../dto';
-import {formatLikeEthAddress, toAtom} from '../helpers';
+import {map, shareReplay, switchMap} from 'rxjs/operators';
+import {toAtom} from '../helpers';
 import {BlockatlasRPC, BlockatlasValidatorResult, CosmosBroadcastResult} from '@trustwallet/rpc/lib';
 import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
-import {blockatlasEndpoint, cosmosEndpoint, priceUri} from '../endpoints';
+import {blockatlasEndpoint, cosmosEndpoint} from '../endpoints';
+import {AccountService} from './account.service';
+import {BlockatlasValidator} from '@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator';
+
 
 @Injectable({
   providedIn: 'root'
 })
 export class CosmosService {
-  readonly mapping: { [key: string]: CosmosServiceInstance } = {};
+  readonly instance$: Observable<CosmosServiceInstance>;
 
-  constructor( private http: HttpClient ) {
-  }
-
-  getInstance( address: string ): CosmosServiceInstance {
-
-    if (this.mapping[address]) {
-      return this.mapping[address];
-    }
-
-    const instance = new CosmosServiceInstance(this.http, address);
-    this.mapping[address] = instance;
-    return instance;
+  constructor(private http: HttpClient, accountService: AccountService) {
+    this.instance$ = accountService.address$.pipe(
+      map((address: string) => {
+        return new CosmosServiceInstance(this.http, address);
+      })
+    );
   }
 }
 
 export class CosmosServiceInstance {
   cosmosRpc: CosmosRPC;
   blockatlasRpc: BlockatlasRPC;
-  currentAccount: string;
-  balance$: Observable<number | BigNumber>;
 
-  constructor( private http: HttpClient, private account: string ) {
+  balance$: Observable<number | BigNumber>;
+  stakedAmount$: Observable<number | BigNumber>;
+
+  constructor(private http: HttpClient, private address: string) {
     this.blockatlasRpc = new BlockatlasRPC(blockatlasEndpoint, 'cosmos');
     this.cosmosRpc = new CosmosRPC(cosmosEndpoint);
-    this.currentAccount = account;
 
+
+    // TODO: move timeout to console
     this.balance$ = timer(0, 5000).pipe(
       switchMap(() => {
-        return this.getBalanceOnce$(account);
+        return this.requestBalance();
       }),
-      map(( balance ) => {
+      map((balance) => {
         return toAtom(balance);
-      })
+      }),
+      shareReplay(1)
     );
+    this.balance$.subscribe(); // start subscription right here
+
+
+    // TODO: move timeout to console
+    this.stakedAmount$ = timer(0, 15000).pipe(
+      switchMap(() => {
+        return this.requestStakedAmount();
+      }),
+      map((balance) => {
+        return toAtom(balance);
+      }),
+      shareReplay(1)
+    );
+    this.balance$.subscribe(); // start subscription right here
+
   }
 
-  getBalanceOnce$( address: string ): Observable<any> {
-    return from(this.cosmosRpc.getAccount(address)).pipe(
-      map(( account: CosmosAccount ) => {
+  requestBalance(): Observable<any> {
+    return from(this.cosmosRpc.getAccount(this.address)).pipe(
+      map((account: CosmosAccount) => {
         const balances = (account as CosmosAccount).coins;
-        const result = balances.find(( coin ) => coin.denom.toUpperCase() === 'UATOM');
+        const result = balances.find((coin) => coin.denom.toUpperCase() === 'UATOM');
         return result.amount;
       })
     );
   }
 
-  getPrice(): Observable<string> {
-    const addr = formatLikeEthAddress(CoinType.cosmos);
-    const body = {
-      'currency': 'USD',
-      'tokens': [
-        {
-          'contract': addr
-        }
-      ]
-    };
-
-    return this.http.post(priceUri, body).pipe(
-      map(( result: IPriceResponse ) => {
-        const coins = result.docs;
-        const cosmos = coins.find(( coin ) => coin.contract === addr);
-        return cosmos.price;
+  requestStakedAmount(): Observable<number> {
+    return from(this.cosmosRpc.listDelegations(this.address)).pipe(
+      map((delegations: CosmosDelegation[]) => {
+        const shares = delegations && delegations.map((d: CosmosDelegation) => d.shares) || [];
+        const sum = BigNumber.sum(...shares);
+        return toAtom(sum);
       })
     );
   }
 
-  getStakedAmount(): Observable<number> {
-    return from(this.cosmosRpc.listDelegations(this.account)).pipe(
-      map(( delegations: CosmosDelegation[] ) => {
-        const shares = delegations && delegations.map(( d: CosmosDelegation ) => d.shares) || [];
-        return (BigNumber.sum(...shares).toNumber() / 1000000);
-      })
-    );
-  }
-
-  getDelegations(): Observable<any> {
-    return from(this.cosmosRpc.listDelegations(this.account));
+  getDelegations(): Observable<CosmosDelegation[]> {
+    return from(this.cosmosRpc.listDelegations(this.address));
   }
 
   getValidators(): Observable<BlockatlasValidatorResult> {
     return from(this.blockatlasRpc.listValidators());
   }
 
-  getAccountOnce$( address: string ): Observable<CosmosAccount> {
+  getValidator(validatorId): Observable<BlockatlasValidator> {
+    return this.getValidators().pipe(
+      map((resp: BlockatlasValidatorResult) => {
+        return resp.docs.find((validator: BlockatlasValidator) => {
+          return validator.id === validatorId;
+        });
+      })
+    );
+  }
+
+  getAccountOnce$(address: string): Observable<CosmosAccount> {
     return from(this.cosmosRpc.getAccount(address));
   }
 
-  broadcastTx( tx: string ): Observable<CosmosBroadcastResult> {
+  broadcastTx(tx: string): Observable<CosmosBroadcastResult> {
     return from(this.cosmosRpc.broadcastTransaction(tx));
   }
 }

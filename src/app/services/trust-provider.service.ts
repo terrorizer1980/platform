@@ -11,27 +11,13 @@ export class TrustProviderService {
 
   currentAccount$: Observable<string>;
 
-  constructor() {
-    if (TrustProvider.isAvailable) {
-      this.currentAccount$ = this.getAddressOnce$(CoinType.cosmos);
-    } else {
-      // For dev purposes only
-      this.currentAccount$ = of('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
-    }
-
-    this.currentAccount$.pipe(
-      take(1),
-      shareReplay(1)
-    ).subscribe();
-  }
-
   signStake(
     coin: CoinType,
     addressTo: string,
     addressFrom: string,
     amount: string,
     sequence: string,
-    accountNumber: string ): Observable<string> {
+    accountNumber: string): Observable<string> {
 
     const transaction = {
       typePrefix: 'auth/StdTx',
@@ -67,7 +53,7 @@ export class TrustProviderService {
     addressFrom: string,
     amount: string,
     sequence: string,
-    accountNumber: string ): Observable<string> {
+    accountNumber: string): Observable<string> {
 
     let transaction;
 
@@ -122,17 +108,5 @@ export class TrustProviderService {
     }
     // @ts-ignore
     return TrustProvider.signTransaction(network, transaction);
-  }
-
-
-  getAddressOnce$( network: CoinType ): Observable<string> {
-    return from(TrustProvider.getAccounts()).pipe(
-      map(( accounts: any ) => {
-        const accountRaw = accounts.find(( account ) => account.network === network);
-        return JSON.stringify(accountRaw.address)
-          .replace('"', '')
-          .replace('"', '');
-      }),
-    );
   }
 }
