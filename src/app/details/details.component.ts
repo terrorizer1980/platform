@@ -1,8 +1,8 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';
-import {map, take} from 'rxjs/operators';
-import {Observable} from 'rxjs';
+import {map, take, tap} from 'rxjs/operators';
+import {Observable, Subscription} from 'rxjs';
 import {BlockatlasValidator, BlockatlasValidatorResult} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
 import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
 
@@ -11,29 +11,31 @@ import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegat
   templateUrl: './details.component.html',
   styleUrls: ['./details.component.scss']
 })
-export class DetailsComponent implements OnInit {
+export class DetailsComponent implements OnDestroy {
   validatorId: string;
   validator: BlockatlasValidator;
-  cosmosInstance: CosmosServiceInstance;
   stakedSum: Observable<string>;
   cosmos: Observable<CosmosServiceInstance>;
+  subscription: Subscription;
 
   constructor(activatedRoute: ActivatedRoute, cosmosService: CosmosService) {
     this.validatorId = activatedRoute.snapshot.params.validatorId;
     this.cosmos = cosmosService.instance$;
+
+    this.subscription = cosmosService.instance$.pipe(
+      tap((cosmosInstance: CosmosServiceInstance) => {
+        this.stakedSum = this.getStakedAmount(cosmosInstance, this.validatorId);
+        cosmosInstance.getValidator(this.validatorId).subscribe(
+          (validator: BlockatlasValidator) => {
+            this.validator = validator;
+          }
+        );
+      })
+    ).subscribe();
   }
 
-  ngOnInit() {
-    this.cosmosInstance.getValidator(this.validatorId)
-      .subscribe((validator: BlockatlasValidator) => {
-        this.validator = validator;
-      });
-
-    this.stakedSum = this.getStakedAmount(this.validatorId);
-  }
-
-  getStakedAmount(validatorId: string): Observable<string> {
-    return this.cosmosInstance.getDelegations().pipe(
+  getStakedAmount(cosmosInstance: CosmosServiceInstance, validatorId: string): Observable<string> {
+    return cosmosInstance.getDelegations().pipe(
       map((response: CosmosDelegation[]) => {
         if (!response) {
           return '0';
@@ -52,5 +54,7 @@ export class DetailsComponent implements OnInit {
     );
   }
 
-
+  ngOnDestroy(): void {
+    this.subscription.unsubscribe();
+  }
 }
