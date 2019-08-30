@@ -1,5 +1,5 @@
 import {Component, OnDestroy} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {CosmosService, CosmosServiceInstance} from '../services/cosmos.service';
 import {map, take, tap} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
@@ -18,7 +18,7 @@ export class DetailsComponent implements OnDestroy {
   cosmos: Observable<CosmosServiceInstance>;
   subscription: Subscription;
 
-  constructor(activatedRoute: ActivatedRoute, cosmosService: CosmosService) {
+  constructor(private router: Router, activatedRoute: ActivatedRoute, cosmosService: CosmosService) {
     this.validatorId = activatedRoute.snapshot.params.validatorId;
     this.cosmos = cosmosService.instance$;
 
@@ -56,5 +56,13 @@ export class DetailsComponent implements OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.unsubscribe();
+  }
+
+  navigateToStake() {
+    this.router.navigate([`/details/${this.validatorId}/stake`]);
+  }
+
+  navigateToUnStake() {
+    this.router.navigate([`/details/${this.validatorId}/unstake`]);
   }
 }

@@ -2,7 +2,7 @@
   <div class="row small">
     <div class="col-12 pt-2">
       <div *ngIf="validator" class="card">
-        <div  class="card-body p-2">
+        <div class="card-body p-2">
           <div class="col-12 text-center">
             <img style="width: 90px"
                  src="{{validator.info.image || '...'}}"
@@ -26,16 +26,9 @@
               <p class="metric">{{(stakedSum | async) || '...'}}</p>
             </div>
           </div>
-          <div class="col-12 text-center pt-2">
-            <div class="input-group input-group-lg">
-              <div class="input-group-prepend">
-              </div>
-              <input placeholder="Enter ATOM to stake" type="number" class="form-control" aria-label="Large"
-                     aria-describedby="inputGroup-sizing-sm">
-            </div>
-          </div>
           <div class="col-12 text-center pt-4 pb-4">
-            <button class="btn btn-info btn-lg col-12">STAKE</button>
+            <button class="btn btn-info btn-lg col-12 mb-4" (click)="navigateToStake()">STAKE</button>
+            <button class="btn btn-danger btn-lg col-12" (click)="navigateToUnStake()">UNSTAKE</button>
           </div>
         </div>
       </div>

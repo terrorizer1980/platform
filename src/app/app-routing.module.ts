@@ -22,6 +22,11 @@ const routes: Routes = [
   {
     path: 'details/:validatorId',
     component: DetailsComponent,
+    pathMatch: 'full',
+  },
+  {
+    path: 'details/:validatorId/:action',
+    component: TestComponent,
   },
   {
     path: 'test',

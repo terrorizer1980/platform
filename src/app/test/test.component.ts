@@ -10,6 +10,7 @@ import {CosmosAccount} from '@trustwallet/rpc/lib';
 import {LoadersCSS} from 'ngx-loaders-css';
 import {AccountService} from '../services/account.service';
 import {TrustProvider} from '@trustwallet/provider/lib';
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-test',
@@ -21,6 +22,9 @@ export class TestComponent {
   cosmosInstanceSubscription: Subscription;
   cosmosInstance: CosmosServiceInstance;
   account: string;
+
+  validatorId: string;
+  action: string;
 
   @ViewChild('input')
   inputElement: ElementRef;
@@ -36,7 +40,11 @@ export class TestComponent {
   constructor(
     private accountService: AccountService,
     private trustProviderService: TrustProviderService,
-    private cosmos: CosmosService) {
+    private cosmos: CosmosService,
+    private activatedRoute: ActivatedRoute) {
+
+    this.validatorId = activatedRoute.snapshot.params.validatorId;
+    this.action = activatedRoute.snapshot.params.action;
 
     this.addressSubscription = this.accountService.address$
       .subscribe((account) => {
