@@ -1,55 +1,43 @@
 <div *ngIf="(myStakeHolders$ | async)" class="row small">
   <div class="col-12 pt-2">
     <div class="card">
-      <div class="card-body p-2">
-        <h6 class="card-title"> Staking</h6>
-        <table class="table m-0">
-          <tbody>
-          <ng-template ngFor let-item [ngForOf]="(myStakeHolders$ | async)" let-i="index">
-            <tr (click)="navigateToMyStakeHoldersList(item)">
-              <td class="m-0 p-0">
-                <img class="icon" src="{{item.info.image}}" alt="cosmos">
-              </td>
-              <td class="m-0 p-0">{{item.info.name}}</td>
-              <td>{{item.reward.annual | number: '1.2-2'}}%</td>
-              <td>{{item.amount}}</td>
-              <td>ATOM</td>
-              <td>
-                <i class="fas fa-chevron-right"></i>
-              </td>
-            </tr>
-          </ng-template>
-          </tbody>
-        </table>
+      <div class="card-body p-0">
+        <h6 class="card-title" class="table-title p-2 m-0">My staking</h6>
+        <ng-template ngFor let-item [ngForOf]="(myStakeHolders$ | async)" let-i="index">
+          <div (click)="navigateToMyStakeHoldersList(item)" class="row-container pl-1">
+            <img class="row-logo" src="{{item.info.image}}" alt="cosmos">
+            <span class="js-l">{{item.info.name}}</span>
+            <span>{{item.reward.annual | number: '1.2-2'}}%</span>
+            <span>{{item.amount}} ATOM</span>
+            <span class="js-c">
+              <i class="fas fa-chevron-right"></i>
+            </span>
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>
 </div>
 
+
 <div class="row small">
   <div class="col-12 pt-2">
     <div class="card">
-      <div class="card-body p-2  m-0">
-        <h6 class="card-title">Blockhains</h6>
-        <table class="table">
-          <tbody>
-
-          <ng-template ngFor let-item [ngForOf]="blockchains" let-i="index">
-            <tr (click)="navigateToPosDelegatorsList(item)">
-              <td>
-                <img class="icon" src="{{item.iconUri}}" alt="cosmos">
-              </td>
-              <td>{{item.currencyName}}</td>
-              <td>{{item.annualRate | number: '1.2-2'}}%</td>
-              <td>{{item.currencySymbol}}</td>
-              <td>
+      <div class="card-body p-0">
+        <h6 class="card-title" class="table-title p-2 m-0">Blockchains</h6>
+        <ng-template ngFor let-item [ngForOf]="blockchains" let-i="index">
+          <div (click)="navigateToPosDelegatorsList(item)" class="row-container pl-1">
+            <img
+              class="p-2 row-logo" src="{{item.iconUri}}" alt="{{item.currencyName}}"
+            >
+            <span class="js-l">{{item.currencyName}}</span>
+            <span>{{item.annualRate | number: '1.2-2'}}%</span>
+            <span>{{item.currencySymbol}}</span>
+            <span class="js-c">
                 <i class="fas fa-chevron-right"></i>
-              </td>
-            </tr>
-          </ng-template>
-
-          </tbody>
-        </table>
+            </span>
+          </div>
+        </ng-template>
       </div>
     </div>
   </div>
