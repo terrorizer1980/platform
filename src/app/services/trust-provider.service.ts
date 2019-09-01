@@ -32,7 +32,7 @@ export class TrustProviderService {
         amounts: [
           {
             denom: 'uatom',
-            amount: '1000',
+            amount: '5000',
           },
         ],
         gas: '200000',
