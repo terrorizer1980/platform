@@ -2,12 +2,15 @@ import {combineLatest, Observable, timer} from 'rxjs';
 import {IBlockchainDto} from '../dto';
 import {Router} from '@angular/router';
 import {CosmosService} from '../services/cosmos.service';
-import {map, shareReplay, switchMap, tap} from 'rxjs/operators';
-import {Component} from '@angular/core';
+import {map, shareReplay, switchMap, switchMapTo, tap} from 'rxjs/operators';
+import {Component, OnInit} from '@angular/core';
 import {CosmosDelegation} from '@trustwallet/rpc/lib';
 import {selectValidatorWithBestInterestRate, toAtom} from '../helpers';
 import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
 import {AccountService} from '../services/account.service';
+
+
+// const MAIN_VIEW_REFRESH_INTERVAL = 10 * 1000; // 60s
 
 interface IAggregatedDelegationMap {
   // TODO: Use BN or native browser BigInt() + polyfill
@@ -34,9 +37,10 @@ function map2List(address2stake: IAggregatedDelegationMap, validators: Array<Blo
 @Component({
   selector: 'app-main',
   templateUrl: './main.component.html',
-  styleUrls: ['./main.component.scss']
+  styleUrls: ['./main.component.scss'],
 })
-export class MainComponent {
+export class MainComponent implements OnInit {
+
   myStakeHolders$: Observable<StakeHolderList>;
 
   blockchains: Array<IBlockchainDto> = [
@@ -49,20 +53,22 @@ export class MainComponent {
     }
   ];
 
-  constructor(private router: Router, cosmos: CosmosService, accountService: AccountService) {
+  constructor(private router: Router, private cosmos: CosmosService, private accountService: AccountService) {
+  }
 
-    const validatorsAndDelegations = [
-      cosmos.getValidatorsFromBlockatlas().pipe(
+  ngOnInit(): void {
+
+    const validatorsAndDelegations = () => [
+      this.cosmos.getValidatorsFromBlockatlas().pipe(
         tap((approvedValidators: BlockatlasValidator[]) => {
           // TODO: used find when we have more than one blockchain
           this.blockchains[0].bestAnnualRate = selectValidatorWithBestInterestRate(approvedValidators);
         })
       ),
-
-      cosmos.getAddressDelegations(accountService.address)
+      this.cosmos.getAddressDelegations(this.accountService.address)
     ];
 
-    const address2StakeMap$ = combineLatest(validatorsAndDelegations).pipe(
+    const address2StakeMap$ = () => combineLatest(validatorsAndDelegations()).pipe(
       map((data: any[]) => {
           const approvedValidators: BlockatlasValidator[] = data[0];
           const myDelegations: CosmosDelegation[] = data[1];
@@ -92,12 +98,20 @@ export class MainComponent {
         }
       ));
 
-    this.myStakeHolders$ = timer(0, 60000).pipe(
+
+    this.myStakeHolders$ = this.accountService.address$.pipe(
       switchMap(() => {
-        return address2StakeMap$;
+        return address2StakeMap$();
       }),
+      // TODO: fix pipeline and support pereodic update, or just use refresh on navigation
+      // switchMapTo(
+      //   timer(0, MAIN_VIEW_REFRESH_INTERVAL).pipe(
+      //     switchMapTo(address2StakeMap$())
+      //   )),
       shareReplay(1)
     );
+
+    this.myStakeHolders$.subscribe();
   }
 
   navigateToPosDelegatorsList(item: IBlockchainDto) {
