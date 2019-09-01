@@ -27,7 +27,6 @@ export class AccountService {
     if (!TrustProvider.isAvailable) {
       // TODO: add input fields to the UI for debugging, or take / whath it from local storage
       this.addressSubject.next('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
-      // cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk
       return;
     }
 
@@ -36,7 +35,7 @@ export class AccountService {
         // a.network on iOS
         // a.id on Android
         const account = accounts.find((a: Account) => (a.network || (a as any).id) === CoinType.cosmos);
-        return account.address;
+        this.addressSubject.next(account.address);
       } catch (err) {
         alert(err);
       }
