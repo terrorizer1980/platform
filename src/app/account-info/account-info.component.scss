@@ -1,3 +1,17 @@
 div {
   margin: 0.1rem 0 0.1rem 0;
 }
+
+.media-big {
+  display: none;
+}
+
+@media screen and (min-width: 600px) {
+  .media-small {
+    display: none
+  }
+  .media-big {
+    display: block
+  }
+}
+

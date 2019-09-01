@@ -20,9 +20,11 @@
           <input (input)="inputElement.nativeElement.value = input.value" #input placeholder="Amount in ATOM"
                  type="number"
                  class="form-control" aria-label="Large">
+          <!--
           <div class="input-group-append">
             <span class="btn btn-outline-primary">MAX</span>
           </div>
+          -->
         </div>
         <div *ngIf="isLoaded" class="col-12 text-center p-0">
           <button (click)="stake()" class="btn btn-primary btn-lg mt-4 mb-4 col-12">STAKE</button>
@@ -53,9 +55,11 @@
           <input (input)="inputElement2.nativeElement.value = input2.value" #input2 placeholder="Amount in ATOM"
                  type="number"
                  class="form-control" aria-label="Large">
+          <!--
           <div class="input-group-append">
             <button class="btn btn-outline-primary">MAX</button>
           </div>
+          -->
         </div>
         <div *ngIf="isLoaded" class="col-12 text-center p-0">
           <button (click)="unStake()" class="btn btn-outline-primary btn-lg mt-4 mb-4 col-12">UNSTAKE</button>
