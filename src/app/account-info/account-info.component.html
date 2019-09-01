@@ -1,20 +1,38 @@
-<div class="balances-box card-body p-0 d-flex justify-content-between">
-  <div>
-    <div>My Balance</div>
-    <div>Staked</div>
-  </div>
 
-  <div>
-    <div *ngIf="!(fiatBalance$ | async)">...</div>
-    <div *ngIf="!(fiatStaked$ | async)">...</div>
-  </div>
-
-  <div>
+<div class="container card media-small">
+  <div class="balances-box card-body p-0 d-flex justify-content-between">
     <div>
-      {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+      <div>My Balance</div>
+      <div>Staked</div>
     </div>
+
     <div>
-      {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+      <div>
+        {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+      </div>
+      <div>
+        {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+      </div>
     </div>
   </div>
 </div>
+
+
+<div class="media-big">
+  <div style="display:grid; grid-template-columns: 1fr 1fr; grid-gap:0.5em">
+    <div class="container card">
+      <div>My Balance</div>
+      <div>
+        {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+      </div>
+    </div>
+
+    <div class="container card">
+      <div>Staked</div>
+      <div>
+        {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+      </div>
+    </div>
+  </div>
+</div>
+
