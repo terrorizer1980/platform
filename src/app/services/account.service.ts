@@ -1,9 +1,9 @@
-import {Injectable} from '@angular/core';
-import {TrustProvider} from '@trustwallet/provider/lib';
-import {Account} from '@trustwallet/types';
-import {CoinType} from '@trustwallet/types/lib/CoinType';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { TrustProvider } from '@trustwallet/provider/lib';
+import { Account } from '@trustwallet/types';
+import { CoinType } from '@trustwallet/types/lib/CoinType';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +18,11 @@ export class AccountService {
   }
 
   constructor() {
+
+    this.address$ = this.addressSubject.asObservable().pipe(
+      // BehaviorSubject starts from null, so let's by pass only not null
+      filter((addr) => !!addr)
+    );
 
     if (!TrustProvider.isAvailable) {
       // TODO: add input fields to the UI for debugging, or take / whath it from local storage
@@ -38,11 +43,5 @@ export class AccountService {
     }, (err) => {
       alert(err);
     });
-
-    this.address$ = this.addressSubject.asObservable()
-      .pipe(
-        // BehaviorSubject starts from null, so let's by pass only not null
-        filter((addr) => !!addr)
-      );
   }
 }

@@ -15,12 +15,11 @@ export class AccountInfoComponent {
   fiatBalance$: Observable<number>;
   fiatStaked$: Observable<number>;
 
-  constructor(private accountService: AccountService, exchangeRateService: ExchangeRateService, private cosmos: CosmosService) {
+  constructor(private accountService: AccountService, exchangeRateService: ExchangeRateService, cosmos: CosmosService) {
 
     const exchangeRate$ = exchangeRateService.exchangeRate$;
 
     // convertToFiatPipeline();
-
     this.fiatBalance$ = combineLatest([exchangeRate$, cosmos.balance$]).pipe(
       map((x: any[]) => {
         // TODO: split to several variables to introduce typts
