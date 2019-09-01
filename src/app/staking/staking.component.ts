@@ -1,12 +1,12 @@
-import {Component, ElementRef, ViewChild} from '@angular/core';
-import {stakeOrUntake, TrustProviderService} from '../services/trust-provider.service';
-import {of} from 'rxjs';
-import {CosmosService} from '../services/cosmos.service';
-import {catchError, map, switchMap} from 'rxjs/operators';
-import {LoadersCSS} from 'ngx-loaders-css';
-import {AccountService} from '../services/account.service';
-import {ActivatedRoute} from '@angular/router';
-import {CosmosAccount} from '@trustwallet/rpc/lib';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { stakeOrUntake, TrustProviderService } from '../services/trust-provider.service';
+import { of } from 'rxjs';
+import { CosmosService } from '../services/cosmos.service';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { LoadersCSS } from 'ngx-loaders-css';
+import { AccountService } from '../services/account.service';
+import { ActivatedRoute } from '@angular/router';
+import { CosmosAccount } from '@trustwallet/rpc/lib';
 
 @Component({
   selector: 'app-test',
@@ -17,29 +17,27 @@ export class StakingComponent {
   myAddress: string;
   validatorId: string;
   action: string;
+  isStakeAction: boolean;
 
   @ViewChild('input')
   inputElement: ElementRef;
-
-  @ViewChild('input2')
-  inputElement2: ElementRef;
 
   loader: LoadersCSS = 'ball-beat';
   bgColor = 'white';
   isLoaded = true;
 
-  constructor(
-    private accountService: AccountService,
-    private trustProviderService: TrustProviderService,
-    private cosmos: CosmosService,
-    private activatedRoute: ActivatedRoute) {
+  constructor(private accountService: AccountService,
+              private trustProviderService: TrustProviderService,
+              private cosmos: CosmosService,
+              private activatedRoute: ActivatedRoute) {
     this.myAddress = this.accountService.address;
     this.validatorId = activatedRoute.snapshot.params.validatorId;
     this.action = activatedRoute.snapshot.params.action;
+    this.isStakeAction = (this.action === 'stake');
   }
 
   sendTx(action: stakeOrUntake) {
-    const amount = this.inputElement2.nativeElement.value * 1000000;
+    const amount = this.inputElement.nativeElement.value * 1000000;
 
     this.cosmos.getAccountOnce$(this.myAddress).pipe(
       switchMap((account: CosmosAccount) => {
