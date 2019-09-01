@@ -48,7 +48,7 @@ export class StakingComponent {
 
       map((result) => {
         try {
-          return JSON.stringify((JSON.parse(result) as any).json);
+          return JSON.stringify(JSON.parse(result) as any);
         } catch (e) {
           // fix for iOS
           return result.substring(9, result.length - 2);
