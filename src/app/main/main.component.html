@@ -29,7 +29,7 @@
           <div (click)="navigateToPosDelegatorsList(item)" class="row-container pl-1">
             <img class="p-2 row-logo" src="{{item.iconUri}}" alt="{{item.currencyName}}">
             <span class="js-l">{{item.currencyName}}</span>
-            <span>{{item.bestAnnualRate | number: '1.2-2'}}%</span>
+            <span>{{item.bestAnnualRate | number: '1.2-2'}}{{item.bestAnnualRate && '%'}}</span>
             <span>{{item.currencySymbol}}</span>
             <span class="js-c">
                 <i class="fas fa-chevron-right"></i>

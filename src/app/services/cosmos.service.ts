@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, combineLatest, from, Observable, timer } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
-import { CosmosAccount, CosmosRPC } from '@trustwallet/rpc';
+import {Injectable} from '@angular/core';
+import {BehaviorSubject, combineLatest, from, Observable, timer} from 'rxjs';
+import {HttpClient} from '@angular/common/http';
+import {CosmosAccount, CosmosRPC} from '@trustwallet/rpc';
 import BigNumber from 'bignumber.js';
-import { map, switchMap } from 'rxjs/operators';
-import { toAtom } from '../helpers';
-import { BlockatlasRPC, BlockatlasValidatorResult, CosmosBroadcastResult } from '@trustwallet/rpc/lib';
-import { CosmosDelegation } from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
-import { blockatlasEndpoint, cosmosEndpoint } from '../endpoints';
-import { AccountService } from './account.service';
-import { BlockatlasValidator } from '@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator';
+import {map, switchMap, tap} from 'rxjs/operators';
+import {toAtom} from '../helpers';
+import {BlockatlasRPC, BlockatlasValidatorResult, CosmosBroadcastResult} from '@trustwallet/rpc/lib';
+import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
+import {blockatlasEndpoint, cosmosEndpoint} from '../endpoints';
+import {AccountService} from './account.service';
+import {BlockatlasValidator} from '@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator';
 
 // TODO: use BigInt with polyfill everywhere
 type NullableNumber = null | number | BigNumber;
@@ -50,7 +50,6 @@ export class CosmosService {
 
     this.balance$ = buildPipeline(BALANCE_REFRESH_INTERVAL).pipe(
       switchMap((address) => {
-        // TODO: f
         return this.requestBalance(address);
       }),
       map((uAtom) => toAtom(uAtom))
@@ -60,7 +59,7 @@ export class CosmosService {
       switchMap((address) => {
         return this.requestStakedAmount(address);
       }),
-      map((uAtom) => toAtom(uAtom))
+      map((uAtom) => toAtom(uAtom) || 0)
     );
   }
 
