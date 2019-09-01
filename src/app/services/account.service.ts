@@ -26,6 +26,7 @@ export class AccountService {
 
     if (!TrustProvider.isAvailable) {
       // TODO: add input fields to the UI for debugging, or take / whath it from local storage
+      // cosmos1nswq3fz33h8e84xw0tqxaxw4ggkmfgw5lxk4nt
       this.addressSubject.next('cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk');
       return;
     }

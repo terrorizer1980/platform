@@ -8,11 +8,6 @@ import {DetailsComponent} from './details/details.component';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'main',
-    pathMatch: 'full',
-  },
-  {
-    path: 'main',
     component: MainComponent,
   },
   {

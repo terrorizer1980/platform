@@ -31,8 +31,8 @@ export class AccountInfoComponent {
 
     this.fiatStaked$ = combineLatest([exchangeRate$, cosmos.stakedAmount$]).pipe(
       map((x: any[]) => {
-        // TODO: split to several variables to introduce typts
-        const [exchangeRate, cryptoBalance] = x;
+        const exchangeRate: string = x[0];
+        const cryptoBalance: number = x[1];
         return (Number(exchangeRate) * Number(cryptoBalance));
       }),
       shareReplay(1)
