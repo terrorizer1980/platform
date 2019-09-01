@@ -8,10 +8,10 @@
 
     <div>
       <div>
-        {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+        {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}
       </div>
       <div>
-        {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+        {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}
       </div>
     </div>
   </div>
@@ -23,14 +23,14 @@
     <div class="container card">
       <div>My Balance</div>
       <div>
-        {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+        {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}
       </div>
     </div>
 
     <div class="container card">
       <div>Staked</div>
       <div>
-        {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'4.2-2') || '...' }}
+        {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}
       </div>
     </div>
   </div>
