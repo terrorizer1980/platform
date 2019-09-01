@@ -1,9 +1,9 @@
-import { Injectable } from '@angular/core';
-import { TrustProvider } from '@trustwallet/provider/lib';
-import { Account } from '@trustwallet/types';
-import { CoinType } from '@trustwallet/types/lib/CoinType';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { filter, map, shareReplay } from 'rxjs/operators';
+import {Injectable} from '@angular/core';
+import {TrustProvider} from '@trustwallet/provider/lib';
+import {Account} from '@trustwallet/types';
+import {CoinType} from '@trustwallet/types/lib/CoinType';
+import {BehaviorSubject, Observable} from 'rxjs';
+import {filter} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'

@@ -1,8 +1,8 @@
-import { Injectable } from '@angular/core';
-import { from, Observable } from 'rxjs';
-import { CosmosAccount } from '@trustwallet/rpc/lib';
-import { CoinType } from '@trustwallet/types/lib/CoinType';
-import { TrustProvider } from '@trustwallet/provider/lib';
+import {Injectable} from '@angular/core';
+import {from, Observable} from 'rxjs';
+import {CosmosAccount} from '@trustwallet/rpc/lib';
+import {CoinType} from '@trustwallet/types/lib/CoinType';
+import {TrustProvider} from '@trustwallet/provider/lib';
 
 export type stakeOrUntake = 'stake' | 'unstake';
 

@@ -1,12 +1,12 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
-import { stakeOrUntake, TrustProviderService } from '../services/trust-provider.service';
-import { of } from 'rxjs';
-import { CosmosService } from '../services/cosmos.service';
-import { catchError, map, switchMap } from 'rxjs/operators';
-import { LoadersCSS } from 'ngx-loaders-css';
-import { AccountService } from '../services/account.service';
-import { ActivatedRoute } from '@angular/router';
-import { CosmosAccount } from '@trustwallet/rpc/lib';
+import {Component, ElementRef, ViewChild} from '@angular/core';
+import {stakeOrUntake, TrustProviderService} from '../services/trust-provider.service';
+import {of} from 'rxjs';
+import {CosmosService} from '../services/cosmos.service';
+import {catchError, map, switchMap} from 'rxjs/operators';
+import {LoadersCSS} from 'ngx-loaders-css';
+import {AccountService} from '../services/account.service';
+import {ActivatedRoute} from '@angular/router';
+import {CosmosAccount} from '@trustwallet/rpc/lib';
 
 @Component({
   selector: 'app-test',

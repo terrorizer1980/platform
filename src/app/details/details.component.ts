@@ -1,11 +1,11 @@
-import { Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CosmosService } from '../services/cosmos.service';
-import { map, tap } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs';
-import { BlockatlasValidator } from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
-import { CosmosDelegation } from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
-import { AccountService } from '../services/account.service';
+import {Component, OnDestroy} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {CosmosService} from '../services/cosmos.service';
+import {map} from 'rxjs/operators';
+import {Observable, Subscription} from 'rxjs';
+import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
+import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
+import {AccountService} from '../services/account.service';
 
 @Component({
   selector: 'app-details',

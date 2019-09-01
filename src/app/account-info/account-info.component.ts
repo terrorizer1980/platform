@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
-import { CosmosService } from '../services/cosmos.service';
-import { combineLatest, Observable } from 'rxjs';
-import { map, shareReplay, switchMap } from 'rxjs/operators';
-import { ExchangeRateService } from '../services/exchange-rate.service';
-import { AccountService } from '../services/account.service';
+import {Component} from '@angular/core';
+import {CosmosService} from '../services/cosmos.service';
+import {combineLatest, Observable} from 'rxjs';
+import {map, shareReplay} from 'rxjs/operators';
+import {ExchangeRateService} from '../services/exchange-rate.service';
+import {AccountService} from '../services/account.service';
 
 @Component({
   selector: 'app-account-info',

@@ -1,13 +1,13 @@
-import { combineLatest, Observable, timer } from 'rxjs';
-import { IBlockchainDto } from '../dto';
-import { Router } from '@angular/router';
-import { CosmosService } from '../services/cosmos.service';
-import { map, shareReplay, switchMap, tap } from 'rxjs/operators';
-import { Component } from '@angular/core';
-import { CosmosDelegation } from '@trustwallet/rpc/lib';
-import { selectValidatorWithBestInterestRate, toAtom } from '../helpers';
-import { BlockatlasValidator } from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
-import { AccountService } from '../services/account.service';
+import {combineLatest, Observable, timer} from 'rxjs';
+import {IBlockchainDto} from '../dto';
+import {Router} from '@angular/router';
+import {CosmosService} from '../services/cosmos.service';
+import {map, shareReplay, switchMap, tap} from 'rxjs/operators';
+import {Component} from '@angular/core';
+import {CosmosDelegation} from '@trustwallet/rpc/lib';
+import {selectValidatorWithBestInterestRate, toAtom} from '../helpers';
+import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
+import {AccountService} from '../services/account.service';
 
 interface IAggregatedDelegationMap {
   // TODO: Use BN or native browser BigInt() + polyfill

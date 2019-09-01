@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { BlockatlasValidator } from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
+import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
 
 // Format number just like eth address
 export function formatLikeEthAddress(value: number | Number) {
