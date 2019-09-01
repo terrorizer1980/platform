@@ -1,7 +1,7 @@
 import {Component, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {CosmosService} from '../services/cosmos.service';
-import {map} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 import {Observable, Subscription} from 'rxjs';
 import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
 import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
@@ -21,9 +21,14 @@ export class DetailsComponent implements OnDestroy {
   constructor(private router: Router, accountService: AccountService, private cosmos: CosmosService, activatedRoute: ActivatedRoute) {
 
     this.validatorId = activatedRoute.snapshot.params.validatorId;
-    this.stakedSum$ = this.getStakedAmount(accountService.address);
 
-    // TODO: use async pipe and template variable defenition
+    this.stakedSum$ = accountService.address$.pipe(
+      switchMap((address: string) => {
+        return this.getStakedAmount(accountService.address);
+      })
+    );
+
+    // TODO: use async pipe and template variable definition, pluck from loaded before
     this.subscription = cosmos.getValidatorFromBlockatlasById(this.validatorId)
       .subscribe(
         (validator: BlockatlasValidator) => {
