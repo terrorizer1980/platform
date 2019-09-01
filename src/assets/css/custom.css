@@ -10,55 +10,25 @@ body {
     background: #2a63a0;
 }
 
-/*.icon-trust {*/
-/*    background-size: 100% 100%;*/
-/*    border: 0;*/
-/*    width: 1.7rem;*/
-/*    height: 1.7rem;*/
-/*    min-width: 1.7rem !important;*/
-/*    min-height: 1.7rem !important;*/
-/*    margin-bottom: 1.89em;*/
-/*}*/
-
-.icon {
-    background-size: 100% 100%;
-    border: 0;
-    width: 1.8rem;
-    height: 1.8rem;
-    min-width: 1.8rem;
-    min-height: 1.8rem;
+.table-title {
+  border-bottom: 1px solid #ccc;
 }
 
-.icon-chosen {
-    vertical-align: middle;
-    margin-bottom: 4px;
-    text-align: center;
-    background-size: 100% 100%;
-    border: 0;
-    width: 1rem;
-    height: 1rem;
-    min-width: 1rem;
-    min-height: 1rem;
+.row-logo {
+  max-width: 50px;
+  max-height: 50px;
 }
 
-.navigation-icons {
+.js-l {
+  justify-self: left;
+}
+
+.js-c {
+  justify-self: center;
+}
+
+.white {
     color: white;
-}
-
-.btn-stake {
-    text-decoration: underline;
-    padding-right: 1em;
-    width: 6.2em;
-}
-
-.table td, .table th {
-    font-size: 16px;
-    padding: .49rem;
-    vertical-align: middle;
-}
-
-.metric {
-    font-size: 19px;
 }
 
 .description {
@@ -79,12 +49,3 @@ body {
   margin-top: 0 !important;
   margin-bottom: 1em;
 }
-
-.left {
-  text-align: left;
-}
-/*.supply-balance-details {*/
-/*    margin-top: -17em;*/
-/*    box-shadow: none;*/
-/*    height: 50px;*/
-/*}*/

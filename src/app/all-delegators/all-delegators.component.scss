@@ -1,0 +1,8 @@
+.row-container {
+  grid-template-columns: 50px 1fr 50px 30px;
+  grid-gap:5px;
+  display: grid;
+  justify-items: right;
+  align-items: center;
+  border-bottom: 1px solid #ccc;
+}

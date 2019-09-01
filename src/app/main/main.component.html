@@ -1,8 +1,8 @@
-<div *ngIf="(myStakeHolders$ | async)" class="row small">
-  <div class="col-12 pt-2">
+<div *ngIf="(myStakeHolders$ | async)" class="row small mb-2">
+  <div class="col-12 p-0">
     <div class="card">
       <div class="card-body p-0">
-        <h6 class="card-title" class="table-title p-2 m-0">My staking</h6>
+        <h6 class="table-title p-2 m-0">My staking</h6>
         <ng-template ngFor let-item [ngForOf]="(myStakeHolders$ | async)" let-i="index">
           <div (click)="navigateToMyStakeHoldersList(item)" class="row-container pl-1">
             <img class="row-logo" src="{{item.info.image}}" alt="cosmos">
@@ -21,10 +21,10 @@
 
 
 <div class="row small">
-  <div class="col-12 pt-2">
+  <div class="col-12 p-0">
     <div class="card">
       <div class="card-body p-0">
-        <h6 class="card-title" class="table-title p-2 m-0">Blockchains</h6>
+        <h6 class="table-title p-2 m-0">Blockchains</h6>
         <ng-template ngFor let-item [ngForOf]="blockchains" let-i="index">
           <div (click)="navigateToPosDelegatorsList(item)" class="row-container pl-1">
             <img
