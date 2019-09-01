@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {interval, Observable, timer} from 'rxjs';
+import {Observable, timer} from 'rxjs';
 import {formatLikeEthAddress} from '../helpers';
 import {map, shareReplay, switchMap} from 'rxjs/operators';
 import {IPriceResponse} from '../dto';

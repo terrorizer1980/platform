@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { CosmosService } from '../services/cosmos.service';
-import { BlockatlasValidator } from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
+import {Component} from '@angular/core';
+import {ActivatedRoute, Router} from '@angular/router';
+import {HttpClient} from '@angular/common/http';
+import {Observable, of} from 'rxjs';
+import {CosmosService} from '../services/cosmos.service';
+import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
 
 @Component({
   selector: 'app-delegators',
