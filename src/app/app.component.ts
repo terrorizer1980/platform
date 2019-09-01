@@ -16,7 +16,7 @@ export class AppComponent {
   constructor( private http: HttpClient, private router: Router, private location: Location ) {
     this.showBackButton$ = this.router.events.pipe(
       filter(( event: any ) => event.url),
-      map(( event: any ) => event.url !== '/' && event.url !== '/main'),
+      map(( event: any ) => event.url !== '/'),
       startWith(false),
     );
   }

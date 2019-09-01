@@ -24,8 +24,8 @@ const routes: Routes = [
     component: StakingComponent,
   },
   {
-    path: 'test',
-    component: StakingComponent,
+    path: '**',
+    component: MainComponent,
   },
 ];
 
