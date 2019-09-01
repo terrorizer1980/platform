@@ -22,7 +22,7 @@
           <p class="metric">{{validator.reward.annual.toFixed(2) + '%' || '...'}}</p>
         </div>
         <div>
-          <p class="metric">{{(stakedSum | async) || '...'}}</p>
+          <p class="metric">{{(stakedSum$ | async) || '...'}}</p>
         </div>
       </div>
       <div class="col-12 text-center pt-4 pb-4">

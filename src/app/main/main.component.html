@@ -27,11 +27,9 @@
         <h6 class="table-title p-2 m-0">Blockchains</h6>
         <ng-template ngFor let-item [ngForOf]="blockchains" let-i="index">
           <div (click)="navigateToPosDelegatorsList(item)" class="row-container pl-1">
-            <img
-              class="p-2 row-logo" src="{{item.iconUri}}" alt="{{item.currencyName}}"
-            >
+            <img class="p-2 row-logo" src="{{item.iconUri}}" alt="{{item.currencyName}}">
             <span class="js-l">{{item.currencyName}}</span>
-            <span>{{item.annualRate | number: '1.2-2'}}%</span>
+            <span>{{item.bestAnnualRate | number: '1.2-2'}}%</span>
             <span>{{item.currencySymbol}}</span>
             <span class="js-c">
                 <i class="fas fa-chevron-right"></i>

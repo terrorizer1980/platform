@@ -5,7 +5,7 @@ export interface IBlockchainDto {
   blockchainId: string;
   currencyName: string;
   currencySymbol: string;
-  annualRate: number;
+  bestAnnualRate: number;
   iconUri: string;
 }
 

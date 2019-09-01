@@ -1,25 +1,32 @@
-import {Injectable} from '@angular/core';
-import {from, Observable, of} from 'rxjs';
-import {map, shareReplay, take} from 'rxjs/operators';
-import {TrustProvider} from '@trustwallet/provider';
-import {CoinType} from '@trustwallet/types/lib/CoinType';
+import { Injectable } from '@angular/core';
+import { from, Observable } from 'rxjs';
+import { CosmosAccount } from '@trustwallet/rpc/lib';
+import { CoinType } from '@trustwallet/types/lib/CoinType';
+import { TrustProvider } from '@trustwallet/provider/lib';
+
+export type stakeOrUntake = 'stake' | 'unstake';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TrustProviderService {
 
-  signStake(
-    coin: CoinType,
-    addressTo: string,
-    addressFrom: string,
-    amount: string,
-    sequence: string,
-    accountNumber: string): Observable<string> {
+  getTxPayload(addressFrom: string, addressTo: string, amount: number): any {
+    return {
+      delegatorAddress: addressFrom,
+      validatorAddress: addressTo,
+      amount: {
+        denom: 'uatom',
+        amount: amount,
+      }
+    };
+  }
 
-    const transaction = {
+  getCosmosTxSkeleton(account: CosmosAccount): any {
+    return {
       typePrefix: 'auth/StdTx',
-      accountNumber: accountNumber,
+      accountNumber: account.accountNumber,
+      sequence: account.sequence,
       chainId: 'cosmoshub-2',
       fee: {
         amounts: [
@@ -29,53 +36,22 @@ export class TrustProviderService {
           },
         ],
         gas: '200000',
-      },
-      sequence: sequence,
-      stakeMessage: {
-        delegatorAddress: addressFrom,
-        validatorAddress: addressTo,
-        amount: {
-          denom: 'uatom',
-          amount: amount,
-        },
-      },
+      }
     };
-
-    return from(TrustProvider.signTransaction(coin, transaction));
   }
 
-  signUnstake(
-      coin: CoinType,
-      addressTo: string,
-      addressFrom: string,
-      amount: string,
-      sequence: string,
-      accountNumber: string ): Observable<string> {
+  signCosmosStakeAction(action: stakeOrUntake, account: CosmosAccount, addressTo: string, amount): Observable<string> {
 
-      const transaction = {
-          typePrefix: 'auth/StdTx',
-          accountNumber: accountNumber,
-          chainId: 'cosmoshub-2',
-          fee: {
-              amounts: [
-                  {
-                      denom: 'uatom',
-                      amount: '5000',
-                  },
-              ],
-              gas: '200000',
-          },
-          sequence: sequence,
-          unstakeMessage: {
-              delegatorAddress: addressFrom,
-              validatorAddress: addressTo,
-              amount: {
-                  denom: 'uatom',
-                  amount: amount,
-              },
-          },
-      };
+    const txSkeleton = this.getCosmosTxSkeleton(account);
+    const payload = this.getTxPayload(account.address, addressTo, amount.toString() );
 
-      return from(TrustProvider.signTransaction(coin, transaction));
+    const tx = {
+      ...txSkeleton,
+      [action === 'stake' ? 'stakeMessage' : 'unstakeMessage']: {
+        ...payload
+      }
+    };
+
+    return from(TrustProvider.signTransaction(CoinType.cosmos, tx));
   }
 }
