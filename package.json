@@ -5,7 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --prod --aot",
-    "test": "ng test --watch false --browsers=PhantomJS --reporters=progress,junit",
+    "test": "ng test --watch false --reporters=progress,junit",
     "lint": "ng lint",
     "e2e": "ng e2e",
     "test-single-headless": "ng test --watch false --reporters=progress,junit"
