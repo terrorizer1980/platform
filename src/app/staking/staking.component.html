@@ -28,7 +28,8 @@
         </div>
         <div *ngIf="isLoaded" class="col-12 text-center p-0">
           <button (click)="isStakeAction ? stake() : unStake()"
-                  class="btn btn-primary btn-lg mt-4 mb-4 col-12">STAKE
+                  [ngClass]="{'btn-primary': isStakeAction, 'btn-outline-primary': !isStakeAction}"
+                  class="btn btn-lg mt-4 mb-4 col-12">{{isStakeAction ? 'STAKE' : 'UNSTAKE'}}
           </button>
         </div>
 
