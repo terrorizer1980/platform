@@ -1,16 +1,17 @@
-import {Component, OnDestroy} from '@angular/core';
-import {ActivatedRoute, Router} from '@angular/router';
-import {CosmosService} from '../services/cosmos.service';
-import {map, switchMap} from 'rxjs/operators';
-import {Observable, Subscription} from 'rxjs';
-import {BlockatlasValidator} from '@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator';
-import {CosmosDelegation} from '@trustwallet/rpc/src/cosmos/models/CosmosDelegation';
-import {AccountService} from '../services/account.service';
+import { Component, OnDestroy } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
+import { CosmosService } from "../../services/cosmos.service";
+import { map, switchMap } from "rxjs/operators";
+import { Observable, Subscription } from "rxjs";
+import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator";
+import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
+import { AccountService } from "../../../../../core/services/account.service";
+import { RouteDataProvider } from "../../../../../router-data/services/route-data-provider";
 
 @Component({
-  selector: 'app-details',
-  templateUrl: './details.component.html',
-  styleUrls: ['./details.component.scss']
+  selector: "app-details",
+  templateUrl: "./details.component.html",
+  styleUrls: ["./details.component.scss"]
 })
 export class DetailsComponent implements OnDestroy {
   validatorId: string;
@@ -18,8 +19,12 @@ export class DetailsComponent implements OnDestroy {
   stakedSum$: Observable<string>;
   subscription: Subscription;
 
-  constructor(private router: Router, accountService: AccountService, private cosmos: CosmosService, activatedRoute: ActivatedRoute) {
-
+  constructor(
+    private router: Router,
+    accountService: AccountService,
+    private cosmos: CosmosService,
+    private activatedRoute: ActivatedRoute
+  ) {
     this.validatorId = activatedRoute.snapshot.params.validatorId;
 
     this.stakedSum$ = accountService.address$.pipe(
@@ -29,12 +34,11 @@ export class DetailsComponent implements OnDestroy {
     );
 
     // TODO: use async pipe and template variable definition, pluck from loaded before
-    this.subscription = cosmos.getValidatorFromBlockatlasById(this.validatorId)
-      .subscribe(
-        (validator: BlockatlasValidator) => {
-          this.validator = validator;
-        }
-      );
+    this.subscription = cosmos
+      .getValidatorFromBlockatlasById(this.validatorId)
+      .subscribe((validator: BlockatlasValidator) => {
+        this.validator = validator;
+      });
   }
 
   // Staked amount per validator - we have that
@@ -42,7 +46,7 @@ export class DetailsComponent implements OnDestroy {
     return this.cosmos.getAddressDelegations(address).pipe(
       map((response: CosmosDelegation[]) => {
         if (!response) {
-          return '0';
+          return "0";
         }
 
         // TODO: make it one reduce call, we have that functionality in main component
@@ -63,10 +67,10 @@ export class DetailsComponent implements OnDestroy {
   }
 
   navigateToStake() {
-    this.router.navigate([`/details/${this.validatorId}/stake`]);
+    this.router.navigate([`stake`], { relativeTo: this.activatedRoute });
   }
 
   navigateToUnStake() {
-    this.router.navigate([`/details/${this.validatorId}/unstake`]);
+    this.router.navigate([`unstake`], { relativeTo: this.activatedRoute });
   }
 }

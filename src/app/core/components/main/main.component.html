@@ -8,7 +8,7 @@
             <img class="row-logo" src="{{item.info.image}}" alt="cosmos">
             <span class="js-l">{{item.info.name}}</span>
             <span>{{item.reward.annual | number: '1.2-2'}}%</span>
-            <span>{{item.amount}} ATOM</span>
+            <span>{{item.amount}} {{ item.coin.currencySymbol }}</span>
             <span class="js-c">
               <i class="fas fa-chevron-right"></i>
             </span>
@@ -26,10 +26,10 @@
       <div class="card-body p-0">
         <h6 class="table-title p-2 m-0">Blockchains</h6>
         <ng-template ngFor let-item [ngForOf]="blockchains" let-i="index">
-          <div (click)="navigateToPosDelegatorsList(item)" class="row-container pl-1">
+          <div (click)="navigateToPosDelegatorsList(item)" class="row-container pl-1" *ngIf="annuals[item.network] | async; let annual">
             <img class="p-2 row-logo" src="{{item.iconUri}}" alt="{{item.currencyName}}">
             <span class="js-l">{{item.currencyName}}</span>
-            <span>{{item.bestAnnualRate | number: '1.2-2'}}{{item.bestAnnualRate && '%'}}</span>
+            <span>{{annual | number: '1.2-2'}}{{annual && '%'}}</span>
             <span>{{item.currencySymbol}}</span>
             <span class="js-c">
                 <i class="fas fa-chevron-right"></i>

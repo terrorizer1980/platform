@@ -1,14 +1,6 @@
 // DTO - data transmission object
 // We use interfaces in binding etc.
 
-export interface IBlockchainDto {
-  blockchainId: string;
-  currencyName: string;
-  currencySymbol: string;
-  bestAnnualRate: number;
-  iconUri: string;
-}
-
 export interface ICoinPrice {
   price: string;
   contract: string;
@@ -20,4 +12,3 @@ export interface IPriceResponse {
   docs: ICoinPrice[];
   currency: string;
 }
-

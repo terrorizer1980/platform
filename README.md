@@ -13,5 +13,3 @@ Building on production:
 ### Authors: 
 
 Nikita Kozlov @enorage, Artem Vorobeev @artall64, Viktor Radchenko @vikmeup
-
-
