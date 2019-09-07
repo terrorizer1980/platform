@@ -4,9 +4,14 @@ import {
   CosmosServiceInjectable
 } from "./services/cosmos.service";
 import { CosmosConfigService } from "./services/cosmos-config.service";
+import { CosmosProviderModule } from "./cosmos-provider.module";
+import { Type } from "@angular/core";
 
-const CosmosModuleLoader = () =>
-  import("./cosmos-provider.module").then(mod => mod.CosmosProviderModule);
+export function CosmosModuleLoader(): Promise<Type<CosmosProviderModule>> {
+  return import("./cosmos-provider.module").then(
+    mod => mod.CosmosProviderModule
+  );
+}
 
 export const CosmosCoinConfig: CoinConfig<CosmosService> = {
   loader: CosmosModuleLoader,

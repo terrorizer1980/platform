@@ -17,7 +17,7 @@ export interface CoinProviderConfig<T = any> {
 }
 
 export interface CoinProviderModuleLoader {
-  loader: () => Promise<Type<any>>;
+  loader(): Promise<Type<any>>;
 }
 
 export interface CoinProviderInjectConfig<T> {
@@ -26,9 +26,9 @@ export interface CoinProviderInjectConfig<T> {
   deps: any[];
 }
 
-export const CoinDescriptor = <T>(data: T): T => {
+export function CoinDescriptor<T>(data: T): T {
   return data;
-};
+}
 
 export type StakeHolderList = Array<StakeHolder>;
 
