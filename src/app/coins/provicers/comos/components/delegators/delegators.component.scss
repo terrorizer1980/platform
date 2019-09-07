@@ -1,8 +1,13 @@
 .row-container {
-  grid-template-columns: 50px 1fr 50px 30px;
-  grid-gap:5px;
+  grid-template-columns: 50px 1fr 80px 30px;
+  grid-gap: 10px;
   display: grid;
   justify-items: right;
   align-items: center;
-  border-bottom: 1px solid #ccc;
+  margin: 14px 0 14px 0;
+}
+
+.row-container img {
+  border-radius: 10px;
+  height: 34px;
 }

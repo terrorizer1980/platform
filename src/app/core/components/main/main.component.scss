@@ -1,8 +1,22 @@
 .row-container {
-  grid-template-columns: 50px 1fr 50px 100px 30px;
-  grid-gap: 5px;
+  grid-template-columns: 50px 1fr 80px 150px 30px;
+  grid-gap: 10px;
   display: grid;
   justify-items: right;
   align-items: center;
-  border-bottom: 1px solid #ccc;
+  margin: 7px;
+}
+
+.row-container2 {
+  grid-template-columns: 50px 1fr 80px 30px;
+  grid-gap: 10px;
+  display: grid;
+  justify-items: right;
+  align-items: center;
+  margin: 7px;
+}
+
+
+.text-gray {
+  color: #7F7F7F;
 }
