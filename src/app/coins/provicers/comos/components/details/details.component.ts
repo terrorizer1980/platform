@@ -29,7 +29,7 @@ export class DetailsComponent implements OnDestroy {
 
     this.stakedSum$ = accountService.address$.pipe(
       switchMap((address: string) => {
-        return this.getStakedAmount(accountService.address);
+        return this.getStakedAmount(address);
       })
     );
 

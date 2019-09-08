@@ -11,7 +11,7 @@ import {
 import { HttpClient } from "@angular/common/http";
 import { CosmosAccount, CosmosRPC } from "@trustwallet/rpc";
 import BigNumber from "bignumber.js";
-import { map, switchMap } from "rxjs/operators";
+import { first, map, switchMap } from "rxjs/operators";
 import {
   BlockatlasRPC,
   BlockatlasValidatorResult,
@@ -132,7 +132,9 @@ export class CosmosService implements CoinService {
   private validatorsAndDelegations(): any[] {
     return [
       this.getValidatorsFromBlockatlas(),
-      this.getAddressDelegations(this.accountService.address)
+      this.accountService.address$.pipe(
+        switchMap(address => this.getAddressDelegations(address))
+      )
     ];
   }
 
@@ -176,7 +178,8 @@ export class CosmosService implements CoinService {
         );
 
         return this.map2List(config, address2stakeMap, approvedValidators);
-      })
+      }),
+      first()
     );
   }
 
