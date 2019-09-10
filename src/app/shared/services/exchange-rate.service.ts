@@ -23,7 +23,7 @@ export class ExchangeRateService {
   private requestCoin2UsdRate(coinType: CoinType): Observable<BigNumber> {
     const addr = Utils.coinToAddress(coinType);
     const body = {
-      currency: [FiatCoinType.USD],
+      currency: FiatCoinType.USD,
       tokens: [
         {
           contract: addr
