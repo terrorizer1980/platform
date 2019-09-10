@@ -1,8 +1,13 @@
 import { InjectionToken, Type } from "@angular/core";
 import { ClassType } from "class-transformer/ClassTransformer";
 import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator";
-import { CoinType } from "@trustwallet/types/lib/CoinType";
+import { CoinType } from "@trustwallet/types";
 import BigNumber from "bignumber.js";
+
+export enum StakeAction {
+  STAKE,
+  UNSTAKE
+}
 
 export type CoinConfig<T> = CoinProviderModuleLoader &
   CoinProviderInjectConfig<T>;

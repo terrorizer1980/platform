@@ -1,8 +1,8 @@
 import { forkJoin, Observable, of, ReplaySubject } from "rxjs";
 import { Router } from "@angular/router";
-import { map, shareReplay } from "rxjs/operators";
+import { catchError, map, shareReplay } from "rxjs/operators";
 import { Component, OnInit } from "@angular/core";
-import { AccountService } from "../../services/account.service";
+import { AccountService } from "../../../shared/services/account.service";
 import { Coins } from "../../../coins/coins";
 import {
   CoinProviderConfig,
@@ -19,6 +19,7 @@ import { CoinsReceiverService } from "../../../shared/services/coins-receiver.se
 export class MainComponent implements OnInit {
   myStakeHolders$: Observable<StakeHolderList> = new ReplaySubject();
   annuals: { [key: string]: Observable<number> };
+  addresses: { [key: string]: Observable<number> };
   blockchains = Coins;
 
   constructor(
@@ -31,6 +32,15 @@ export class MainComponent implements OnInit {
         [coin.network]: this.coinsReceiverService.blochchainServices[
           index
         ].getAnnualPercent()
+      }),
+      {}
+    );
+    this.addresses = Coins.reduce(
+      (annuals, coin, index) => ({
+        ...annuals,
+        [coin.network]: this.coinsReceiverService.blochchainServices[index]
+          .getAddress()
+          .pipe(catchError(_ => of(true)))
       }),
       {}
     );

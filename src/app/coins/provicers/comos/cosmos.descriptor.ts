@@ -6,6 +6,10 @@ import {
 import { CosmosConfigService } from "./services/cosmos-config.service";
 import { CosmosProviderModule } from "./cosmos-provider.module";
 import { Type } from "@angular/core";
+import { Observable } from "rxjs";
+import { HttpClient } from "@angular/common/http";
+import { environment } from "../../../../environments/environment";
+import { map } from "rxjs/operators";
 
 export function CosmosModuleLoader(): Promise<Type<CosmosProviderModule>> {
   return import("./cosmos-provider.module").then(
@@ -20,8 +24,14 @@ export const CosmosCoinConfig: CoinConfig<CosmosService> = {
   deps: CosmosServiceInjectable
 };
 
+export function CosmosChainId(http: HttpClient): Observable<string> {
+  return http
+    .get(`${environment.cosmosEndpoint}/node_info`)
+    .pipe(map((res: any) => res.network));
+}
+
 export interface CosmosProviderConfig
   extends CoinProviderConfig<CosmosService> {
   endpoint: string;
-  chainId: string;
+  chainId: (http: HttpClient) => Observable<string>;
 }

@@ -1,12 +1,12 @@
 import { Component, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { CosmosService } from "../../services/cosmos.service";
-import { map, switchMap } from "rxjs/operators";
+import { combineAll, map, switchMap } from "rxjs/operators";
 import { Observable, Subscription } from "rxjs";
 import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator";
 import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
-import { AccountService } from "../../../../../core/services/account.service";
-import { RouteDataProvider } from "../../../../../router-data/services/route-data-provider";
+import { AccountService } from "../../../../../shared/services/account.service";
+import { CoinType } from "@trustwallet/types";
 
 @Component({
   selector: "app-details",
@@ -21,13 +21,12 @@ export class DetailsComponent implements OnDestroy {
 
   constructor(
     private router: Router,
-    accountService: AccountService,
     private cosmos: CosmosService,
     private activatedRoute: ActivatedRoute
   ) {
     this.validatorId = activatedRoute.snapshot.params.validatorId;
 
-    this.stakedSum$ = accountService.address$.pipe(
+    this.stakedSum$ = this.cosmos.getAddress().pipe(
       switchMap((address: string) => {
         return this.getStakedAmount(address);
       })

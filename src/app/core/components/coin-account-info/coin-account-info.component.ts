@@ -2,7 +2,7 @@ import { Component } from "@angular/core";
 import { CosmosService } from "../../../coins/provicers/comos/services/cosmos.service";
 import { combineLatest, Observable } from "rxjs";
 import { map, shareReplay } from "rxjs/operators";
-import { AccountService } from "../../services/account.service";
+import { AccountService } from "../../../shared/services/account.service";
 import { CoinsReceiverService } from "../../../shared/services/coins-receiver.service";
 
 @Component({
@@ -14,10 +14,7 @@ export class CoinAccountInfoComponent {
   fiatBalance$: Observable<string>;
   fiatStaked$: Observable<string>;
 
-  constructor(
-    private accountService: AccountService,
-    private coinsReceiverService: CoinsReceiverService
-  ) {
+  constructor(private coinsReceiverService: CoinsReceiverService) {
     this.fiatBalance$ = combineLatest(
       this.coinsReceiverService.blochchainServices.map(service =>
         service.getBalanceUSD()

@@ -2,7 +2,8 @@ import { Injectable } from "@angular/core";
 import { Observable, timer } from "rxjs";
 import { map, shareReplay, switchMap } from "rxjs/operators";
 import { IPriceResponse } from "../../dto";
-import { CoinType } from "@trustwallet/types/lib/CoinType";
+import { CoinType } from "@trustwallet/types";
+import { FiatCoinType } from "@trustwallet/types";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
 import { Utils } from "@trustwallet/api";
@@ -22,7 +23,7 @@ export class ExchangeRateService {
   private requestCoin2UsdRate(coinType: CoinType): Observable<BigNumber> {
     const addr = Utils.coinToAddress(coinType);
     const body = {
-      currency: "USD",
+      currency: [FiatCoinType.USD],
       tokens: [
         {
           contract: addr

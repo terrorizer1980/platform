@@ -9,4 +9,7 @@ export interface CoinService {
   getStakedUSD(): Observable<BigNumber>;
   getStakeHolders(): Observable<StakeHolderList>;
   getPriceUSD(): Observable<BigNumber>;
+  getAddress(): Observable<string>;
+  stake(account: any, to: string, amount: string): Observable<string>;
+  unstake(account: any, to: string, amount: string): Observable<string>;
 }
