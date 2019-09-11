@@ -51,6 +51,18 @@
                   Add coin in Wallet menu
                 </div></ng-container
               >
+              <ng-container *ngIf="pending[item.network] | async; let pending"
+                ><div *ngIf="pending > 0">
+                  <div>
+                    Pending unstaking: {{ pending }} {{ item.currencySymbol }}
+                  </div>
+                  <div
+                    *ngIf="releaseDate[item.network] | async; let releaseDate"
+                  >
+                    Will be released: {{ releaseDate | date }}
+                  </div>
+                </div></ng-container
+              >
             </div>
             <span>{{ annual | number: "1.2-2" }}{{ annual && "%" }}</span>
             <span class="js-c">
