@@ -44,35 +44,27 @@ export class StakingComponent {
     this.myAddress
       .pipe(
         switchMap(address => {
-          return this.cosmos.getAccountOnce$(address);
+          return this.cosmos.getAccountOnce(address);
         }),
         switchMap((account: CosmosAccount) => {
           this.isLoaded = false;
           const addressTo = this.validatorId;
+
           if (action === StakeAction.STAKE) {
             return this.cosmos.stake(account, addressTo, amount.toString());
           } else {
             return this.cosmos.unstake(account, addressTo, amount.toString());
           }
         }),
-        map(result => {
-          try {
-            return JSON.stringify(JSON.parse(result) as any);
-          } catch (e) {
-            // fix for iOS
-            return result.substring(9, result.length - 2);
-          }
-        }),
         switchMap(result => {
           return this.cosmos.broadcastTx(result);
         }),
         catchError(error => {
-          alert(JSON.stringify(error));
+          alert(error);
           return of(error);
         })
       )
       .subscribe(result => {
-        // alert(result.txhash);
         this.isLoaded = true;
       });
   }
