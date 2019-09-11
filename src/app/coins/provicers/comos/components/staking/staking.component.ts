@@ -6,6 +6,7 @@ import { LoadersCSS } from "ngx-loaders-css";
 import { ActivatedRoute } from "@angular/router";
 import { CosmosAccount } from "@trustwallet/rpc";
 import { StakeAction } from "../../../../coin-provider-config";
+import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
 
 @Component({
   selector: "app-test",
@@ -17,6 +18,7 @@ export class StakingComponent {
   validatorId: string;
   action: string;
   isStakeAction: boolean;
+  info: Observable<CosmosStakingInfo>;
 
   @ViewChild("input", { static: true })
   inputElement: ElementRef;
@@ -33,6 +35,7 @@ export class StakingComponent {
     this.validatorId = activatedRoute.snapshot.params.validatorId;
     this.action = activatedRoute.snapshot.params.action;
     this.isStakeAction = this.action === "stake";
+    this.info = this.cosmos.getStakingInfo();
   }
 
   sendTx(action: StakeAction) {

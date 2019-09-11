@@ -31,6 +31,7 @@ import { CoinType } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider/lib";
 import { CosmosRpcService } from "./cosmos-rpc.service";
 import { CosmosUnboundInfoService } from "./cosmos-unbound-info.service";
+import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
 
 // TODO: There is plenty of old boilerplate here yet. Need to be refactored.
 
@@ -358,5 +359,9 @@ export class CosmosService implements CoinService {
 
   getUnstakingDate(): Observable<Date> {
     return this.cosmosUnboundInfoService.getReleaseDate();
+  }
+
+  getStakingInfo(): Observable<CosmosStakingInfo> {
+    return this.cosmosUnboundInfoService.getStakingInfo();
   }
 }
