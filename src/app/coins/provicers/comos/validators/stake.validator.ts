@@ -4,14 +4,18 @@ import { timer } from "rxjs";
 import { first, map, switchMap } from "rxjs/operators";
 import BigNumber from "bignumber.js";
 
-export const StakeValidator = (isStake: boolean, cosmos: CosmosService) => {
+export const StakeValidator = (
+  isStake: boolean,
+  cosmos: CosmosService,
+  validatorId: string
+) => {
   return (input: FormControl) => {
     return timer(300).pipe(
       switchMap(() => {
         if (isStake) {
           return cosmos.getBalance();
         } else {
-          return cosmos.getStaked();
+          return cosmos.getStakedToValidator(validatorId);
         }
       }),
       map(res => {

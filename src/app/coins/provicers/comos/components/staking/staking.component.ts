@@ -7,7 +7,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { CosmosAccount } from "@trustwallet/rpc";
 import { StakeAction } from "../../../../coin-provider-config";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
-import { FormBuilder } from "@angular/forms";
+import { FormBuilder, FormGroup } from "@angular/forms";
 import { StakeValidator } from "../../validators/stake.validator";
 import { NgbActiveModal, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SuccessPopupComponent } from "../success-popup/success-popup.component";
@@ -21,9 +21,7 @@ export class StakingComponent {
   myAddress: Observable<string>;
   validatorId: string;
   info: Observable<CosmosStakingInfo>;
-  stakeForm = this.fb.group({
-    amount: ["", [], [StakeValidator(true, this.cosmos)]]
-  });
+  stakeForm: FormGroup;
   max$ = this.cosmos.getBalance();
   Math = Math;
 
@@ -39,6 +37,9 @@ export class StakingComponent {
     this.myAddress = this.cosmos.getAddress();
     this.validatorId = activatedRoute.snapshot.params.validatorId;
     this.info = this.cosmos.getStakingInfo();
+    this.stakeForm = this.fb.group({
+      amount: ["", [], [StakeValidator(true, this.cosmos, this.validatorId)]]
+    });
   }
 
   stake() {

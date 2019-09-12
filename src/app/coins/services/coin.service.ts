@@ -3,7 +3,7 @@ import { Observable } from "rxjs";
 import { StakeHolderList } from "../coin-provider-config";
 import BigNumber from "bignumber.js";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
-import {ClassType} from "class-transformer/ClassTransformer";
+import { ClassType } from "class-transformer/ClassTransformer";
 
 export interface CoinService {
   getAnnualPercent(): Observable<number>;

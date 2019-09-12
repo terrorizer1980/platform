@@ -387,4 +387,13 @@ export class CosmosService implements CoinService {
       })
     );
   }
+
+  getStakedToValidator(validator: string): Observable<BigNumber> {
+    return this.getStakeHolders().pipe(
+      map(stakeholders => {
+        return stakeholders.find(holder => holder.id === validator).amount;
+      }),
+      first()
+    );
+  }
 }

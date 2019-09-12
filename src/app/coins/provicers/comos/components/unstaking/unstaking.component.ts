@@ -5,10 +5,12 @@ import { StakeValidator } from "../../validators/stake.validator";
 import { LoadersCSS } from "ngx-loaders-css";
 import { CosmosService } from "../../services/cosmos.service";
 import { ActivatedRoute, Router } from "@angular/router";
-import { FormBuilder } from "@angular/forms";
+import { FormBuilder, FormGroup } from "@angular/forms";
 import { StakeAction } from "../../../../coin-provider-config";
 import { SuccessPopupComponent } from "../success-popup/success-popup.component";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import BigNumber from "bignumber.js";
+import { map } from "rxjs/operators";
 
 @Component({
   selector: "app-unstaking",
@@ -19,10 +21,8 @@ export class UnstakingComponent {
   myAddress: Observable<string>;
   validatorId: string;
   info: Observable<CosmosStakingInfo>;
-  max$ = this.cosmos.getStaked();
-  stakeForm = this.fb.group({
-    amount: ["", [], [StakeValidator(false, this.cosmos)]]
-  });
+  max$;
+  stakeForm: FormGroup;
   Math = Math;
 
   loader: LoadersCSS = "ball-beat";
@@ -38,6 +38,10 @@ export class UnstakingComponent {
     this.myAddress = this.cosmos.getAddress();
     this.validatorId = activatedRoute.snapshot.params.validatorId;
     this.info = this.cosmos.getStakingInfo();
+    this.max$ = this.cosmos.getStakedToValidator(this.validatorId);
+    this.stakeForm = this.fb.group({
+      amount: ["", [], [StakeValidator(false, this.cosmos, this.validatorId)]]
+    });
   }
 
   unStake() {
@@ -50,8 +54,8 @@ export class UnstakingComponent {
   }
 
   setMax() {
-    const s = this.cosmos.getStaked().subscribe(staked => {
-      this.stakeForm.get("amount").setValue(staked);
+    const s = this.max$.subscribe(max => {
+      this.stakeForm.get("amount").setValue(max);
       s.unsubscribe();
     });
   }
