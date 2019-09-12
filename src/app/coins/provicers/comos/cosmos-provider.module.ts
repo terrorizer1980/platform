@@ -12,13 +12,15 @@ import { CosmosConfigService } from "./services/cosmos-config.service";
 import { RouteDataProvider } from "../../../router-data/services/route-data-provider";
 import { CoinTypesInjector } from "../../coin-types-injector";
 import { CosmosProviderConfig } from "./cosmos.descriptor";
+import { UnstakingComponent } from "./components/unstaking/unstaking.component";
 
 @NgModule({
   declarations: [
     CosmosProviderComponent,
     DelegatorsComponent,
     DetailsComponent,
-    StakingComponent
+    StakingComponent,
+    UnstakingComponent
   ],
   imports: [
     SharedModule,
