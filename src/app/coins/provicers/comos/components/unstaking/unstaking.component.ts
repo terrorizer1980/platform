@@ -4,9 +4,11 @@ import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStak
 import { StakeValidator } from "../../validators/stake.validator";
 import { LoadersCSS } from "ngx-loaders-css";
 import { CosmosService } from "../../services/cosmos.service";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder } from "@angular/forms";
 import { StakeAction } from "../../../../coin-provider-config";
+import { SuccessPopupComponent } from "../success-popup/success-popup.component";
+import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 
 @Component({
   selector: "app-unstaking",
@@ -29,7 +31,9 @@ export class UnstakingComponent {
   constructor(
     private cosmos: CosmosService,
     private activatedRoute: ActivatedRoute,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private modalService: NgbModal,
+    private router: Router
   ) {
     this.myAddress = this.cosmos.getAddress();
     this.validatorId = activatedRoute.snapshot.params.validatorId;
@@ -40,7 +44,9 @@ export class UnstakingComponent {
     const amount = this.stakeForm.get("amount").value * 1000000;
     this.cosmos
       .sendTx(StakeAction.UNSTAKE, this.validatorId, amount.toString())
-      .subscribe();
+      .subscribe(_ => {
+        this.congratulate(this.stakeForm.get("amount").value);
+      });
   }
 
   setMax() {
@@ -48,5 +54,18 @@ export class UnstakingComponent {
       this.stakeForm.get("amount").setValue(staked);
       s.unsubscribe();
     });
+  }
+
+  congratulate(sum: number) {
+    const modalRef = this.modalService.open(SuccessPopupComponent);
+    modalRef.componentInstance.text = `You have successfully withdrawn ${sum} ATOMs`;
+    modalRef.result.then(
+      data => {
+        this.router.navigate([`/`]);
+      },
+      reason => {
+        this.router.navigate([`/`]);
+      }
+    );
   }
 }
