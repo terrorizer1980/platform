@@ -2,7 +2,6 @@ import { Component } from "@angular/core";
 import { Observable, of } from "rxjs";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
 import { StakeValidator } from "../../validators/stake.validator";
-import { LoadersCSS } from "ngx-loaders-css";
 import { CosmosService } from "../../services/cosmos.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { FormBuilder, FormGroup } from "@angular/forms";
@@ -10,7 +9,7 @@ import { StakeAction } from "../../../../coin-provider-config";
 import { SuccessPopupComponent } from "../success-popup/success-popup.component";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import BigNumber from "bignumber.js";
-import { map } from "rxjs/operators";
+import {tap} from "rxjs/operators";
 
 @Component({
   selector: "app-unstaking",
@@ -24,9 +23,7 @@ export class UnstakingComponent {
   max$;
   stakeForm: FormGroup;
   Math = Math;
-
-  loader: LoadersCSS = "ball-beat";
-  bgColor = "white";
+  isLoading = false;
 
   constructor(
     private cosmos: CosmosService,
@@ -45,11 +42,19 @@ export class UnstakingComponent {
   }
 
   unStake() {
-    const amount = this.stakeForm.get("amount").value * 1000000;
+    if (this.isLoading) { return; }
+
+    this.isLoading = true;
+    const amount = new BigNumber(this.stakeForm.get("amount").value)
+      .times(new BigNumber(1000000));
+
     this.cosmos
-      .sendTx(StakeAction.UNSTAKE, this.validatorId, amount.toString())
+      .sendTx(StakeAction.UNSTAKE, this.validatorId, amount)
+      .pipe(tap(() => this.isLoading = false, e => this.isLoading = false))
       .subscribe(_ => {
         this.congratulate(this.stakeForm.get("amount").value);
+      }, e => {
+        alert(e);
       });
   }
 

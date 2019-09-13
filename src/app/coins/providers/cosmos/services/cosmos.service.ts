@@ -55,9 +55,9 @@ interface IAggregatedDelegationMap {
 @Injectable()
 export class CosmosService implements CoinService {
   private _manualRefresh: BehaviorSubject<boolean> = new BehaviorSubject(true);
-
-  private balance$: Observable<BigNumber>;
-  private stakedAmount$: Observable<BigNumber>;
+  private readonly fee = new BigNumber(5000);
+  private readonly balance$: Observable<BigNumber>;
+  private readonly stakedAmount$: Observable<BigNumber>;
 
   constructor(
     @Inject(CosmosConfigService)
@@ -204,14 +204,14 @@ export class CosmosService implements CoinService {
   private getTxPayload(
     addressFrom: string,
     addressTo: string,
-    amount: string
+    amount: BigNumber,
   ): any {
     return {
       delegatorAddress: addressFrom,
       validatorAddress: addressTo,
       amount: {
         denom: "uatom",
-        amount: amount
+        amount: amount.minus(this.fee).toFixed()
       }
     };
   }
@@ -228,7 +228,7 @@ export class CosmosService implements CoinService {
           amounts: [
             {
               denom: "uatom",
-              amount: "5000"
+              amount: this.fee.toFixed()
             }
           ],
           gas: "200000"
@@ -317,7 +317,7 @@ export class CosmosService implements CoinService {
   stake(
     account: CosmosAccount,
     to: string,
-    amount: string
+    amount: BigNumber,
   ): Observable<string> {
     const payload = this.getTxPayload(account.address, to, amount);
     return this.getCosmosTxSkeleton(account).pipe(
@@ -334,7 +334,7 @@ export class CosmosService implements CoinService {
   unstake(
     account: CosmosAccount,
     to: string,
-    amount: string
+    amount: BigNumber
   ): Observable<string> {
     const payload = this.getTxPayload(account.address, to, amount);
     return this.getCosmosTxSkeleton(account).pipe(
@@ -370,7 +370,7 @@ export class CosmosService implements CoinService {
     );
   }
 
-  sendTx(action: StakeAction, addressTo: string, amount: string) {
+  sendTx(action: StakeAction, addressTo: string, amount: BigNumber): Observable<CosmosBroadcastResult> {
     return this.getAddress().pipe(
       switchMap(address => {
         return this.getAccountOnce(address);

@@ -6,18 +6,21 @@
           <div>
             <div class="pb-3">
               <h5>
-                Enter amount to stake
+                Enter amount to withdraw
               </h5>
+            </div>
+
+            <div>
+              <span *ngIf="info | async; let info"
+                >It takes {{ info.timeFrame.day }} days to withdraw your
+                funds</span
+              >
             </div>
 
             <div
               *ngIf="stakeForm.controls.amount.valueChanges | async; let value"
               class="pb-3"
             >
-              <h5>
-                You will stake
-              </h5>
-              <h5>{{ value + " ATOMs" }}</h5>
             </div>
           </div>
 
@@ -34,7 +37,7 @@
                 <span
                   class="btn btn-outline-primary"
                   *ngIf="max$ | async; let max"
-                  ><span class="small">Max: {{ Math.floor(max * 1000) / 1000 }}</span></span
+                ><span class="small">Max: {{ Math.floor(max * 1000) / 1000 }}</span></span
                 >
               </div>
             </div>
@@ -48,13 +51,12 @@
             </div>
           </div>
           <div class="col-12 text-center p-0">
-            <button
-              (click)="stake()"
-              [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
-              class="btn btn-lg btn-primary mt-4 mb-4 col-12"
-            >
-              Stake
-            </button>
+            <loading-button
+              (click)="unStake()"
+              [loading]="isLoading"
+              [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value">
+              Withdraw
+            </loading-button>
           </div>
         </div>
       </div>

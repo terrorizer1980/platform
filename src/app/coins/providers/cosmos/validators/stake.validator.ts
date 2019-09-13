@@ -24,7 +24,8 @@ export const StakeValidator = (
         }
 
         const val = new BigNumber(input.value);
-        if (val.isLessThanOrEqualTo(0) || val.isNaN()) {
+        const minValue = new BigNumber(1);
+        if (val.isLessThan(minValue) || val.isNaN()) {
           return { fill: true };
         }
         return val.isLessThanOrEqualTo(res) ? null : { max: res.toString() };
