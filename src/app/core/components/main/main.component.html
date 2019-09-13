@@ -1,14 +1,9 @@
-<div *ngIf="myStakeHolders$ | async" class="row small mb-2">
-  <div class="col-12 p-0">
+<div *ngIf="myStakeHolders$ | async; let stakeHolders" class="row small mb-2">
+  <div class="col-12 p-0" *ngIf="stakeHolders && stakeHolders.length">
     <div class="card">
       <div class="card-body p-0">
         <h6 class="ml-3 mt-3 mb-1">Staked</h6>
-        <ng-template
-          ngFor
-          let-item
-          [ngForOf]="myStakeHolders$ | async"
-          let-i="index"
-        >
+        <ng-template ngFor let-item [ngForOf]="stakeHolders" let-i="index">
           <div
             (click)="navigateToMyStakeHoldersList(item)"
             class="row row-container pb-1 pt-1"

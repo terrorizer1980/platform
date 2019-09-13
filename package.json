@@ -1,10 +1,11 @@
 {
   "name": "staking",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --aot false --host 0.0.0.0",
     "build": "ng build --prod --aot",
+    "build:sentry": "ng build --configuration=sentry",
     "build:watch": "ng build --prod --watch",
     "test": "ng test --watch false",
     "lint": "ng lint",

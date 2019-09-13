@@ -13,8 +13,9 @@ export class AccountService {
 
   getAddress(coin: CoinType): Observable<string> {
     if (!TrustProvider.isAvailable) {
-      return of("cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk");
-      // return of("cosmos1xcn6f52mall95cw798qgftsvxvqrrdj535t8pm");
+      // return of("cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk");
+      return of("cosmos1xcn6f52mall95cw798qgftsvxvqrrdj535t8pm");
+      // return of("cosmos130q48agm6yal2uxp3rgv3ptlwmwwk099c5nwj4");
     }
 
     return fromPromise(TrustProvider.getAccounts()).pipe(
