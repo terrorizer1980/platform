@@ -47,7 +47,7 @@
               ],
               "optimization": true,
               "outputHashing": "all",
-              "sourceMap": false,
+              "sourceMap": true,
               "extractCss": true,
               "namedChunks": false,
               "aot": true,
@@ -62,17 +62,6 @@
                 }
               ]
             },
-            "sentry": {
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
-                }
-              ],
-              "sourceMap": true,
-              "extractCss": true,
-              "aot": true
-            }
           }
         },
         "serve": {

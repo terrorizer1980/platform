@@ -5,8 +5,9 @@
     "ng": "ng",
     "start": "ng serve --aot false --host 0.0.0.0",
     "build": "ng build --prod --aot",
-    "build:sentry": "ng build --configuration=sentry",
+    "build:sentry": "ng build --prod --aot",
     "build:watch": "ng build --prod --watch",
+    "postbuild": "rimraf dist/**/*.map",
     "test": "ng test --watch false",
     "lint": "ng lint",
     "e2e": "ng e2e"
@@ -58,6 +59,7 @@
     "node-sass": "^4.12.0",
     "prettier": "^1.18.2",
     "protractor": "~5.4.0",
+    "rimraf": "^3.0.0",
     "ts-node": "~7.0.0",
     "tslint": "~5.11.0",
     "typescript": "~3.5.3"
