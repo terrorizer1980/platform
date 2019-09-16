@@ -1,4 +1,3 @@
-
 .row-logo {
   max-width: 36px;
   max-height: 36px;
@@ -21,20 +20,20 @@
 }
 
 .white {
-    color: white;
+  color: white;
 }
 
 .description {
-    font-size: 16px;
-    line-height: 26px;
+  font-size: 16px;
+  line-height: 26px;
 }
 
 .balances-box {
-    font-size: 17px;
-    vertical-align: middle;
+  font-size: 17px;
+  vertical-align: middle;
 }
 
-.balances-box > * > * {
+.balances-box>*>* {
   font-size: 16px;
   vertical-align: middle;
   margin: 0.5em;
