@@ -10,7 +10,7 @@ import {
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { catchError, first, map, switchMap } from "rxjs/operators";
+import {catchError, first, map, switchMap, tap} from "rxjs/operators";
 import {
   BlockatlasRPC,
   BlockatlasValidatorResult,
@@ -55,7 +55,7 @@ interface IAggregatedDelegationMap {
 @Injectable()
 export class CosmosService implements CoinService {
   private _manualRefresh: BehaviorSubject<boolean> = new BehaviorSubject(true);
-  private readonly fee = new BigNumber(5000);
+  private fee: BigNumber;
   private readonly balance$: Observable<BigNumber>;
   private readonly stakedAmount$: Observable<BigNumber>;
 
@@ -90,6 +90,10 @@ export class CosmosService implements CoinService {
         return this.requestStakedAmount(address);
       }),
       map(uAtom => CosmosUtils.toAtom(uAtom) || new BigNumber(0))
+    );
+
+    this.config.pipe(
+      tap(cfg => this.fee = new BigNumber(cfg.fee))
     );
   }
 
