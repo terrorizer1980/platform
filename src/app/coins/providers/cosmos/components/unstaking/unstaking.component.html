@@ -50,6 +50,10 @@
                 Minimum withdraw value is
                 {{ stakeForm.controls.amount.errors?.min }}
               </div>
+              <div *ngIf="stakeForm.controls.amount.errors?.restriction">
+                Your Wallet balance is too low. You need at least:
+                {{ stakeForm.controls.amount.errors?.restriction }} ATOMs
+              </div>
             </div>
           </div>
           <div class="col-12 text-center p-0">

@@ -17,7 +17,7 @@ import BigNumber from "bignumber.js";
   styleUrls: ["./main.component.scss"]
 })
 export class MainComponent implements OnInit {
-  myStakeHolders$: Observable<StakeHolderList> = new ReplaySubject();
+  myStakeHolders$: Observable<StakeHolderList> = new ReplaySubject(1);
   annuals: { [key: string]: Observable<number> };
   addresses: { [key: string]: Observable<number> };
   pending: { [key: string]: Observable<BigNumber> };

@@ -5,7 +5,7 @@ import { Observable, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { fromPromise } from "rxjs/internal-compatibility";
 import { CoinNotSupportedException } from "../../exceptions/coin-not-supported-exception";
-import {environment} from "../../../environments/environment";
+import { environment } from "../../../environments/environment";
 
 @Injectable({
   providedIn: "root"

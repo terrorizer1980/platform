@@ -7,7 +7,7 @@ import { CosmosProviderConfig } from "../cosmos.descriptor";
   providedIn: "root"
 })
 export class CosmosRpcService {
-  private _rpc = new ReplaySubject<CosmosRPC>();
+  private _rpc = new ReplaySubject<CosmosRPC>(1);
   get rpc(): Observable<CosmosRPC> {
     return this._rpc;
   }

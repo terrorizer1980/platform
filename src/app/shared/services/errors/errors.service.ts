@@ -1,4 +1,5 @@
 import Errors from "../../../../errors.json";
+import ErrorsIgnore from "../../../../errors_to_ignore.json";
 
 import { Injectable } from "@angular/core";
 import { ErrorModel } from "./error.model";
@@ -12,10 +13,19 @@ export class ErrorsService {
 
   // TODO: There are raw errors values for each error code now. They gonna be replaced with translation codes in the future
   showError(error: ErrorModel): void {
+    console.error(error);
     if (Errors[error.code]) {
       this.dialogService.showError(Errors[error.code]);
     } else {
-      this.dialogService.showError((Errors as any).default);
+      if (
+        (typeof error === "string" &&
+          (ErrorsIgnore as string[]).some(err => err === error)) ||
+        (error && (ErrorsIgnore as string[]).some(err => error.code === err))
+      ) {
+        console.log(`Ignore error ${JSON.stringify(error)}`);
+      } else {
+        this.dialogService.showError((Errors as any).default);
+      }
     }
   }
 }

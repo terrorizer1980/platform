@@ -1,5 +1,5 @@
 import { Component, Inject } from "@angular/core";
-import { Observable } from "rxjs";
+import { combineLatest, Observable } from "rxjs";
 import { CosmosService } from "../../services/cosmos.service";
 import { ActivatedRoute, Router } from "@angular/router";
 import { StakeAction } from "../../../../coin-provider-config";
@@ -8,11 +8,12 @@ import { FormBuilder, FormGroup } from "@angular/forms";
 import { StakeValidator } from "../../validators/stake.validator";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SuccessPopupComponent } from "../../../../../shared/components/success-popup/success-popup.component";
-import { tap } from "rxjs/operators";
+import { map, tap } from "rxjs/operators";
 import BigNumber from "bignumber.js";
 import { DialogsService } from "../../../../../shared/services/dialogs.service";
 import { CosmosConfigService } from "../../services/cosmos-config.service";
 import { CosmosProviderConfig } from "../../cosmos.descriptor";
+import { CosmosUtils } from "@trustwallet/rpc/lib";
 
 @Component({
   selector: "app-test",
@@ -24,7 +25,7 @@ export class StakingComponent {
   validatorId: string;
   info: Observable<CosmosStakingInfo>;
   stakeForm: FormGroup;
-  max$ = this.cosmos.getBalance();
+  max$ = this.getMax();
   Math = Math;
   isLoading = false;
 
@@ -70,10 +71,22 @@ export class StakingComponent {
   }
 
   setMax() {
-    const s = this.cosmos.getBalance().subscribe(balance => {
-      this.stakeForm.get("amount").setValue(balance);
+    const s = this.getMax().subscribe(max => {
+      this.stakeForm.get("amount").setValue(max);
       s.unsubscribe();
     });
+  }
+
+  getMax(): Observable<BigNumber> {
+    return combineLatest([this.cosmos.getBalance(), this.config]).pipe(
+      map(([balance, config]) => {
+        const additional = CosmosUtils.toAtom(
+          new BigNumber(config.gas + config.fee)
+        );
+        const max = balance.minus(additional);
+        return max.isGreaterThan(0) ? max : new BigNumber(0);
+      })
+    );
   }
 
   congratulate(sum: number) {

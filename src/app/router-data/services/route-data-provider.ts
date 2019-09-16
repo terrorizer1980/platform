@@ -5,7 +5,7 @@ import { filter, map, switchMap } from "rxjs/operators";
 
 @Injectable()
 export class RouteDataProvider {
-  private routeData = new ReplaySubject<any>(0);
+  private routeData = new ReplaySubject<any>(1);
 
   constructor(router: Router, activatedRoute: ActivatedRoute) {
     router.events

@@ -10,7 +10,7 @@ import {
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import {catchError, first, map, switchMap, tap} from "rxjs/operators";
+import { catchError, first, map, switchMap, tap } from "rxjs/operators";
 import {
   BlockatlasRPC,
   BlockatlasValidatorResult,
@@ -208,12 +208,12 @@ export class CosmosService implements CoinService {
     amount: BigNumber
   ): any {
     return this.config.pipe(
-      map (cfg => ({
+      map(cfg => ({
         delegatorAddress: addressFrom,
         validatorAddress: addressTo,
         amount: {
           denom: "uatom",
-          amount: amount.minus(cfg.fee).toFixed()
+          amount: amount.toFixed()
         }
       }))
     );
@@ -328,13 +328,13 @@ export class CosmosService implements CoinService {
       this.getTxPayload(account.address, to, amount),
       this.getCosmosTxSkeleton(account)
     ]).pipe(
-        map(([payload, txSkeleton]) => ({
-          ...txSkeleton,
-          ["stakeMessage"]: {
-            ...payload
-          }
-        })),
-        switchMap(tx => from(TrustProvider.signTransaction(CoinType.cosmos, tx)))
+      map(([payload, txSkeleton]) => ({
+        ...txSkeleton,
+        ["stakeMessage"]: {
+          ...payload
+        }
+      })),
+      switchMap(tx => from(TrustProvider.signTransaction(CoinType.cosmos, tx)))
     );
   }
 
@@ -375,7 +375,10 @@ export class CosmosService implements CoinService {
 
   broadcastTx(tx: string): Observable<CosmosBroadcastResult> {
     return this.cosmosRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.broadcastTransaction(tx)))
+      switchMap(rpc => {
+        console.log("broadcast tx");
+        return from(rpc.broadcastTransaction(tx));
+      })
     );
   }
 
@@ -404,7 +407,13 @@ export class CosmosService implements CoinService {
   getStakedToValidator(validator: string): Observable<BigNumber> {
     return this.getStakeHolders().pipe(
       map(stakeholders => {
-        return stakeholders.find(holder => holder.id === validator).amount;
+        const validatorStaked = stakeholders.find(
+          holder => holder.id === validator
+        );
+        if (validatorStaked) {
+          return validatorStaked.amount;
+        }
+        return new BigNumber(0);
       }),
       first()
     );
