@@ -1,19 +1,25 @@
-<div class="text-center text-sm-left header-bg p-3">
-  <div class="container">
-  <div class="logo">
-    <a routerLink="/"><img src="assets/images/trust_logo.svg" alt="trust"/></a>
+<div *ngIf="isTrustProviderAvailable">
+  <div class="text-center text-sm-left header-bg p-3">
+    <div class="container">
+    <div class="logo">
+      <a routerLink="/"><img src="assets/images/trust_logo.svg" alt="trust"/></a>
+    </div>
+    </div>
   </div>
+
+  <div class="header-bg pt-1 pb-5">
+    <div class="container">
+      <app-coin-account-info></app-coin-account-info>
+    </div>
+  </div>
+
+  <div class="override p-2">
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
   </div>
 </div>
 
-<div class="header-bg pt-1 pb-5">
-  <div class="container">
-    <app-coin-account-info></app-coin-account-info>
-  </div>
-</div>
-
-<div class="override p-2">
-  <div class="container">
-    <router-outlet></router-outlet>
-  </div>
+<div *ngIf="!isTrustProviderAvailable">
+  <use-trust-wallet></use-trust-wallet>
 </div>
