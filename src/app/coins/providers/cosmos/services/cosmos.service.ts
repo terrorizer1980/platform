@@ -55,7 +55,6 @@ interface IAggregatedDelegationMap {
 @Injectable()
 export class CosmosService implements CoinService {
   private _manualRefresh: BehaviorSubject<boolean> = new BehaviorSubject(true);
-  private fee: BigNumber;
   private readonly balance$: Observable<BigNumber>;
   private readonly stakedAmount$: Observable<BigNumber>;
 
@@ -90,10 +89,6 @@ export class CosmosService implements CoinService {
         return this.requestStakedAmount(address);
       }),
       map(uAtom => CosmosUtils.toAtom(uAtom) || new BigNumber(0))
-    );
-
-    this.config.pipe(
-      tap(cfg => this.fee = new BigNumber(cfg.fee))
     );
   }
 
@@ -212,14 +207,16 @@ export class CosmosService implements CoinService {
     addressTo: string,
     amount: BigNumber
   ): any {
-    return {
-      delegatorAddress: addressFrom,
-      validatorAddress: addressTo,
-      amount: {
-        denom: "uatom",
-        amount: amount.minus(this.fee).toFixed()
-      }
-    };
+    return this.config.pipe(
+      map (cfg => ({
+        delegatorAddress: addressFrom,
+        validatorAddress: addressTo,
+        amount: {
+          denom: "uatom",
+          amount: amount.minus(cfg.fee).toFixed()
+        }
+      }))
+    );
   }
 
   private getCosmosTxSkeleton(account: CosmosAccount): Observable<any> {
@@ -236,7 +233,7 @@ export class CosmosService implements CoinService {
           amounts: [
             {
               denom: "uatom",
-              amount: this.fee.toFixed()
+              amount: new BigNumber(config.fee).toFixed()
             }
           ],
           gas: config.gas
@@ -327,15 +324,17 @@ export class CosmosService implements CoinService {
     to: string,
     amount: BigNumber
   ): Observable<string> {
-    const payload = this.getTxPayload(account.address, to, amount);
-    return this.getCosmosTxSkeleton(account).pipe(
-      map(txSkeleton => ({
-        ...txSkeleton,
-        ["stakeMessage"]: {
-          ...payload
-        }
-      })),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.cosmos, tx)))
+    return combineLatest([
+      this.getTxPayload(account.address, to, amount),
+      this.getCosmosTxSkeleton(account)
+    ]).pipe(
+        map(([payload, txSkeleton]) => ({
+          ...txSkeleton,
+          ["stakeMessage"]: {
+            ...payload
+          }
+        })),
+        switchMap(tx => from(TrustProvider.signTransaction(CoinType.cosmos, tx)))
     );
   }
 
@@ -344,9 +343,11 @@ export class CosmosService implements CoinService {
     to: string,
     amount: BigNumber
   ): Observable<string> {
-    const payload = this.getTxPayload(account.address, to, amount);
-    return this.getCosmosTxSkeleton(account).pipe(
-      map(txSkeleton => ({
+    return combineLatest([
+      this.getTxPayload(account.address, to, amount),
+      this.getCosmosTxSkeleton(account)
+    ]).pipe(
+      map(([payload, txSkeleton]) => ({
         ...txSkeleton,
         ["unstakeMessage"]: {
           ...payload

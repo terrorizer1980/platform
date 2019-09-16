@@ -7,7 +7,6 @@ import { CoinType } from "@trustwallet/types";
 import { fromPromise } from "rxjs/internal-compatibility";
 import BigNumber from "bignumber.js";
 import { CosmosUnbond } from "@trustwallet/rpc/lib/cosmos/models/CosmosUnbond";
-import { CosmosUtils } from "@trustwallet/rpc";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
 
 @Injectable({

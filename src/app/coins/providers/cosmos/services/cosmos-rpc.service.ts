@@ -13,8 +13,8 @@ export class CosmosRpcService {
   }
 
   setConfig(config: Observable<CosmosProviderConfig>): CosmosRpcService {
-    config.subscribe(config => {
-      this._rpc.next(new CosmosRPC(config.endpoint));
+    config.subscribe(cfg => {
+      this._rpc.next(new CosmosRPC(cfg.endpoint));
     });
     return this;
   }

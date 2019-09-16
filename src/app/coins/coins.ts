@@ -17,7 +17,7 @@ export const Coins: CoinProviderConfig[] = [
     currencySymbol: "ATOM",
     iconUri: "https://assets.trustwalletapp.com/blockchains/cosmos/info/logo.png",
     config: CosmosCoinConfig,
-    gas: 20000,
+    gas: 250000,
     fee: 5000
   })
 ];

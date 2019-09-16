@@ -13,7 +13,6 @@ import { RouteDataProvider } from "../../../router-data/services/route-data-prov
 import { CoinTypesInjector } from "../../coin-types-injector";
 import { CosmosProviderConfig } from "./cosmos.descriptor";
 import { UnstakingComponent } from "./components/unstaking/unstaking.component";
-import { SuccessPopupComponent } from "../../../shared/components/success-popup/success-popup.component";
 
 @NgModule({
   declarations: [
