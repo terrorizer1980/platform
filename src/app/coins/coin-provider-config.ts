@@ -18,6 +18,8 @@ export interface CoinProviderConfig<T = any> {
   currencyName: string;
   currencySymbol: string;
   iconUri: string;
+  gas: number;
+  fee: number;
   config: CoinConfig<T>;
 }
 

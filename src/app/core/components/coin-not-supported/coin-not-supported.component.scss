@@ -1,0 +1,20 @@
+@import "variables.scss";
+
+#coin-not-supported-message {
+  color: $primary;
+  text-align: center;
+}
+
+.message {
+  border-bottom: 1px solid $primary;
+  font-size: 12pt;
+  font-weight: 200;
+  color: $primary;
+}
+
+.sub-message {
+  color: $primary;
+  font-weight: 600;
+  font-size: 12pt;
+  padding: 6pt 10pt;
+}

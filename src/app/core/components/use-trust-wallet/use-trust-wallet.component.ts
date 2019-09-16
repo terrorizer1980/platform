@@ -1,7 +1,7 @@
 import {Component} from "@angular/core";
 
 @Component({
-  selector: "use-trust-wallet",
+  selector: "app-use-trust-wallet",
   templateUrl: "./use-trust-wallet.component.html",
   styleUrls: ["./use-trust-wallet.component.scss"]
 })

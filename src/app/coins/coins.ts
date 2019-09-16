@@ -15,8 +15,7 @@ export const Coins: CoinProviderConfig[] = [
     endpoint: environment.cosmosEndpoint,
     currencyName: "Cosmos",
     currencySymbol: "ATOM",
-    iconUri:
-      "https://assets.trustwalletapp.com/blockchains/cosmos/info/logo.png",
+    iconUri: "https://assets.trustwalletapp.com/blockchains/cosmos/info/logo.png",
     config: CosmosCoinConfig,
     gas: 20000,
     fee: 5000

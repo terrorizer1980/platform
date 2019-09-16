@@ -4,6 +4,7 @@ import { Account, CoinType } from "@trustwallet/types";
 import { Observable, of } from "rxjs";
 import { map } from "rxjs/operators";
 import { fromPromise } from "rxjs/internal-compatibility";
+import { CoinNotSupportedException } from "../../exceptions/coin-not-supported-exception";
 
 @Injectable({
   providedIn: "root"
@@ -16,7 +17,7 @@ export class AccountService {
       map(accounts => {
         const account = accounts.find((a: Account) => a.network === coin);
         if (!account) {
-          throw `No address found for ${coin}`;
+          throw new CoinNotSupportedException(coin);
         }
         return account.address;
       })

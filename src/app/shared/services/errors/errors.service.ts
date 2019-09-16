@@ -1,7 +1,6 @@
 import Errors from "../../../../errors.json";
 
 import { Injectable } from "@angular/core";
-import { Observable } from "rxjs";
 import { ErrorModel } from "./error.model";
 import { DialogsService } from "../dialogs.service";
 

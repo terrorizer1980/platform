@@ -35,6 +35,11 @@
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css",
               "src/assets/css/custom.css"
             ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "src/assets/sass"
+              ]
+            },
             "scripts": []
           },
           "configurations": {
@@ -61,7 +66,7 @@
                   "maximumError": "5mb"
                 }
               ]
-            },
+            }
           }
         },
         "serve": {
