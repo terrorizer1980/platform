@@ -39,3 +39,8 @@
   margin: 0.5em;
   margin-top: 0 !important;
 }
+
+.invalid-feedback
+{
+  font-size: 100%;
+}

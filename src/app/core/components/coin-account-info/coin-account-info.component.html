@@ -1,13 +1,13 @@
 <div class="mt-2 header-cards media-small">
   <div class="balances-box">
-    <div class="pt-3 pb-2 d-flex justify-content-between">
+    <div class="pt-3 pb-1 d-flex justify-content-between">
       <div class="mt-4 text-alpha text-left ml-2">Available To Stake</div>
       <h4 class="text-right mr-2 pt-1">
         {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}
       </h4>
     </div>
 
-    <div class="pt-2 pb-2 d-flex justify-content-between">
+    <div class="pt-1 pb-2 d-flex justify-content-between">
       <div class="text-alpha text-left ml-2">Staked Balance</div>
       <h4 class="text-right mr-2 pt-1">
         {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}

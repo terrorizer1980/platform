@@ -3,7 +3,7 @@
 @import 'assets/sass/variables.scss';
 
 body {
-    background-color: $light;
+    background-color: $light !important;
 }
 
 .override {
@@ -39,24 +39,42 @@ body {
 
 // btns
 .btn-primary {
-  background-color: $primary;
-  border: 1px solid $primary;
+  background-color: $primary !important;
+  border: 1px solid $primary !important;
 }
 
 .btn-primary:hover {
-  background-color: $primary-desat;
-  border: 1px solid $primary;
+  background-color: $primary-desat !important;
+  border: 1px solid $primary !important;
 }
 
 .btn-secondary{
-  color: $primary;
-  background-color: $white;
-  border: 1px solid $border;
+  color: $primary !important;
+  background-color: $gray-200 !important;
+  border: 1px !important;
 }
 .btn-secondary:hover{
-  color: $primary;
-  background-color: $gray-100;
-  border: 1px solid $border;
+  color: $primary !important;
+  background-color: $gray-300 !important;
+  border: 1px !important;
+}
+
+.btn-link{
+  color: $primary !important;
+  cursor: pointer;
+  text-decoration: none !important;
+  font-size: 15px;
+}
+
+.feedback{
+  min-height: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.available {
+  min-height: 30px;
+  display: block;
 }
 
 .row-container {

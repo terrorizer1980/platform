@@ -1,65 +1,40 @@
 <form [formGroup]="stakeForm">
   <div class="row small">
-    <div class="card col-12 p-0">
-      <div class="card-body">
+    <div class="card col-12 pt-2 pb-2 p-0">
+      <div class="card-body p-1 mt-4 mb-4">
         <div class="col-12 text-center">
-          <div>
-            <div class="pb-3">
-              <h5>
-                Enter amount to withdraw
-              </h5>
+          <div class="pb-4">
+            <h5>
+              Withdraw ATOM
+            </h5>
+            <div class="col-12 available p-0 pb-2" (click)="setMax()">
+              <span class="btn-link" *ngIf="max$ | async; let max"><span>Available: {{ Math.floor(max * 1000) / 1000 }}</span></span>
             </div>
-
-            <div>
-              <span *ngIf="info | async; let info"
-                >It takes {{ info.timeFrame.day }} days to withdraw your
-                funds</span
-              >
-            </div>
-
-            <div
-              *ngIf="stakeForm.controls.amount.valueChanges | async; let value"
-              class="pb-3"
-            ></div>
+            <div *ngIf="stakeForm.controls.amount.valueChanges | async; let value" class=""></div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group mb-2">
             <div class="input-group input-group-lg">
-              <input
-                formControlName="amount"
-                placeholder="Amount in ATOM"
-                class="form-control"
-                aria-label="Large"
-                [ngClass]="{ 'is-invalid': stakeForm.invalid }"
-              />
-              <div class="input-group-append" (click)="setMax()">
-                <span
-                  class="btn btn-outline-primary"
-                  *ngIf="max$ | async; let max"
-                  ><span class="small"
-                    >Max: {{ Math.floor(max * 1000) / 1000 }}</span
-                  ></span
-                >
-              </div>
+              <input formControlName="amount" placeholder="Amount in ATOM" class="form-control" aria-label="Large" [ngClass]="{ 'is-invalid': stakeForm.invalid }" />
             </div>
-            <div *ngIf="stakeForm.invalid" class="invalid-feedback d-block">
-              <div *ngIf="stakeForm.controls.amount.errors?.max">
-                You don't have enough funds.
-              </div>
-              <div *ngIf="stakeForm.controls.amount.errors?.min">
-                Minimum withdraw value is
-                {{ stakeForm.controls.amount.errors?.min }}
+            <div class="feedback">
+              <div *ngIf="stakeForm.invalid" class="mt-2 invalid-feedback d-block">
+                <div *ngIf="stakeForm.controls.amount.errors?.max">
+                  You don't have enough funds.
+                </div>
+                <div *ngIf="stakeForm.controls.amount.errors?.min">
+                  Minimum withdraw value is
+                  {{ stakeForm.controls.amount.errors?.min }}
+                </div>
               </div>
             </div>
           </div>
           <div class="col-12 text-center p-0">
-            <loading-button
-              (click)="unStake()"
-              [loading]="isLoading"
-              [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
-            >
+            <loading-button (click)="unStake()" [loading]="isLoading" [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value">
               Withdraw
             </loading-button>
+            <div class="text-muted pt-3" *ngIf="info | async; let info">It takes {{ info.timeFrame.day }} days to withdraw your
+              funds</div>
           </div>
         </div>
       </div>
