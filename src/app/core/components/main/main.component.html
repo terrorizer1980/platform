@@ -21,9 +21,9 @@
                 >
               </div>
             </div>
-            <div class="col-auto js-r pr-1 mr-3">
+            <div class="col-auto js-r pr-0 mr-3">
               <span>{{ item.amount }} {{ item.coin.currencySymbol }}</span>
-              <span class="js-l"><i class="ml-2 text-muted fas fa-chevron-right"></i></span>
+              <span class="ml-2"><i class="text-muted fas fa-chevron-right"></i></span>
             </div>
           </div>
         </ng-template>
@@ -39,7 +39,7 @@
         <h6 class="m-2 ml-3">Coins</h6>
         <ng-template ngFor let-item [ngForOf]="blockchains" let-i="index">
           <div (click)="navigateToPosDelegatorsList(item)" class="row row-container pb-1 pt-1" *ngIf="annuals[item.network] | async; let annual">
-            <div class="col-6 col-auto mr-auto pl-2">
+            <div class="col-8 col-auto mr-auto pl-2">
               <img class="m-2 row-logo" src="{{ item.iconUri }}" alt="{{ item.currencyName }}" />
               <span>{{ item.currencyName }} </span>
               <span class="text-muted">{{ item.currencySymbol }}</span>
@@ -61,9 +61,9 @@
                 </ng-container>
               </div>
             </div>
-            <div class="col-auto pr-1 mr-3">
-              <span class="success mr-3">{{ annual | number: "1.2-2" }}{{ annual && "%" }}
-              <span class="js-r"><i class="mr-1 text-muted fas fa-chevron-right"></i></span></span>
+            <div class="col-auto pr-0 mr-3">
+              <span class="success">{{ annual | number: "1.2-2" }}{{ annual && "%" }}
+              <span class="ml-1"><i class="text-muted fas fa-chevron-right"></i></span></span>
             </div>
           </div>
         </ng-template>
