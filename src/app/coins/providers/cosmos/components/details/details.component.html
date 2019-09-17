@@ -1,10 +1,21 @@
 <div class="row">
-  <div *ngIf="validator" class="card w-100">
+  <div
+    *ngIf="details$ | async as details; else loadingValidator"
+    class="card w-100"
+  >
     <div class="card-body p-0">
       <div class="col-12 mt-3">
-        <img class="row-logo" src="{{validator.info.image || '...'}}" alt="{{validator.info.name || '...'}}">
-        <h6 class="card-title p-2 m-0 js-l">{{validator.info.name || '...'}}</h6>
-        <p class="text-left description text-muted pt-2 mb-2">{{validator.info.description || '...'}}</p>
+        <img
+          class="row-logo"
+          src="{{ details.validator.info.image || '...' }}"
+          alt="{{ details.validator.info.name || '...' }}"
+        />
+        <h6 class="card-title p-2 m-0 js-l">
+          {{ details.validator.info.name || "..." }}
+        </h6>
+        <p class="text-left description text-muted pt-2 mb-2">
+          {{ details.validator.info.description || "..." }}
+        </p>
       </div>
 
       <div class="row row-container ml-3 mr-3">
@@ -12,7 +23,9 @@
           <span class="text-muted">Current Interest APR</span>
         </div>
         <div class="col-auto p-0">
-          <p class="success m-0">{{validator.reward.annual.toFixed(2) + '%' || '...'}}</p>
+          <p class="success m-0">
+            {{ details.validator.reward.annual.toFixed(2) + "%" || "..." }}
+          </p>
         </div>
       </div>
 
@@ -21,15 +34,32 @@
           <span class="text-muted">Staked amount</span>
         </div>
         <div class="col-auto p-0">
-          <p class="m-0">{{(stakedSum$ | async) || '...'}}</p>
+          <p class="m-0">{{ details.stakedSum }}</p>
         </div>
       </div>
 
       <div class="col-12 text-center pt-4 pb-4">
-        <button class="btn btn-primary btn-lg col-12 mb-3" (click)="navigateToStake()">Stake</button>
-        <button class="btn btn-secondary btn-lg col-12" (click)="navigateToUnStake()">Withdraw</button>
+        <button
+          class="btn btn-primary btn-lg col-12 mb-3"
+          (click)="navigateToStake()"
+        >
+          Stake
+        </button>
+        <button
+          class="btn btn-secondary btn-lg col-12"
+          (click)="navigateToUnStake()"
+        >
+          Withdraw
+        </button>
       </div>
     </div>
   </div>
 
+  <ng-template #loadingValidator>
+    <div class="card w-100">
+      <div class="card-body pl-5 pr-5 pt-5 pb-0">
+        <app-content-placeholder></app-content-placeholder>
+      </div>
+    </div>
+  </ng-template>
 </div>

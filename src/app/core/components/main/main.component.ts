@@ -1,6 +1,13 @@
-import { forkJoin, Observable, of, ReplaySubject } from "rxjs";
+import {
+  combineLatest,
+  forkJoin,
+  Observable,
+  of,
+  ReplaySubject,
+  throwError
+} from "rxjs";
 import { Router } from "@angular/router";
-import { catchError, map, shareReplay } from "rxjs/operators";
+import { catchError, first, map, shareReplay } from "rxjs/operators";
 import { Component, OnInit } from "@angular/core";
 import { Coins } from "../../../coins/coins";
 import {
@@ -11,6 +18,15 @@ import {
 import { CoinsReceiverService } from "../../../shared/services/coins-receiver.service";
 import BigNumber from "bignumber.js";
 
+interface CoinDescriptor {
+  item: CoinProviderConfig;
+  annual: number;
+  address: string;
+  pending: BigNumber;
+  unstakingDate: Date;
+  stakingInfo: any;
+}
+
 @Component({
   selector: "app-main",
   templateUrl: "./main.component.html",
@@ -18,62 +34,36 @@ import BigNumber from "bignumber.js";
 })
 export class MainComponent implements OnInit {
   myStakeHolders$: Observable<StakeHolderList> = new ReplaySubject(1);
-  annuals: { [key: string]: Observable<number> };
-  addresses: { [key: string]: Observable<number> };
-  pending: { [key: string]: Observable<BigNumber> };
-  releaseDate: { [key: string]: Observable<Date> };
-  info: { [key: string]: Observable<any> };
-  blockchains = Coins;
+  blockchains$: Observable<CoinDescriptor[]>;
 
   constructor(
     private router: Router,
     private coinsReceiverService: CoinsReceiverService
   ) {
-    this.annuals = Coins.reduce(
-      (annuals, coin, index) => ({
-        ...annuals,
-        [coin.network]: this.coinsReceiverService.blochchainServices[
-          index
-        ].getAnnualPercent()
-      }),
-      {}
-    );
-    this.addresses = Coins.reduce(
-      (annuals, coin, index) => ({
-        ...annuals,
-        [coin.network]: this.coinsReceiverService.blochchainServices[index]
-          .getAddress()
-          .pipe(catchError(_ => of(true)))
-      }),
-      {}
-    );
-    this.pending = Coins.reduce(
-      (annuals, coin, index) => ({
-        ...annuals,
-        [coin.network]: this.coinsReceiverService.blochchainServices[
-          index
-        ].getStakePendingBalance()
-      }),
-      {}
-    );
-    this.releaseDate = Coins.reduce(
-      (annuals, coin, index) => ({
-        ...annuals,
-        [coin.network]: this.coinsReceiverService.blochchainServices[
-          index
-        ].getUnstakingDate()
-      }),
-      {}
-    );
-    this.info = Coins.reduce(
-      (annuals, coin, index) => ({
-        ...annuals,
-        [coin.network]: this.coinsReceiverService.blochchainServices[
-          index
-        ].getStakingInfo()
-      }),
-      {}
-    );
+    this.blockchains$ = forkJoin(
+      Coins.map((coin, index) => {
+        const service = this.coinsReceiverService.blochchainServices[index];
+        return forkJoin({
+          item: of(coin).pipe(first()),
+          annual: service.getAnnualPercent().pipe(first()),
+          address: service.getAddress().pipe(
+            catchError(_ => of(true)),
+            first()
+          ),
+          pending: service.getStakePendingBalance().pipe(first()),
+          unstakingDate: service.getUnstakingDate().pipe(
+            catchError(_ => of(null)),
+            first()
+          ),
+          stakingInfo: service.getStakingInfo().pipe(first())
+        });
+      })
+    ).pipe(
+      catchError(err => {
+        console.log(err);
+        return throwError(err);
+      })
+    ) as Observable<CoinDescriptor[]>;
   }
 
   ngOnInit(): void {

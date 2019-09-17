@@ -13,6 +13,7 @@ import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/Bloc
 export class DelegatorsComponent {
   blockchain = "";
   validators$: Observable<Array<BlockatlasValidator>> = of([]);
+  placeholderValidators = Array(20).fill(0);
 
   constructor(
     private activatedRoute: ActivatedRoute,

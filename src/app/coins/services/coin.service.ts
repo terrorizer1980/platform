@@ -1,8 +1,8 @@
 // Interface should be implemented by each coin provider
-import {Observable} from "rxjs";
-import {StakeHolderList} from "../coin-provider-config";
+import { Observable } from "rxjs";
+import { StakeHolderList } from "../coin-provider-config";
 import BigNumber from "bignumber.js";
-import {CosmosStakingInfo} from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
+import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
 
 export interface CoinService {
   getAnnualPercent(): Observable<number>;
@@ -18,6 +18,6 @@ export interface CoinService {
   getStakePendingBalance(): Observable<BigNumber>;
   getStakingRewards(): Observable<BigNumber>;
   getUnstakingDate(): Observable<Date>;
-  getStakingInfo(): Observable<CosmosStakingInfo>;
+  getStakingInfo(): Observable<any>;
   broadcastTx(tx: string): Observable<any>;
 }
