@@ -8,7 +8,7 @@ import { FormBuilder, FormGroup } from "@angular/forms";
 import { StakeValidator } from "../../validators/stake.validator";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SuccessPopupComponent } from "../../../../../shared/components/success-popup/success-popup.component";
-import { map, switchMap, tap } from "rxjs/operators";
+import { map, shareReplay, switchMap, tap } from "rxjs/operators";
 import BigNumber from "bignumber.js";
 import { DialogsService } from "../../../../../shared/services/dialogs.service";
 import { CosmosConfigService } from "../../services/cosmos-config.service";
@@ -27,6 +27,7 @@ export class StakingComponent implements OnInit {
   stakeForm: FormGroup;
   max$ = this.getMax();
   warn$: Observable<BigNumber>;
+  monthlyEarnings$: Observable<BigNumber>;
   Math = Math;
   isLoading = false;
 
@@ -42,7 +43,7 @@ export class StakingComponent implements OnInit {
     this.myAddress = this.cosmos.getAddress();
     this.validatorId = activatedRoute.snapshot.params.validatorId;
     this.info = this.cosmos.getStakingInfo();
-    const s = this.config.subscribe(config => {
+    this.config.subscribe(config => {
       this.stakeForm = this.fb.group({
         amount: [
           "",
@@ -72,9 +73,8 @@ export class StakingComponent implements OnInit {
   }
 
   setMax() {
-    const s = this.getMax().subscribe(({ normal }) => {
+    this.max$.subscribe(({ normal }) => {
       this.stakeForm.get("amount").setValue(normal);
-      s.unsubscribe();
     });
   }
 
@@ -89,10 +89,26 @@ export class StakingComponent implements OnInit {
           return max.normal;
         }
         return null;
-      })
+      }),
+      shareReplay(1)
     );
   }
 
+  getMonthlyEarnings(): Observable<BigNumber> {
+    return combineLatest([
+      this.stakeForm.get("amount").valueChanges,
+      this.cosmos.getValidatorFromBlockatlasById(this.validatorId)
+    ]).pipe(
+      map(([value, validator]) => {
+        const val = new BigNumber(value);
+        if (val.isNaN()) {
+          return null;
+        }
+        return val.multipliedBy(validator.reward.annual / 100).dividedBy(12);
+      }),
+      shareReplay(1)
+    );
+  }
   getMax(): Observable<{ min: BigNumber; normal: BigNumber }> {
     return combineLatest([this.cosmos.getBalance(), this.config]).pipe(
       map(([balance, config]) => {
@@ -103,7 +119,8 @@ export class StakingComponent implements OnInit {
           normal: normal.isGreaterThan(0) ? normal : new BigNumber(0),
           min: min.isGreaterThan(0) ? min : new BigNumber(0)
         };
-      })
+      }),
+      shareReplay(1)
     );
   }
 
@@ -123,5 +140,6 @@ export class StakingComponent implements OnInit {
 
   ngOnInit(): void {
     this.warn$ = this.warn();
+    this.monthlyEarnings$ = this.getMonthlyEarnings();
   }
 }

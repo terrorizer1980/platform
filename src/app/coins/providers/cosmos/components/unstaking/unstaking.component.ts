@@ -9,7 +9,7 @@ import { StakeAction } from "../../../../coin-provider-config";
 import { SuccessPopupComponent } from "../../../../../shared/components/success-popup/success-popup.component";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import BigNumber from "bignumber.js";
-import { tap } from "rxjs/operators";
+import { shareReplay, tap } from "rxjs/operators";
 import { DialogsService } from "../../../../../shared/services/dialogs.service";
 import { CosmosConfigService } from "../../services/cosmos-config.service";
 import { CosmosProviderConfig } from "../../cosmos.descriptor";
@@ -40,8 +40,10 @@ export class UnstakingComponent {
     this.myAddress = this.cosmos.getAddress();
     this.validatorId = activatedRoute.snapshot.params.validatorId;
     this.info = this.cosmos.getStakingInfo();
-    this.max$ = this.cosmos.getStakedToValidator(this.validatorId);
-    const s = this.config.subscribe(config => {
+    this.max$ = this.cosmos
+      .getStakedToValidator(this.validatorId)
+      .pipe(shareReplay(1));
+    this.config.subscribe(config => {
       this.stakeForm = this.fb.group({
         amount: [
           "",
@@ -71,9 +73,8 @@ export class UnstakingComponent {
   }
 
   setMax() {
-    const s = this.max$.subscribe(max => {
+    this.max$.subscribe(max => {
       this.stakeForm.get("amount").setValue(max);
-      s.unsubscribe();
     });
   }
 

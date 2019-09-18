@@ -8,10 +8,21 @@
               <h5>
                 Stake ATOM
               </h5>
-              <div class="col-12 available p-0 pb-2" (click)="setMax()">
+              <div class="col-12 available p-0 pb-1" (click)="setMax()">
                 <span class="btn-link" *ngIf="max$ | async; let max"
                   ><span
                     >Available: {{ Math.floor(max.normal * 1000) / 1000 }}</span
+                  ></span
+                >
+              </div>
+              <div class="col-12 available p-0 pb-1" (click)="setMax()">
+                <span
+                  class="text-info"
+                  *ngIf="monthlyEarnings$ | async as monthlyEarnings"
+                  ><span *ngIf="monthlyEarnings"
+                    >You will earn:
+                    {{ Math.floor(monthlyEarnings * 1000) / 1000 }} ATOMs a
+                    month</span
                   ></span
                 >
               </div>
