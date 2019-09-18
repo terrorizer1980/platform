@@ -34,9 +34,7 @@ export const StakeValidator = (
           return { min: minValue.toString() };
         }
 
-        const additional = CosmosUtils.toAtom(
-          new BigNumber(config.gas + config.fee)
-        );
+        const additional = CosmosUtils.toAtom(new BigNumber(config.fee));
         if (isStake && val.plus(additional).isGreaterThan(balance)) {
           return { max: balance.minus(additional).toString() };
         }
