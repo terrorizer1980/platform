@@ -1,10 +1,13 @@
+import { CoinType, CoinTypeUtils } from "@trustwallet/types";
+
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
   production: false,
-  cosmosEndpoint: "https://cosmos-rpc.trustwalletapp.com",
+  rpcEndpoint: (coin: CoinType) =>
+    `https://${CoinTypeUtils.id(coin)}-rpc.trustwalletapp.com`,
   blockatlasEndpoint: "https://blockatlas.trustwalletapp.com"
 };
 

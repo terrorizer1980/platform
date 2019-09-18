@@ -1,5 +1,8 @@
+import { CoinType, CoinTypeUtils } from "@trustwallet/types";
+
 export const environment = {
   production: true,
-  cosmosEndpoint: "https://cosmos-rpc.trustwalletapp.com",
+  rpcEndpoint: (coin: CoinType) =>
+    `https://${CoinTypeUtils.id(coin)}-rpc.trustwalletapp.com`,
   blockatlasEndpoint: "https://blockatlas.trustwalletapp.com"
 };

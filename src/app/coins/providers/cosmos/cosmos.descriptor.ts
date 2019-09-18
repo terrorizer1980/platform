@@ -24,16 +24,17 @@ export const CosmosCoinConfig: CoinConfig<CosmosService> = {
   deps: CosmosServiceInjectable
 };
 
-export function CosmosChainId(http: HttpClient): Observable<string> {
-  return http
-    .get(`${environment.cosmosEndpoint}/node_info`)
-    .pipe(map((res: any) => res.network));
+export function CosmosChainId(
+  http: HttpClient,
+  endpoint: string
+): Observable<string> {
+  return http.get(`${endpoint}/node_info`).pipe(map((res: any) => res.network));
 }
 
 export interface CosmosProviderConfig
   extends CoinProviderConfig<CosmosService> {
   endpoint: string;
-  chainId: (http: HttpClient) => Observable<string>;
+  chainId: (http: HttpClient, endpoint: string) => Observable<string>;
   gas: number;
   fee: number;
 }
