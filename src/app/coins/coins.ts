@@ -26,19 +26,23 @@ export const Coins: CoinProviderConfig[] = [
     config: CosmosCoinConfig,
     gas: 250000,
     fee: 1000
-  }),
-  CoinDescriptor<TronProviderConfig>({
-    network: CoinTypeUtils.id(CoinType.tron),
-    coin: CoinType.tron,
-    chainId: TronChainId,
-    endpoint: environment.rpcEndpoint(CoinType.tron),
-    currencyName: CoinTypeUtils.networkName(CoinType.tron),
-    currencySymbol: CoinTypeUtils.symbol(CoinType.tron),
-    iconUri: `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(
-      CoinType.tron
-    )}/info/logo.png`,
-    config: TronCoinConfig,
-    gas: 250000,
-    fee: 1000
   })
 ];
+if (!environment.production) {
+  Coins.push(
+    CoinDescriptor<TronProviderConfig>({
+      network: CoinTypeUtils.id(CoinType.tron),
+      coin: CoinType.tron,
+      chainId: TronChainId,
+      endpoint: environment.rpcEndpoint(CoinType.tron),
+      currencyName: CoinTypeUtils.networkName(CoinType.tron),
+      currencySymbol: CoinTypeUtils.symbol(CoinType.tron),
+      iconUri: `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(
+        CoinType.tron
+      )}/info/logo.png`,
+      config: TronCoinConfig,
+      gas: 250000,
+      fee: 1000
+    })
+  );
+}

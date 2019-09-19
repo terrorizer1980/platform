@@ -3,14 +3,14 @@
     <div class="pt-1 pb-1 d-flex justify-content-between">
       <div class="mt-4 text-alpha text-left ml-2">Available To Stake</div>
       <h4 class="text-right mr-2 pt-1">
-        {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}
+        {{ (fiatBalance$ | async | currency: "USD":"symbol":"1.2-2") || "..." }}
       </h4>
     </div>
 
     <div class="pt-1 pb-0 d-flex justify-content-between">
       <div class="text-alpha text-left ml-2">Staked Balance</div>
       <h4 class="text-right mr-2 pt-1">
-        {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}
+        {{ (fiatStaked$ | async | currency: "USD":"symbol":"1.2-2") || "..." }}
       </h4>
     </div>
   </div>
@@ -20,14 +20,14 @@
   <div class="header-cards cards-big">
     <div class="text-alpha">Available To Stake</div>
     <h4>
-      {{ ((fiatBalance$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}
+      {{ (fiatBalance$ | async | currency: "USD":"symbol":"1.2-2") || "..." }}
     </h4>
   </div>
 
   <div class="header-cards cards-big">
     <div class="text-alpha">Staked Balance</div>
     <h4>
-      {{ ((fiatStaked$ | async) | currency:'USD':'symbol':'1.2-2') || '...' }}
+      {{ (fiatStaked$ | async | currency: "USD":"symbol":"1.2-2") || "..." }}
     </h4>
   </div>
 </div>
