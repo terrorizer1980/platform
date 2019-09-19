@@ -1,8 +1,8 @@
 import { Component, OnDestroy } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
 import { CosmosService } from "../../services/cosmos.service";
-import { map, switchMap } from "rxjs/operators";
-import { Observable, Subscription } from "rxjs";
+import { first, map, switchMap } from "rxjs/operators";
+import { forkJoin, Observable, Subscription } from "rxjs";
 import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator";
 import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
 
@@ -13,9 +13,10 @@ import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDeleg
 })
 export class DetailsComponent implements OnDestroy {
   validatorId: string;
-  validator: BlockatlasValidator;
-  stakedSum$: Observable<string>;
-  subscription: Subscription;
+  details$: Observable<{
+    validator: BlockatlasValidator;
+    stakedSum: string;
+  }>;
 
   constructor(
     private router: Router,
@@ -23,19 +24,17 @@ export class DetailsComponent implements OnDestroy {
     private activatedRoute: ActivatedRoute
   ) {
     this.validatorId = activatedRoute.snapshot.params.validatorId;
-
-    this.stakedSum$ = this.cosmos.getAddress().pipe(
-      switchMap((address: string) => {
-        return this.getStakedAmount(address);
-      })
-    );
-
-    // TODO: use async pipe and template variable definition, pluck from loaded before
-    this.subscription = cosmos
-      .getValidatorFromBlockatlasById(this.validatorId)
-      .subscribe((validator: BlockatlasValidator) => {
-        this.validator = validator;
-      });
+    this.details$ = forkJoin({
+      validator: cosmos
+        .getValidatorFromBlockatlasById(this.validatorId)
+        .pipe(first()),
+      stakedSum: this.cosmos.getAddress().pipe(
+        switchMap((address: string) => {
+          return this.getStakedAmount(address);
+        }),
+        first()
+      )
+    });
   }
 
   // Staked amount per validator - we have that
@@ -59,9 +58,7 @@ export class DetailsComponent implements OnDestroy {
     );
   }
 
-  ngOnDestroy(): void {
-    this.subscription.unsubscribe();
-  }
+  ngOnDestroy(): void {}
 
   navigateToStake() {
     this.router.navigate([`stake`], { relativeTo: this.activatedRoute });

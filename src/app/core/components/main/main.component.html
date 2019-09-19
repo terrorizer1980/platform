@@ -1,12 +1,18 @@
-<div *ngIf="myStakeHolders$ | async; let stakeHolders" class="row small mb-2">
-  <div class="col-12 p-0" *ngIf="stakeHolders && stakeHolders.length">
+<div
+  *ngIf="myStakeHolders$ | async as stakeHolders; else loadingStakeholders"
+  class="row small mb-2"
+>
+  <div class="col-12 p-0">
     <div class="card">
       <div class="card-body p-0">
         <h6 class="m-2 ml-3">Staked</h6>
+        <div *ngIf="stakeHolders.length === 0" class="pb-2 pt-2 pl-3">
+          The stakes list is empty
+        </div>
         <ng-template ngFor let-item [ngForOf]="stakeHolders" let-i="index">
           <div
             (click)="navigateToMyStakeHoldersList(item)"
-            class="row row-container pb-1 pt-1"
+            class="row row-container pb-1 pt-1 item"
           >
             <div class="col-8 pl-2">
               <img
@@ -23,7 +29,9 @@
             </div>
             <div class="col-auto js-r pr-0 mr-3">
               <span>{{ item.amount }} {{ item.coin.currencySymbol }}</span>
-              <span class="ml-2"><i class="text-muted fas fa-chevron-right"></i></span>
+              <span class="ml-2"
+                ><i class="text-muted fas fa-chevron-right"></i
+              ></span>
             </div>
           </div>
         </ng-template>
@@ -31,43 +39,77 @@
     </div>
   </div>
 </div>
+<ng-template #loadingStakeholders>
+  <div class="row small mb-2">
+    <div class="col-12 p-0">
+      <div class="card">
+        <div class="card-body p-0">
+          <h6 class="m-2 ml-3">Staked</h6>
+          <ng-template ngFor let-i [ngForOf]="[1]">
+            <app-stake-placeholder class="col-8 pl-3"></app-stake-placeholder>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-template>
 
-<div class="row small">
+<div class="row">
   <div class="col-12 p-0">
     <div class="card">
       <div class="card-body p-0">
         <h6 class="m-2 ml-3">Coins</h6>
-        <ng-template ngFor let-item [ngForOf]="blockchains" let-i="index">
-          <div (click)="navigateToPosDelegatorsList(item)" class="row row-container pb-1 pt-1" *ngIf="annuals[item.network] | async; let annual">
-            <div class="col-8 col-auto mr-auto pl-2">
-              <img class="m-2 row-logo" src="{{ item.iconUri }}" alt="{{ item.currencyName }}" />
-              <span>{{ item.currencyName }} </span>
-              <span class="text-muted">{{ item.currencySymbol }}</span>
-              <div class="pl-2">
-                <ng-container *ngIf="addresses[item.network] | async; let address">
-                  <div class="add-coin" *ngIf="address === true">
+        <ng-container
+          *ngIf="blockchains$ | async as blockchains; else loadingCoins"
+        >
+          <div *ngFor="let blockchain of blockchains">
+            <div
+              (click)="navigateToPosDelegatorsList(blockchain.item)"
+              class="row row-container pb-1 pt-1 item"
+            >
+              <div class="col-8 col-auto mr-auto pl-2">
+                <img
+                  class="m-2 row-logo"
+                  src="{{ blockchain.item.iconUri }}"
+                  alt="{{ blockchain.item.currencyName }}"
+                />
+                <span>{{ blockchain.item.currencyName }} </span>
+                <span class="text-muted">{{
+                  blockchain.item.currencySymbol
+                }}</span>
+                <div class="pl-2">
+                  <div class="add-coin" *ngIf="blockchain.address === true">
                     Add coin in Wallet menu
                   </div>
-                </ng-container>
-                <ng-container *ngIf="pending[item.network] | async; let pending">
-                  <div *ngIf="pending > 0">
+
+                  <div *ngIf="blockchain.pending > 0">
                     <span>
-                      Pending: {{ pending }} {{ item.currencySymbol }}s
+                      Pending: {{ blockchain.pending }}
+                      {{ blockchain.item.currencySymbol }}s
                     </span>
-                    <span *ngIf="releaseDate[item.network] | async; let releaseDate">
-                      to {{ releaseDate | date }}
-                    </span>
+                    <span> to {{ blockchain.unstakingDate | date }} </span>
                   </div>
-                </ng-container>
+                </div>
+              </div>
+              <div class="col-auto pr-0 mr-3">
+                <span class="success"
+                  >{{ blockchain.annual | number: "1.2-2"
+                  }}{{ blockchain.annual && "%" }}
+                  <span class="ml-1"
+                    ><i class="text-muted fas fa-chevron-right"></i></span
+                ></span>
               </div>
             </div>
-            <div class="col-auto pr-0 mr-3">
-              <span class="success">{{ annual | number: "1.2-2" }}{{ annual && "%" }}
-              <span class="ml-1"><i class="text-muted fas fa-chevron-right"></i></span></span>
-            </div>
           </div>
-        </ng-template>
+        </ng-container>
       </div>
     </div>
   </div>
 </div>
+<ng-template #loadingCoins>
+  <ng-template ngFor let-i [ngForOf]="[1]">
+    <div class="col-8 col-auto mr-auto pl-3 pt-2 pb-2">
+      <app-stake-placeholder></app-stake-placeholder>
+    </div>
+  </ng-template>
+</ng-template>

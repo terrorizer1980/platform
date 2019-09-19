@@ -1,4 +1,3 @@
-import { CosmosProviderComponent } from "./components/cosmos-provider/cosmos-provider.component";
 import { DetailsComponent } from "./components/details/details.component";
 import { StakingComponent } from "./components/staking/staking.component";
 import { NgModule } from "@angular/core";
@@ -16,7 +15,6 @@ import { UnstakingComponent } from "./components/unstaking/unstaking.component";
 
 @NgModule({
   declarations: [
-    CosmosProviderComponent,
     DelegatorsComponent,
     DetailsComponent,
     StakingComponent,

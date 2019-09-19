@@ -1,12 +1,13 @@
-import { Component } from "@angular/core";
+import { Component, OnInit } from "@angular/core";
+import { Observable, of } from "rxjs";
+import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator";
 import { ActivatedRoute, Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
-import { Observable, of } from "rxjs";
-import { CosmosService } from "../../services/cosmos.service";
-import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator";
+import { CosmosService } from "../../../cosmos/services/cosmos.service";
+import { TronService } from "../../services/tron.service";
 
 @Component({
-  selector: "app-cosmos",
+  selector: "app-delegators",
   templateUrl: "./delegators.component.html",
   styleUrls: ["./delegators.component.scss"]
 })
@@ -18,11 +19,11 @@ export class DelegatorsComponent {
   constructor(
     private activatedRoute: ActivatedRoute,
     private http: HttpClient,
-    private cosmos: CosmosService,
+    private tron: TronService,
     private router: Router
   ) {
     this.blockchain = activatedRoute.snapshot.params.blockchainId;
-    this.validators$ = this.cosmos.getValidatorsFromBlockatlas();
+    this.validators$ = this.tron.getValidatorsFromBlockatlas();
   }
 
   navigateToMyStakeHoldersList(item: BlockatlasValidator) {

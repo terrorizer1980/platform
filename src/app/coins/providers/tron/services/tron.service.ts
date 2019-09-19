@@ -21,17 +21,16 @@ import {
 import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
 import { AccountService } from "../../../../shared/services/account.service";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
-import { CosmosConfigService } from "./cosmos-config.service";
-import { CosmosProviderConfig } from "../cosmos.descriptor";
+import { environment } from "../../../../../environments/environment";
 import { CoinService } from "../../../services/coin.service";
 import { StakeAction, StakeHolderList } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinType } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider/lib";
-import { CosmosRpcService } from "./cosmos-rpc.service";
-import { CosmosUnboundInfoService } from "./cosmos-unbound-info.service";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
-import { environment } from "../../../../../environments/environment";
+import { TronConfigService } from "./tron-config.service";
+import { TronRpcService } from "./tron-rpc.service";
+import { TronProviderConfig } from "../tron.descriptor";
 
 // TODO: There is plenty of old boilerplate here yet. Need to be refactored.
 
@@ -39,13 +38,12 @@ const BALANCE_REFRESH_INTERVAL = 60000;
 const STAKE_REFRESH_INTERVAL = 115000;
 
 // Used for creating Cosmos service manually bypassing regular routing flow
-export const CosmosServiceInjectable = [
-  CosmosConfigService,
+export const TronServiceInjectable = [
+  TronConfigService,
   HttpClient,
   AccountService,
   ExchangeRateService,
-  CosmosRpcService,
-  CosmosUnboundInfoService
+  TronRpcService
 ];
 
 interface IAggregatedDelegationMap {
@@ -53,43 +51,42 @@ interface IAggregatedDelegationMap {
 }
 
 @Injectable()
-export class CosmosService implements CoinService {
+export class TronService implements CoinService {
   private _manualRefresh: BehaviorSubject<boolean> = new BehaviorSubject(true);
   private readonly balance$: Observable<BigNumber>;
   private readonly stakedAmount$: Observable<BigNumber>;
 
   constructor(
-    @Inject(CosmosConfigService)
-    private config: Observable<CosmosProviderConfig>,
+    @Inject(TronConfigService)
+    private config: Observable<TronProviderConfig>,
     private http: HttpClient,
     private accountService: AccountService,
     private exchangeRateService: ExchangeRateService,
-    private cosmosRpc: CosmosRpcService,
-    private cosmosUnboundInfoService: CosmosUnboundInfoService
+    private rpc: TronRpcService
   ) {
-    this.cosmosRpc.setConfig(config);
+    this.rpc.setConfig(config);
     // Fires on address change or manual refresh
-    const buildPipeline = (milliSeconds): Observable<string> =>
-      combineLatest([this.getAddress(), this._manualRefresh]).pipe(
-        switchMap((x: any[]) => {
-          const [address, skip] = x;
-          return timer(0, milliSeconds).pipe(map(() => address));
-        })
-      );
-
-    this.balance$ = buildPipeline(BALANCE_REFRESH_INTERVAL).pipe(
-      switchMap(address => {
-        return this.requestBalance(address);
-      }),
-      map(uAtom => CosmosUtils.toAtom(uAtom))
-    );
-
-    this.stakedAmount$ = buildPipeline(STAKE_REFRESH_INTERVAL).pipe(
-      switchMap(address => {
-        return this.requestStakedAmount(address);
-      }),
-      map(uAtom => CosmosUtils.toAtom(uAtom) || new BigNumber(0))
-    );
+    // const buildPipeline = (milliSeconds): Observable<string> =>
+    //   combineLatest([this.getAddress(), this._manualRefresh]).pipe(
+    //     switchMap((x: any[]) => {
+    //       const [address, skip] = x;
+    //       return timer(0, milliSeconds).pipe(map(() => address));
+    //     })
+    //   );
+    //
+    // this.balance$ = buildPipeline(BALANCE_REFRESH_INTERVAL).pipe(
+    //   switchMap(address => {
+    //     return this.requestBalance(address);
+    //   })
+    //   // map(uAtom => CosmosUtils.toAtom(uAtom))
+    // );
+    //
+    // this.stakedAmount$ = buildPipeline(STAKE_REFRESH_INTERVAL).pipe(
+    //   switchMap(address => {
+    //     return this.requestStakedAmount(address);
+    //   })
+    //   // map(uAtom => CosmosUtils.toAtom(uAtom) || new BigNumber(0))
+    // );
   }
 
   private requestBalance(address: string): Observable<BigNumber> {
@@ -121,7 +118,7 @@ export class CosmosService implements CoinService {
   }
 
   private map2List(
-    config: CosmosProviderConfig,
+    config: TronProviderConfig,
     address2stake: IAggregatedDelegationMap,
     validators: Array<BlockatlasValidator>
   ): StakeHolderList {
@@ -152,7 +149,7 @@ export class CosmosService implements CoinService {
       map((data: any[]) => {
         const approvedValidators: BlockatlasValidator[] = data[0];
         const myDelegations: CosmosDelegation[] = data[1];
-        const config: CosmosProviderConfig = data[2];
+        const config: TronProviderConfig = data[2];
 
         // TODO: double check most probably we no need that check
         if (!approvedValidators || !myDelegations) {
@@ -243,9 +240,7 @@ export class CosmosService implements CoinService {
   }
 
   getAddressDelegations(address: string): Observable<CosmosDelegation[]> {
-    return this.cosmosRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.listDelegations(address)))
-    );
+    return of([]);
   }
 
   getValidatorsFromBlockatlas(): Observable<BlockatlasValidator[]> {
@@ -254,7 +249,7 @@ export class CosmosService implements CoinService {
         from(
           new BlockatlasRPC(
             environment.blockatlasEndpoint,
-            "cosmos"
+            "tron"
           ).listValidators()
         )
       ),
@@ -274,10 +269,8 @@ export class CosmosService implements CoinService {
     );
   }
 
-  private getAccountOnce(address: string): Observable<CosmosAccount> {
-    return this.cosmosRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.getAccount(address)))
-    );
+  private getAccountOnce(address: string): Observable<any> {
+    return of(null);
   }
 
   getAnnualPercent(): Observable<number> {
@@ -286,23 +279,17 @@ export class CosmosService implements CoinService {
     );
   }
   getBalanceUSD(): Observable<BigNumber> {
-    return this.balance$.pipe(
-      switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
-      map(([balance, price]) => balance.multipliedBy(price))
-    );
+    return of(new BigNumber(0));
   }
   getBalance(): Observable<BigNumber> {
-    return this.balance$;
+    return of(new BigNumber(0));
   }
   getStakedUSD(): Observable<BigNumber> {
-    return this.stakedAmount$.pipe(
-      switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
-      map(([balance, price]) => balance.multipliedBy(price))
-    );
+    return of(new BigNumber(0));
   }
 
   getStaked(): Observable<BigNumber> {
-    return this.stakedAmount$;
+    return of(new BigNumber(0));
   }
 
   getStakeHolders(): Observable<StakeHolderList> {
@@ -360,28 +347,23 @@ export class CosmosService implements CoinService {
   }
 
   getStakePendingBalance(): Observable<BigNumber> {
-    return this.cosmosUnboundInfoService.getPendingBalance();
+    return of(new BigNumber(0));
   }
 
   getStakingRewards(): Observable<BigNumber> {
-    return this.cosmosUnboundInfoService.getRewards();
+    return of(new BigNumber(0));
   }
 
   getUnstakingDate(): Observable<Date> {
-    return this.cosmosUnboundInfoService.getReleaseDate();
+    return of(new Date());
   }
 
   getStakingInfo(): Observable<CosmosStakingInfo> {
-    return this.cosmosUnboundInfoService.getStakingInfo();
+    return of(null);
   }
 
   broadcastTx(tx: string): Observable<CosmosBroadcastResult> {
-    return this.cosmosRpc.rpc.pipe(
-      switchMap(rpc => {
-        console.log("broadcast tx");
-        return from(rpc.broadcastTransaction(tx));
-      })
-    );
+    return of(null);
   }
 
   sendTx(

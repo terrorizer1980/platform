@@ -8,12 +8,21 @@
               <h5>
                 Stake ATOM
               </h5>
-              <div class="col-12 available p-0 pb-2" (click)="setMax()">
-                <span
-                  class="btn-link"
-                  *ngIf="max$ | async; let max"
+              <div class="col-12 available p-0 pb-1" (click)="setMax()">
+                <span class="btn-link" *ngIf="max$ | async; let max"
                   ><span
-                    >Available: {{ Math.floor(max * 1000) / 1000 }}</span
+                    >Available: {{ Math.floor(max.normal * 1000) / 1000 }}</span
+                  ></span
+                >
+              </div>
+              <div class="col-12 available p-0 pb-1" (click)="setMax()">
+                <span
+                  class="text-info"
+                  *ngIf="monthlyEarnings$ | async as monthlyEarnings"
+                  ><span *ngIf="monthlyEarnings"
+                    >You will earn:
+                    {{ Math.floor(monthlyEarnings * 1000) / 1000 }} ATOMs a
+                    month</span
                   ></span
                 >
               </div>
@@ -36,15 +45,27 @@
               />
             </div>
             <div class="feedback">
-            <div *ngIf="stakeForm.invalid" class="mt-2 invalid-feedback d-block">
-              <div *ngIf="stakeForm.controls.amount.errors?.max">
-                You don't have enough funds.
+              <div
+                *ngIf="warn$ | async as warn"
+                class="mt-2 warn-feedback d-block"
+              >
+                <div *ngIf="warn !== null">
+                  The sum you have entered might not cover transaction fee.
+                  Broadcasting transaction may fail.
+                </div>
               </div>
-              <div *ngIf="stakeForm.controls.amount.errors?.min">
-                Minimum deposit value is
-                {{ stakeForm.controls.amount.errors?.min }}
+              <div
+                *ngIf="stakeForm.invalid"
+                class="mt-2 invalid-feedback d-block"
+              >
+                <div *ngIf="stakeForm.controls.amount.errors?.max">
+                  You don't have enough funds.
+                </div>
+                <div *ngIf="stakeForm.controls.amount.errors?.min">
+                  Minimum deposit value is
+                  {{ stakeForm.controls.amount.errors?.min }}
+                </div>
               </div>
-            </div>
             </div>
           </div>
           <div class="col-12 text-center p-0">

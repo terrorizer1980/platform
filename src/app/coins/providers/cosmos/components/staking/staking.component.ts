@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, OnInit } from "@angular/core";
 import { combineLatest, Observable } from "rxjs";
 import { CosmosService } from "../../services/cosmos.service";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -8,7 +8,7 @@ import { FormBuilder, FormGroup } from "@angular/forms";
 import { StakeValidator } from "../../validators/stake.validator";
 import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { SuccessPopupComponent } from "../../../../../shared/components/success-popup/success-popup.component";
-import { map, tap } from "rxjs/operators";
+import { map, shareReplay, switchMap, tap } from "rxjs/operators";
 import BigNumber from "bignumber.js";
 import { DialogsService } from "../../../../../shared/services/dialogs.service";
 import { CosmosConfigService } from "../../services/cosmos-config.service";
@@ -20,12 +20,14 @@ import { CosmosUtils } from "@trustwallet/rpc/lib";
   templateUrl: "./staking.component.html",
   styleUrls: ["./staking.component.scss"]
 })
-export class StakingComponent {
+export class StakingComponent implements OnInit {
   myAddress: Observable<string>;
   validatorId: string;
   info: Observable<CosmosStakingInfo>;
   stakeForm: FormGroup;
   max$ = this.getMax();
+  warn$: Observable<BigNumber>;
+  monthlyEarnings$: Observable<BigNumber>;
   Math = Math;
   isLoading = false;
 
@@ -41,7 +43,7 @@ export class StakingComponent {
     this.myAddress = this.cosmos.getAddress();
     this.validatorId = activatedRoute.snapshot.params.validatorId;
     this.info = this.cosmos.getStakingInfo();
-    const s = this.config.subscribe(config => {
+    this.config.subscribe(config => {
       this.stakeForm = this.fb.group({
         amount: [
           "",
@@ -71,21 +73,54 @@ export class StakingComponent {
   }
 
   setMax() {
-    const s = this.getMax().subscribe(max => {
-      this.stakeForm.get("amount").setValue(max);
-      s.unsubscribe();
+    this.max$.subscribe(({ normal }) => {
+      this.stakeForm.get("amount").setValue(normal);
     });
   }
 
-  getMax(): Observable<BigNumber> {
+  warn(): Observable<BigNumber> {
+    return combineLatest([
+      this.stakeForm.get("amount").valueChanges,
+      this.max$
+    ]).pipe(
+      map(([value, max]) => {
+        const val = new BigNumber(value);
+        if (val.isGreaterThan(max.normal) && val.isLessThan(max.min)) {
+          return max.normal;
+        }
+        return null;
+      }),
+      shareReplay(1)
+    );
+  }
+
+  getMonthlyEarnings(): Observable<BigNumber> {
+    return combineLatest([
+      this.stakeForm.get("amount").valueChanges,
+      this.cosmos.getValidatorFromBlockatlasById(this.validatorId)
+    ]).pipe(
+      map(([value, validator]) => {
+        const val = new BigNumber(value);
+        if (val.isNaN()) {
+          return null;
+        }
+        return val.multipliedBy(validator.reward.annual / 100).dividedBy(12);
+      }),
+      shareReplay(1)
+    );
+  }
+  getMax(): Observable<{ min: BigNumber; normal: BigNumber }> {
     return combineLatest([this.cosmos.getBalance(), this.config]).pipe(
       map(([balance, config]) => {
-        const additional = CosmosUtils.toAtom(
-          new BigNumber(config.gas + config.fee)
-        );
-        const max = balance.minus(additional);
-        return max.isGreaterThan(0) ? max : new BigNumber(0);
-      })
+        const additional = CosmosUtils.toAtom(new BigNumber(config.fee));
+        const normal = balance.minus(additional.multipliedBy(2));
+        const min = balance.minus(additional);
+        return {
+          normal: normal.isGreaterThan(0) ? normal : new BigNumber(0),
+          min: min.isGreaterThan(0) ? min : new BigNumber(0)
+        };
+      }),
+      shareReplay(1)
     );
   }
 
@@ -101,5 +136,10 @@ export class StakingComponent {
         this.router.navigate([`/`]);
       }
     );
+  }
+
+  ngOnInit(): void {
+    this.warn$ = this.warn();
+    this.monthlyEarnings$ = this.getMonthlyEarnings();
   }
 }

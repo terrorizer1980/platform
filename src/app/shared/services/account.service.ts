@@ -16,6 +16,7 @@ export class AccountService {
   getAddress(coin: CoinType): Observable<string> {
     if (environment.production === false) {
       if (!TrustProvider.isAvailable) {
+        // return of("cosmos130q48agm6yal2uxp3rgv3ptlwmwwk099c5nwj4");
         return of("cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk");
       }
     }
