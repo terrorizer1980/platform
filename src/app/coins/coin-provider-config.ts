@@ -43,3 +43,7 @@ export interface StakeHolder extends BlockatlasValidator {
   coin: CoinProviderConfig;
   amount: BigNumber;
 }
+
+// CONSTS
+export const BALANCE_REFRESH_INTERVAL = 60000;
+export const STAKE_REFRESH_INTERVAL = 115000;

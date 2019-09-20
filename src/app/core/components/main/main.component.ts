@@ -1,11 +1,4 @@
-import {
-  combineLatest,
-  forkJoin,
-  Observable,
-  of,
-  ReplaySubject,
-  throwError
-} from "rxjs";
+import { forkJoin, Observable, of, ReplaySubject, throwError } from "rxjs";
 import { Router } from "@angular/router";
 import { catchError, first, map, shareReplay } from "rxjs/operators";
 import { Component, OnInit } from "@angular/core";

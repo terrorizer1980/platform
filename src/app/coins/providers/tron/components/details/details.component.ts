@@ -1,7 +1,7 @@
 import { Component } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
-import { CosmosService } from "../../services/cosmos.service";
 import { map } from "rxjs/operators";
+import { ActivatedRoute } from "@angular/router";
+import { TronService } from "../../services/tron.service";
 
 @Component({
   selector: "app-details",
@@ -10,17 +10,17 @@ import { map } from "rxjs/operators";
 })
 export class DetailsComponent {
   validatorId = this.activatedRoute.snapshot.params.validatorId;
-  additionalInfo = this.cosmos.getStakingInfo().pipe(
+  additionalInfo = this.tron.getStakingInfo().pipe(
     map(info => [
       {
         name: "Lock Time",
-        value: `${info.timeFrame.day} days`
+        value: `${info.lockTime} days`
       }
     ])
   );
 
   constructor(
-    public cosmos: CosmosService,
+    public tron: TronService,
     private activatedRoute: ActivatedRoute
   ) {}
 }

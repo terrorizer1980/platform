@@ -1,6 +1,9 @@
 import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { DelegatorsComponent } from "./components/delegators/delegators.component";
+import { DetailsComponent } from "./components/details/details.component";
+import { StakingComponent } from "./components/staking/staking.component";
+import { UnstakingComponent } from "./components/unstaking/unstaking.component";
 
 const routes: Routes = [
   {
@@ -13,15 +16,15 @@ const routes: Routes = [
   },
   {
     path: "details/:validatorId",
-    component: null
+    component: DetailsComponent
   },
   {
     path: "details/:validatorId/stake",
-    component: null
+    component: StakingComponent
   },
   {
     path: "details/:validatorId/unstake",
-    component: null
+    component: UnstakingComponent
   }
 ];
 

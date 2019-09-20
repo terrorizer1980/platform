@@ -10,40 +10,40 @@ import {
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { catchError, first, map, switchMap, tap } from "rxjs/operators";
-import {
-  BlockatlasRPC,
-  BlockatlasValidatorResult,
-  CosmosAccount,
-  CosmosBroadcastResult,
-  CosmosUtils
-} from "@trustwallet/rpc";
-import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
+import { first, map, switchMap } from "rxjs/operators";
 import { AccountService } from "../../../../shared/services/account.service";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
-import { environment } from "../../../../../environments/environment";
 import { CoinService } from "../../../services/coin.service";
-import { StakeAction, StakeHolderList } from "../../../coin-provider-config";
+import {
+  BALANCE_REFRESH_INTERVAL,
+  STAKE_REFRESH_INTERVAL,
+  StakeAction,
+  StakeHolderList
+} from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinType } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider/lib";
-import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
+import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { TronConfigService } from "./tron-config.service";
-import { TronRpcService } from "./tron-rpc.service";
 import { TronProviderConfig } from "../tron.descriptor";
+import { TronRpcService } from "./tron-rpc.service";
+import { TronUnboundInfoService } from "./tron-unbound-info.service";
+import {
+  TronAccount,
+  TronBroadcastResult,
+  TronStakingInfo,
+  TronUtils,
+  TronVote
+} from "@trustwallet/rpc/lib";
 
-// TODO: There is plenty of old boilerplate here yet. Need to be refactored.
-
-const BALANCE_REFRESH_INTERVAL = 60000;
-const STAKE_REFRESH_INTERVAL = 115000;
-
-// Used for creating Cosmos service manually bypassing regular routing flow
 export const TronServiceInjectable = [
   TronConfigService,
   HttpClient,
   AccountService,
   ExchangeRateService,
-  TronRpcService
+  TronRpcService,
+  TronUnboundInfoService,
+  CoinAtlasService
 ];
 
 interface IAggregatedDelegationMap {
@@ -62,56 +62,47 @@ export class TronService implements CoinService {
     private http: HttpClient,
     private accountService: AccountService,
     private exchangeRateService: ExchangeRateService,
-    private rpc: TronRpcService
+    private tronRpc: TronRpcService,
+    private tronUnboundInfoService: TronUnboundInfoService,
+    private atlasService: CoinAtlasService
   ) {
-    this.rpc.setConfig(config);
+    this.tronRpc.setConfig(config);
     // Fires on address change or manual refresh
-    // const buildPipeline = (milliSeconds): Observable<string> =>
-    //   combineLatest([this.getAddress(), this._manualRefresh]).pipe(
-    //     switchMap((x: any[]) => {
-    //       const [address, skip] = x;
-    //       return timer(0, milliSeconds).pipe(map(() => address));
-    //     })
-    //   );
-    //
-    // this.balance$ = buildPipeline(BALANCE_REFRESH_INTERVAL).pipe(
-    //   switchMap(address => {
-    //     return this.requestBalance(address);
-    //   })
-    //   // map(uAtom => CosmosUtils.toAtom(uAtom))
-    // );
-    //
-    // this.stakedAmount$ = buildPipeline(STAKE_REFRESH_INTERVAL).pipe(
-    //   switchMap(address => {
-    //     return this.requestStakedAmount(address);
-    //   })
-    //   // map(uAtom => CosmosUtils.toAtom(uAtom) || new BigNumber(0))
-    // );
+    const buildPipeline = (milliSeconds): Observable<string> =>
+      combineLatest([this.getAddress(), this._manualRefresh]).pipe(
+        switchMap((x: any[]) => {
+          const [address, skip] = x;
+          return timer(0, milliSeconds).pipe(map(() => address));
+        })
+      );
+
+    this.balance$ = buildPipeline(BALANCE_REFRESH_INTERVAL).pipe(
+      switchMap(address => {
+        return this.requestBalance(address);
+      })
+    );
+
+    this.stakedAmount$ = buildPipeline(STAKE_REFRESH_INTERVAL).pipe(
+      switchMap(address => {
+        return this.requestStakedAmount(address);
+      }),
+      map(amount => amount || new BigNumber(0))
+    );
   }
 
   private requestBalance(address: string): Observable<BigNumber> {
     return this.getAccountOnce(address).pipe(
-      map((account: CosmosAccount) => {
-        // TODO: add type annotation once it exported by library (Coin)
-        const balances = (account as CosmosAccount).coins;
-
-        // TODO: check, probably with library toUpperCase is no needed here
-        const result = balances.find(
-          coin => coin.denom.toUpperCase() === "UATOM"
-        );
-        return result.amount;
+      map((account: TronAccount) => {
+        return account.balance;
       })
     );
   }
 
   private requestStakedAmount(address: string): Observable<BigNumber> {
     return this.getAddressDelegations(address).pipe(
-      map((delegations: CosmosDelegation[]) => {
-        const shares =
-          (delegations && delegations.map((d: CosmosDelegation) => d.shares)) ||
-          [];
-        return shares && shares.length
-          ? BigNumber.sum(...shares)
+      map((delegations: TronVote[]) => {
+        return delegations && delegations.length
+          ? BigNumber.sum(...delegations.map(vote => vote.voteCount))
           : new BigNumber(0);
       })
     );
@@ -126,7 +117,7 @@ export class TronService implements CoinService {
       const validator = validators.find(v => v.id === address);
       return {
         ...validator,
-        amount: CosmosUtils.toAtom(address2stake[address]),
+        amount: TronUtils.toTron(address2stake[address]),
         coin: config
       };
     });
@@ -134,9 +125,9 @@ export class TronService implements CoinService {
 
   private validatorsAndDelegations(): any[] {
     return [
-      this.getValidatorsFromBlockatlas(),
+      this.getValidators(),
       this.accountService
-        .getAddress(CoinType.cosmos)
+        .getAddress(CoinType.tron)
         .pipe(switchMap(address => this.getAddressDelegations(address)))
     ];
   }
@@ -148,7 +139,7 @@ export class TronService implements CoinService {
     ]).pipe(
       map((data: any[]) => {
         const approvedValidators: BlockatlasValidator[] = data[0];
-        const myDelegations: CosmosDelegation[] = data[1];
+        const myDelegations: TronVote[] = data[1];
         const config: TronProviderConfig = data[2];
 
         // TODO: double check most probably we no need that check
@@ -160,21 +151,19 @@ export class TronService implements CoinService {
 
         // Ignore delegations to validators that isn't in a list of approved validators
         const filteredDelegations = myDelegations.filter(
-          (delegation: CosmosDelegation) => {
+          (delegation: TronVote) => {
             // TODO: use map(Object) in case we have more that 10 approved validators
-            return addresses.includes(delegation.validatorAddress);
+            return addresses.includes(delegation.voteAddress);
           }
         );
 
         const address2stakeMap = filteredDelegations.reduce(
-          (acc: IAggregatedDelegationMap, delegation: CosmosDelegation) => {
+          (acc: IAggregatedDelegationMap, delegation: TronVote) => {
             // TODO: Use BN or native browser BigInt() + polyfill
             const aggregatedAmount =
-              acc[delegation.validatorAddress] || new BigNumber(0);
-            const sharesAmount = +delegation.shares || new BigNumber(0);
-            acc[delegation.validatorAddress] = aggregatedAmount.plus(
-              sharesAmount
-            );
+              acc[delegation.voteAddress] || new BigNumber(0);
+            const sharesAmount = +delegation.voteCount || new BigNumber(0);
+            acc[delegation.voteAddress] = aggregatedAmount.plus(sharesAmount);
             return acc;
           },
           {}
@@ -216,80 +205,52 @@ export class TronService implements CoinService {
     );
   }
 
-  private getCosmosTxSkeleton(account: CosmosAccount): Observable<any> {
+  private getTxSkeleton(account: TronAccount): Observable<any> {
     return this.config.pipe(
       switchMap(config =>
         combineLatest([config.chainId(this.http, config.endpoint), of(config)])
       ),
       map(([chain, config]) => ({
-        typePrefix: "auth/StdTx",
-        accountNumber: account.accountNumber,
-        sequence: account.sequence,
-        chainId: chain,
-        fee: {
-          amounts: [
-            {
-              denom: "uatom",
-              amount: new BigNumber(config.fee).toFixed()
-            }
-          ],
-          gas: config.gas
-        }
+        typePrefix: "auth/StdTx"
       }))
     );
   }
 
-  getAddressDelegations(address: string): Observable<CosmosDelegation[]> {
-    return of([]);
-  }
-
-  getValidatorsFromBlockatlas(): Observable<BlockatlasValidator[]> {
-    return this.config.pipe(
-      switchMap(config =>
-        from(
-          new BlockatlasRPC(
-            environment.blockatlasEndpoint,
-            "tron"
-          ).listValidators()
-        )
-      ),
-      map((resp: BlockatlasValidatorResult) => {
-        return resp.docs;
-      })
+  getAddressDelegations(address: string): Observable<TronVote[]> {
+    return this.tronRpc.rpc.pipe(
+      switchMap(rpc => from(rpc.listDelegations(address)))
     );
   }
 
-  getValidatorFromBlockatlasById(validatorId): Observable<BlockatlasValidator> {
-    return this.getValidatorsFromBlockatlas().pipe(
-      map((validators: BlockatlasValidator[]) => {
-        return validators.find((validator: BlockatlasValidator) => {
-          return validator.id === validatorId;
-        });
-      })
+  private getAccountOnce(address: string): Observable<TronAccount> {
+    return this.tronRpc.rpc.pipe(
+      switchMap(rpc => from(rpc.getAccount(address)))
     );
-  }
-
-  private getAccountOnce(address: string): Observable<any> {
-    return of(null);
   }
 
   getAnnualPercent(): Observable<number> {
-    return this.getValidatorsFromBlockatlas().pipe(
+    return this.getValidators().pipe(
       map(validators => this.selectValidatorWithBestInterestRate(validators))
     );
   }
   getBalanceUSD(): Observable<BigNumber> {
-    return of(new BigNumber(0));
+    return this.balance$.pipe(
+      switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
+      map(([balance, price]) => balance.multipliedBy(price))
+    );
   }
   getBalance(): Observable<BigNumber> {
-    return of(new BigNumber(0));
+    return this.balance$;
   }
   getStakedUSD(): Observable<BigNumber> {
-    return of(new BigNumber(0));
+    return this.stakedAmount$.pipe(
+      switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
+      map(([balance, price]) => balance.multipliedBy(price))
+    );
   }
 
   getStaked(): Observable<BigNumber> {
-    return of(new BigNumber(0));
+    return this.stakedAmount$;
   }
 
   getStakeHolders(): Observable<StakeHolderList> {
@@ -308,14 +269,14 @@ export class TronService implements CoinService {
     );
   }
 
-  stake(
-    account: CosmosAccount,
+  private stake(
+    account: TronAccount,
     to: string,
     amount: BigNumber
   ): Observable<string> {
     return combineLatest([
       this.getTxPayload(account.address, to, amount),
-      this.getCosmosTxSkeleton(account)
+      this.getTxSkeleton(account)
     ]).pipe(
       map(([payload, txSkeleton]) => ({
         ...txSkeleton,
@@ -323,18 +284,18 @@ export class TronService implements CoinService {
           ...payload
         }
       })),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.cosmos, tx)))
+      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx)))
     );
   }
 
-  unstake(
-    account: CosmosAccount,
+  private unstake(
+    account: TronAccount,
     to: string,
     amount: BigNumber
   ): Observable<string> {
     return combineLatest([
       this.getTxPayload(account.address, to, amount),
-      this.getCosmosTxSkeleton(account)
+      this.getTxSkeleton(account)
     ]).pipe(
       map(([payload, txSkeleton]) => ({
         ...txSkeleton,
@@ -342,40 +303,45 @@ export class TronService implements CoinService {
           ...payload
         }
       })),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.cosmos, tx)))
+      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx)))
     );
   }
 
   getStakePendingBalance(): Observable<BigNumber> {
-    return of(new BigNumber(0));
+    return this.tronUnboundInfoService.getPendingBalance();
   }
 
   getStakingRewards(): Observable<BigNumber> {
-    return of(new BigNumber(0));
+    return this.tronUnboundInfoService.getRewards();
   }
 
   getUnstakingDate(): Observable<Date> {
-    return of(new Date());
+    return this.tronUnboundInfoService.getReleaseDate();
   }
 
-  getStakingInfo(): Observable<CosmosStakingInfo> {
-    return of(null);
+  getStakingInfo(): Observable<TronStakingInfo> {
+    return this.tronUnboundInfoService.getStakingInfo();
   }
 
-  broadcastTx(tx: string): Observable<CosmosBroadcastResult> {
-    return of(null);
+  broadcastTx(tx: string): Observable<TronBroadcastResult> {
+    return this.tronRpc.rpc.pipe(
+      switchMap(rpc => {
+        console.log("broadcast tx");
+        return from(rpc.broadcastTransaction(tx));
+      })
+    );
   }
 
-  sendTx(
+  prepareStakeTx(
     action: StakeAction,
     addressTo: string,
     amount: BigNumber
-  ): Observable<CosmosBroadcastResult> {
+  ): Observable<TronBroadcastResult> {
     return this.getAddress().pipe(
       switchMap(address => {
         return this.getAccountOnce(address);
       }),
-      switchMap((account: CosmosAccount) => {
+      switchMap((account: TronAccount) => {
         if (action === StakeAction.STAKE) {
           return this.stake(account, addressTo, amount);
         } else {
@@ -400,6 +366,16 @@ export class TronService implements CoinService {
         return new BigNumber(0);
       }),
       first()
+    );
+  }
+
+  getValidators(): Observable<BlockatlasValidator[]> {
+    return this.atlasService.getValidatorsFromBlockatlas(CoinType.tron);
+  }
+  getValidatorsById(validatorId: string): Observable<BlockatlasValidator> {
+    return this.atlasService.getValidatorFromBlockatlasById(
+      CoinType.tron,
+      validatorId
     );
   }
 }

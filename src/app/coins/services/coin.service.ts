@@ -1,8 +1,9 @@
 // Interface should be implemented by each coin provider
 import { Observable } from "rxjs";
-import { StakeHolderList } from "../coin-provider-config";
+import { StakeAction, StakeHolderList } from "../coin-provider-config";
 import BigNumber from "bignumber.js";
-import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
+import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
+import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
 
 export interface CoinService {
   getAnnualPercent(): Observable<number>;
@@ -10,14 +11,21 @@ export interface CoinService {
   getBalanceUSD(): Observable<BigNumber>;
   getStaked(): Observable<BigNumber>;
   getStakedUSD(): Observable<BigNumber>;
+  getStakedToValidator(validator: string): Observable<BigNumber>;
+  getAddressDelegations(address: string): Observable<any[]>;
   getStakeHolders(): Observable<StakeHolderList>;
   getPriceUSD(): Observable<BigNumber>;
   getAddress(): Observable<string>;
-  stake(account: any, to: string, amount: BigNumber): Observable<string>;
-  unstake(account: any, to: string, amount: BigNumber): Observable<string>;
+  prepareStakeTx(
+    action: StakeAction,
+    addressTo: string,
+    amount: BigNumber
+  ): Observable<any>;
   getStakePendingBalance(): Observable<BigNumber>;
   getStakingRewards(): Observable<BigNumber>;
   getUnstakingDate(): Observable<Date>;
   getStakingInfo(): Observable<any>;
   broadcastTx(tx: string): Observable<any>;
+  getValidators(): Observable<BlockatlasValidator[]>;
+  getValidatorsById(validatorId: string): Observable<BlockatlasValidator>;
 }

@@ -1,3 +1,4 @@
+import { TronRPC } from "@trustwallet/rpc";
 import { Injectable } from "@angular/core";
 import { Observable, ReplaySubject } from "rxjs";
 import { TronProviderConfig } from "../tron.descriptor";
@@ -6,15 +7,15 @@ import { TronProviderConfig } from "../tron.descriptor";
   providedIn: "root"
 })
 export class TronRpcService {
-  private _rpc = new ReplaySubject<any>(1);
-  get rpc(): Observable<any> {
+  private _rpc = new ReplaySubject<TronRPC>(1);
+  get rpc(): Observable<TronRPC> {
     return this._rpc;
   }
 
   setConfig(config: Observable<TronProviderConfig>): TronRpcService {
-    // config.subscribe(cfg => {
-    //   this._rpc.next(new CosmosRPC(cfg.endpoint));
-    // });
+    config.subscribe(cfg => {
+      this._rpc.next(new TronRPC(cfg.endpoint));
+    });
     return this;
   }
 }

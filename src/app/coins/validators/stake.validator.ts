@@ -1,21 +1,21 @@
-import { CosmosService } from "../services/cosmos.service";
 import { FormControl } from "@angular/forms";
-import { combineLatest, Observable, of, timer } from "rxjs";
-import { first, map, shareReplay, switchMap } from "rxjs/operators";
+import { combineLatest } from "rxjs";
+import { first, map, shareReplay } from "rxjs/operators";
 import BigNumber from "bignumber.js";
-import { CosmosProviderConfig } from "../cosmos.descriptor";
 import { CosmosUtils } from "@trustwallet/rpc/lib";
+import { CoinProviderConfig } from "../coin-provider-config";
+import { CoinService } from "../services/coin.service";
 
 export const StakeValidator = (
   isStake: boolean,
-  config: CosmosProviderConfig,
-  cosmos: CosmosService,
+  config: CoinProviderConfig,
+  dataSource: CoinService,
   validatorId: string,
   minValue: BigNumber = new BigNumber(0.001)
 ) => {
   const data = combineLatest([
-    cosmos.getBalance(),
-    cosmos.getStakedToValidator(validatorId)
+    dataSource.getBalance(),
+    dataSource.getStakedToValidator(validatorId)
   ]).pipe(shareReplay(1));
 
   return (input: FormControl) => {

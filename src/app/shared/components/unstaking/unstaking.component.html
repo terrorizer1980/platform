@@ -1,0 +1,67 @@
+<form [formGroup]="stakeForm" *ngIf="config | async as config">
+  <div class="row small">
+    <div class="card col-12 pt-2 pb-2 p-0">
+      <div class="card-body p-1 mt-4 mb-4">
+        <div class="col-12 text-center">
+          <div class="pb-4">
+            <h5>Withdraw {{ config.currencySymbol }}</h5>
+            <div class="col-12 available p-0 pb-2" (click)="setMax()">
+              <span class="btn-link" *ngIf="max$ | async; let max"
+                ><span
+                  >Available: {{ Math.floor(max * 1000) / 1000 }}</span
+                ></span
+              >
+            </div>
+            <div
+              *ngIf="stakeForm.controls.amount.valueChanges | async; let value"
+              class=""
+            ></div>
+          </div>
+
+          <div class="form-group mb-2">
+            <div class="input-group input-group-lg">
+              <input
+                formControlName="amount"
+                placeholder="Amount in {{ config.currencySymbol }}"
+                class="form-control"
+                aria-label="Large"
+                [ngClass]="{ 'is-invalid': stakeForm.invalid }"
+              />
+            </div>
+            <div class="feedback">
+              <div
+                *ngIf="stakeForm.invalid"
+                class="mt-2 invalid-feedback d-block"
+              >
+                <div *ngIf="stakeForm.controls.amount.errors?.max">
+                  You don't have enough funds.
+                </div>
+                <div *ngIf="stakeForm.controls.amount.errors?.min">
+                  Minimum withdraw value is
+                  {{ stakeForm.controls.amount.errors?.min }}
+                </div>
+              </div>
+              <div *ngIf="stakeForm.controls.amount.errors?.restriction">
+                Your Wallet balance is too low. You need at least:
+                {{ stakeForm.controls.amount.errors?.restriction }}
+                {{ config.currencySymbol }}s
+              </div>
+            </div>
+          </div>
+          <div class="col-12 text-center p-0">
+            <loading-button
+              (click)="unStake()"
+              [loading]="isLoading"
+              [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
+            >
+              Withdraw
+            </loading-button>
+            <div class="text-muted pt-3" *ngIf="timeFrame | async as timeFrame">
+              It takes {{ timeFrame }} days to withdraw your funds
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

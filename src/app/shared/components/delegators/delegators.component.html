@@ -1,0 +1,40 @@
+<div class="row small">
+  <div class="card col-12 p-0">
+    <div class="card-body p-0">
+      <h6 class="m-2 ml-3">All {{ blockchain }} markets</h6>
+
+      <div *ngIf="validators$ | async as validators; else loadingValidators">
+        <div *ngFor="let item of validators" class="validator">
+          <div
+            (click)="navigateToMyStakeHoldersList(item)"
+            class="row row-container pb-1 pt-1"
+          >
+            <div class="col-6 col-auto mr-auto pl-2">
+              <img
+                class="m-2 row-logo"
+                src="{{ item.info.image }}"
+                alt="{{ item.info.name }}"
+              />
+              <span>{{ item.info.name }}</span>
+            </div>
+            <div class="col-auto pr-0 mr-3">
+              <span class="success"
+                >{{ item.reward.annual.toFixed(2) }}%
+                <span class="ml-1"
+                  ><i class="mr-0 text-muted fas fa-chevron-right"></i></span
+              ></span>
+            </div>
+          </div>
+          <tr></tr>
+        </div>
+      </div>
+      <ng-template #loadingValidators>
+        <ng-template ngFor let-i [ngForOf]="placeholderValidators">
+          <div class="pb-3 pt-3 pl-3">
+            <app-stake-placeholder></app-stake-placeholder>
+          </div>
+        </ng-template>
+      </ng-template>
+    </div>
+  </div>
+</div>

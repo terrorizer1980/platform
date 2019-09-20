@@ -10,10 +10,8 @@ import {
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { catchError, first, map, switchMap, tap } from "rxjs/operators";
+import { first, map, switchMap } from "rxjs/operators";
 import {
-  BlockatlasRPC,
-  BlockatlasValidatorResult,
   CosmosAccount,
   CosmosBroadcastResult,
   CosmosUtils
@@ -24,19 +22,21 @@ import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/Bloc
 import { CosmosConfigService } from "./cosmos-config.service";
 import { CosmosProviderConfig } from "../cosmos.descriptor";
 import { CoinService } from "../../../services/coin.service";
-import { StakeAction, StakeHolderList } from "../../../coin-provider-config";
+import {
+  StakeAction,
+  StakeHolderList,
+  BALANCE_REFRESH_INTERVAL,
+  STAKE_REFRESH_INTERVAL
+} from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinType } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider/lib";
 import { CosmosRpcService } from "./cosmos-rpc.service";
 import { CosmosUnboundInfoService } from "./cosmos-unbound-info.service";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
-import { environment } from "../../../../../environments/environment";
+import { CoinAtlasService } from "../../../services/coin-atlas.service";
 
 // TODO: There is plenty of old boilerplate here yet. Need to be refactored.
-
-const BALANCE_REFRESH_INTERVAL = 60000;
-const STAKE_REFRESH_INTERVAL = 115000;
 
 // Used for creating Cosmos service manually bypassing regular routing flow
 export const CosmosServiceInjectable = [
@@ -45,7 +45,8 @@ export const CosmosServiceInjectable = [
   AccountService,
   ExchangeRateService,
   CosmosRpcService,
-  CosmosUnboundInfoService
+  CosmosUnboundInfoService,
+  CoinAtlasService
 ];
 
 interface IAggregatedDelegationMap {
@@ -65,7 +66,8 @@ export class CosmosService implements CoinService {
     private accountService: AccountService,
     private exchangeRateService: ExchangeRateService,
     private cosmosRpc: CosmosRpcService,
-    private cosmosUnboundInfoService: CosmosUnboundInfoService
+    private cosmosUnboundInfoService: CosmosUnboundInfoService,
+    private atlasService: CoinAtlasService
   ) {
     this.cosmosRpc.setConfig(config);
     // Fires on address change or manual refresh
@@ -137,7 +139,7 @@ export class CosmosService implements CoinService {
 
   private validatorsAndDelegations(): any[] {
     return [
-      this.getValidatorsFromBlockatlas(),
+      this.getValidators(),
       this.accountService
         .getAddress(CoinType.cosmos)
         .pipe(switchMap(address => this.getAddressDelegations(address)))
@@ -248,32 +250,6 @@ export class CosmosService implements CoinService {
     );
   }
 
-  getValidatorsFromBlockatlas(): Observable<BlockatlasValidator[]> {
-    return this.config.pipe(
-      switchMap(config =>
-        from(
-          new BlockatlasRPC(
-            environment.blockatlasEndpoint,
-            "cosmos"
-          ).listValidators()
-        )
-      ),
-      map((resp: BlockatlasValidatorResult) => {
-        return resp.docs;
-      })
-    );
-  }
-
-  getValidatorFromBlockatlasById(validatorId): Observable<BlockatlasValidator> {
-    return this.getValidatorsFromBlockatlas().pipe(
-      map((validators: BlockatlasValidator[]) => {
-        return validators.find((validator: BlockatlasValidator) => {
-          return validator.id === validatorId;
-        });
-      })
-    );
-  }
-
   private getAccountOnce(address: string): Observable<CosmosAccount> {
     return this.cosmosRpc.rpc.pipe(
       switchMap(rpc => from(rpc.getAccount(address)))
@@ -281,7 +257,7 @@ export class CosmosService implements CoinService {
   }
 
   getAnnualPercent(): Observable<number> {
-    return this.getValidatorsFromBlockatlas().pipe(
+    return this.getValidators().pipe(
       map(validators => this.selectValidatorWithBestInterestRate(validators))
     );
   }
@@ -321,7 +297,7 @@ export class CosmosService implements CoinService {
     );
   }
 
-  stake(
+  private stake(
     account: CosmosAccount,
     to: string,
     amount: BigNumber
@@ -340,7 +316,7 @@ export class CosmosService implements CoinService {
     );
   }
 
-  unstake(
+  private unstake(
     account: CosmosAccount,
     to: string,
     amount: BigNumber
@@ -384,7 +360,7 @@ export class CosmosService implements CoinService {
     );
   }
 
-  sendTx(
+  prepareStakeTx(
     action: StakeAction,
     addressTo: string,
     amount: BigNumber
@@ -418,6 +394,16 @@ export class CosmosService implements CoinService {
         return new BigNumber(0);
       }),
       first()
+    );
+  }
+
+  getValidators(): Observable<BlockatlasValidator[]> {
+    return this.atlasService.getValidatorsFromBlockatlas(CoinType.cosmos);
+  }
+  getValidatorsById(validatorId: string): Observable<BlockatlasValidator> {
+    return this.atlasService.getValidatorFromBlockatlasById(
+      CoinType.cosmos,
+      validatorId
     );
   }
 }

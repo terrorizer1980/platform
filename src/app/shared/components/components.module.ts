@@ -6,11 +6,20 @@ import { LoadingButtonComponent } from "./loading-button/loading-button.componen
 import { StakePlaceholderComponent } from "./stake-placeholder/stake-placeholder.component";
 import { ContentLoaderModule } from "@ngneat/content-loader";
 import { ContentPlaceholderComponent } from "./content-placeholder/content-placeholder.component";
+import { DelegatorsComponent } from "./delegators/delegators.component";
+import { StakingComponent } from "./staking/staking.component";
+import { UnstakingComponent } from "./unstaking/unstaking.component";
+import { DetailsComponent } from "./details/details.component";
+import { ReactiveFormsModule } from "@angular/forms";
 
 const components = [
   LoadingButtonComponent,
   StakePlaceholderComponent,
-  ContentPlaceholderComponent
+  ContentPlaceholderComponent,
+  DelegatorsComponent,
+  StakingComponent,
+  UnstakingComponent,
+  DetailsComponent
 ];
 
 @NgModule({
@@ -19,7 +28,8 @@ const components = [
     CommonModule,
     HttpClientModule,
     NgxLoadersCssModule,
-    ContentLoaderModule
+    ContentLoaderModule,
+    ReactiveFormsModule
   ],
   exports: [...components, ContentLoaderModule]
 })

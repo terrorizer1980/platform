@@ -1,12 +1,12 @@
 import { Component, Inject } from "@angular/core";
 import { Observable } from "rxjs";
-import { CosmosService } from "../../services/cosmos.service";
 import { ActivatedRoute } from "@angular/router";
-import { CosmosConfigService } from "../../services/cosmos-config.service";
-import { CosmosProviderConfig } from "../../cosmos.descriptor";
+import { TronProviderConfig } from "../../tron.descriptor";
+import { TronConfigService } from "../../services/tron-config.service";
+import { TronService } from "../../services/tron.service";
 
 @Component({
-  selector: "app-test",
+  selector: "app-staking",
   templateUrl: "./staking.component.html",
   styleUrls: ["./staking.component.scss"]
 })
@@ -14,9 +14,9 @@ export class StakingComponent {
   validatorId: string = this.activatedRoute.snapshot.params.validatorId;
 
   constructor(
-    @Inject(CosmosConfigService)
-    public config: Observable<CosmosProviderConfig>,
-    public cosmos: CosmosService,
+    @Inject(TronConfigService)
+    public config: Observable<TronProviderConfig>,
+    public tron: TronService,
     private activatedRoute: ActivatedRoute
   ) {}
 }
