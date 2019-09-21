@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --aot false --host 0.0.0.0",
-    "build": "ng build --prod --aot && ./sentry.sh",
+    "build": "ng build --prod --aot && sentry-cli releases -o trustwallet -p platform new -p platform RELEASE && sentry-cli releases -o trustwallet -p platform files RELEASE upload-sourcemaps \"./dist\" && sentry-cli releases -o trustwallet -p platform set-commits --auto RELEASE && releases finalize RELEASE",
     "build:watch": "ng build --prod --watch",
     "postbuild": "rimraf dist/**/*.map",
     "test": "ng test --watch false",
