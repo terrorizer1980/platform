@@ -11,6 +11,7 @@ import {
   TronCoinConfig,
   TronProviderConfig
 } from "./providers/tron/tron.descriptor";
+import BigNumber from "bignumber.js";
 
 export const Coins: CoinProviderConfig[] = [
   CoinDescriptor<CosmosProviderConfig>({
@@ -24,8 +25,9 @@ export const Coins: CoinProviderConfig[] = [
       CoinType.cosmos
     )}/info/logo.png`,
     config: CosmosCoinConfig,
-    gas: 250000,
-    fee: 1000
+    gas: new BigNumber(250000),
+    fee: new BigNumber(1000),
+    digits: 6
   })
 ];
 if (!environment.production) {
@@ -41,8 +43,9 @@ if (!environment.production) {
         CoinType.tron
       )}/info/logo.png`,
       config: TronCoinConfig,
-      gas: 250000,
-      fee: 1000
+      gas: new BigNumber(0),
+      fee: new BigNumber(0),
+      digits: 0
     })
   );
 }

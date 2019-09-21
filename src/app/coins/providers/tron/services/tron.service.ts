@@ -1,40 +1,36 @@
 import { Inject, Injectable } from "@angular/core";
 import {
   BehaviorSubject,
+  Observable,
   combineLatest,
   forkJoin,
   from,
-  Observable,
   of,
   timer
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { first, map, switchMap } from "rxjs/operators";
-import { AccountService } from "../../../../shared/services/account.service";
-import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
-import { CoinService } from "../../../services/coin.service";
+import { first, map, switchMap, tap } from "rxjs/operators";
 import {
-  BALANCE_REFRESH_INTERVAL,
-  STAKE_REFRESH_INTERVAL,
-  StakeAction,
-  StakeHolderList
-} from "../../../coin-provider-config";
+  BlockatlasValidator,
+  TronAccount,
+  TronBlock,
+  TronBroadcastResult,
+  TronStakingInfo,
+  TronUtils,
+  TronVote
+} from "@trustwallet/rpc";
+import { CoinType, Utils } from "@trustwallet/types";
+import { TrustProvider } from "@trustwallet/provider";
+import { CoinService } from "../../../services/coin.service";
+import { AccountService } from "../../../../shared/services/account.service";
+import { BALANCE_REFRESH_INTERVAL, STAKE_REFRESH_INTERVAL, StakeAction, StakeHolderList } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
-import { CoinType } from "@trustwallet/types";
-import { TrustProvider } from "@trustwallet/provider/lib";
 import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { TronConfigService } from "./tron-config.service";
 import { TronProviderConfig } from "../tron.descriptor";
 import { TronRpcService } from "./tron-rpc.service";
 import { TronUnboundInfoService } from "./tron-unbound-info.service";
-import {
-  TronAccount,
-  TronBroadcastResult,
-  TronStakingInfo,
-  TronUtils,
-  TronVote
-} from "@trustwallet/rpc/lib";
 
 export const TronServiceInjectable = [
   TronConfigService,
@@ -87,6 +83,125 @@ export class TronService implements CoinService {
         return this.requestStakedAmount(address);
       }),
       map(amount => amount || new BigNumber(0))
+    );
+  }
+
+  getAddressDelegations(address: string): Observable<TronVote[]> {
+    return this.tronRpc.rpc.pipe(
+      switchMap(rpc => from(rpc.listDelegations(address)))
+    );
+  }
+
+  getAnnualPercent(): Observable<number> {
+    return this.getValidators().pipe(
+      map(validators => this.selectValidatorWithBestInterestRate(validators))
+    );
+  }
+  getBalanceUSD(): Observable<BigNumber> {
+    return this.balance$.pipe(
+      switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
+      map(([balance, price]) => balance.multipliedBy(price))
+    );
+  }
+  getBalance(): Observable<BigNumber> {
+    return this.balance$;
+  }
+
+  getStakedUSD(): Observable<BigNumber> {
+    return this.stakedAmount$.pipe(
+      switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
+      map(([balance, price]) => balance.multipliedBy(price))
+    );
+  }
+
+  getStaked(): Observable<BigNumber> {
+    return this.stakedAmount$;
+  }
+
+  getStakeHolders(): Observable<StakeHolderList> {
+    return this.address2StakeMap();
+  }
+
+  getPriceUSD(): Observable<BigNumber> {
+    return this.config.pipe(
+      switchMap(config => this.exchangeRateService.getRate(config.coin))
+    );
+  }
+
+  getAddress(): Observable<string> {
+    return this.config.pipe(
+      switchMap(config => this.accountService.getAddress(config.coin))
+    );
+  }
+
+  getStakePendingBalance(): Observable<BigNumber> {
+    return this.tronUnboundInfoService.getPendingBalance();
+  }
+
+  getStakingRewards(): Observable<BigNumber> {
+    return this.tronUnboundInfoService.getRewards();
+  }
+
+  getUnstakingDate(): Observable<Date> {
+    return this.tronUnboundInfoService.getReleaseDate();
+  }
+
+  getStakingInfo(): Observable<TronStakingInfo> {
+    return this.tronUnboundInfoService.getStakingInfo();
+  }
+
+  broadcastTx(tx: string): Observable<TronBroadcastResult> {
+    return this.tronRpc.rpc.pipe(
+      switchMap(rpc => {
+        console.log("broadcast tx");
+        return from(rpc.broadcastTransaction(tx));
+      })
+    );
+  }
+
+  prepareStakeTx(
+    action: StakeAction,
+    addressTo: string,
+    amount: BigNumber
+  ): Observable<TronBroadcastResult> {
+    return this.getAddress().pipe(
+      switchMap(address => {
+        return this.getAccountOnce(address);
+      }),
+      switchMap((account: TronAccount) => {
+        switch (action) {
+          case StakeAction.STAKE:
+            return this.stake(account, addressTo, amount);
+          case StakeAction.UNSTAKE:
+            return this.unstake(account, addressTo, amount);
+        }
+      })
+    );
+  }
+
+  getStakedToValidator(validator: string): Observable<BigNumber> {
+    return this.getStakeHolders().pipe(
+      map(stakeholders => {
+        const validatorStaked = stakeholders.find(
+          holder => holder.id === validator
+        );
+        if (validatorStaked) {
+          return validatorStaked.amount;
+        }
+        return new BigNumber(0);
+      }),
+      first()
+    );
+  }
+
+  getValidators(): Observable<BlockatlasValidator[]> {
+    return this.atlasService.getValidatorsFromBlockatlas(CoinType.tron);
+  }
+
+  getValidatorsById(validatorId: string): Observable<BlockatlasValidator> {
+    return this.atlasService.getValidatorFromBlockatlasById(
+      CoinType.tron,
+      validatorId
     );
   }
 
@@ -188,84 +303,94 @@ export class TronService implements CoinService {
     );
   }
 
-  private getTxPayload(
-    addressFrom: string,
-    addressTo: string,
-    amount: BigNumber
-  ): any {
-    return this.config.pipe(
-      map(cfg => ({
-        delegatorAddress: addressFrom,
-        validatorAddress: addressTo,
-        amount: {
-          denom: "uatom",
-          amount: amount.toFixed()
-        }
-      }))
-    );
-  }
-
-  private getTxSkeleton(account: TronAccount): Observable<any> {
-    return this.config.pipe(
-      switchMap(config =>
-        combineLatest([config.chainId(this.http, config.endpoint), of(config)])
-      ),
-      map(([chain, config]) => ({
-        typePrefix: "auth/StdTx"
-      }))
-    );
-  }
-
-  getAddressDelegations(address: string): Observable<TronVote[]> {
-    return this.tronRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.listDelegations(address)))
-    );
-  }
-
   private getAccountOnce(address: string): Observable<TronAccount> {
     return this.tronRpc.rpc.pipe(
       switchMap(rpc => from(rpc.getAccount(address)))
     );
   }
 
-  getAnnualPercent(): Observable<number> {
-    return this.getValidators().pipe(
-      map(validators => this.selectValidatorWithBestInterestRate(validators))
-    );
-  }
-  getBalanceUSD(): Observable<BigNumber> {
-    return this.balance$.pipe(
-      switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
-      map(([balance, price]) => balance.multipliedBy(price))
-    );
-  }
-  getBalance(): Observable<BigNumber> {
-    return this.balance$;
-  }
-  getStakedUSD(): Observable<BigNumber> {
-    return this.stakedAmount$.pipe(
-      switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
-      map(([balance, price]) => balance.multipliedBy(price))
+  private getNowBlock(): Observable<TronBlock> {
+    return this.tronRpc.rpc.pipe(
+      switchMap(rpc => from(rpc.getNowBlock()))
     );
   }
 
-  getStaked(): Observable<BigNumber> {
-    return this.stakedAmount$;
-  }
-
-  getStakeHolders(): Observable<StakeHolderList> {
-    return this.address2StakeMap();
-  }
-
-  getPriceUSD(): Observable<BigNumber> {
-    return this.config.pipe(
-      switchMap(config => this.exchangeRateService.getRate(config.coin))
+  private buildBlockHeader(timestamp: number): Observable<any> {
+    return this.getNowBlock().pipe(
+      map(block => ({
+        timestamp: timestamp,
+        txTrieRoot: Utils.toBase64(Utils.fromHex(block.blockHeader.rawData.txTrieRoot)),
+        parentHash: Utils.toBase64(Utils.fromHex(block.blockID)),
+        witnessAddress: Utils.toBase64(Utils.fromHex(block.blockHeader.rawData.witnessAddress)),
+        version: block.blockHeader.rawData.version
+      }))
     );
   }
 
-  getAddress(): Observable<string> {
-    return this.config.pipe(
-      switchMap(config => this.accountService.getAddress(config.coin))
+  private buildFreezeTransaction(address: string, frozenBalance: BigNumber, frozenDuration: number): Observable<string> {
+    const timestamp = new Date().getTime();
+    return this.buildBlockHeader(timestamp).pipe(
+      map(blockHeader => JSON.stringify({
+        transaction: {
+          timestamp: timestamp,
+          blockHeader: blockHeader,
+          freezeBalance: {
+            ownerAddress: address,
+            frozenBalance: frozenBalance.toNumber(),
+            frozenDuration: frozenDuration,
+            resource: "BANDWIDTH"
+          }
+        }
+      })),
+      tap(tx => console.log(tx))
+    );
+  }
+
+  private buildVoteTransaction(address: string, votes: { address: string, count: number }[]): Observable<string> {
+    const timestamp = new Date().getTime();
+    return this.buildBlockHeader(timestamp).pipe(
+      map(blockHeader => JSON.stringify({
+        transaction: {
+          timestamp: timestamp,
+          blockHeader: blockHeader,
+          voteWitness: {
+            ownerAddress: address,
+            votes: votes.map(v => ({ vote_address: v.address, vote_count: v.count }))
+          }
+        }
+      })),
+      tap(tx => console.log(tx))
+    );
+  }
+
+  private buildUnfreezeTransaction(address: string): Observable<string> {
+    const timestamp = new Date().getTime();
+    return this.buildBlockHeader(timestamp).pipe(
+      map(blockHeader => JSON.stringify({
+        transaction: {
+          timestamp: timestamp,
+          blockHeader: blockHeader,
+          unfreezeBalance: {
+            ownerAddress: address,
+            resource: "BANDWIDTH",
+          }
+        }
+      }))
+    );
+  }
+
+  private freezeBalance(
+    account: TronAccount,
+    amount: BigNumber
+  ): Observable<TronBroadcastResult> {
+    return this.buildFreezeTransaction(account.address, amount, 3).pipe(
+      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
+      switchMap(tx => this.broadcastTx(tx)),
+      map(result => {
+        if (result.result) { return result; }
+        const message = new TextDecoder("utf-8").decode(Utils.fromHex(result.message));
+        throw Error(`TronBroadcastError: ${message}`);
+      })
     );
   }
 
@@ -273,18 +398,20 @@ export class TronService implements CoinService {
     account: TronAccount,
     to: string,
     amount: BigNumber
-  ): Observable<string> {
-    return combineLatest([
-      this.getTxPayload(account.address, to, amount),
-      this.getTxSkeleton(account)
-    ]).pipe(
-      map(([payload, txSkeleton]) => ({
-        ...txSkeleton,
-        ["stakeMessage"]: {
-          ...payload
-        }
-      })),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx)))
+  ): Observable<TronBroadcastResult> {
+    const votes = [
+      { address: to, count: amount.toNumber() }
+    ];
+
+    return this.freezeBalance(account, amount).pipe(
+      switchMap( _ => this.buildVoteTransaction(account.address, votes)),
+      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
+      switchMap(tx => this.broadcastTx(tx)),
+      map(result => {
+        if (result.result) { return result; }
+        const message = new TextDecoder("utf-8").decode(Utils.fromHex(result.message));
+        throw Error(`TronBroadcastError: ${message}`);
+      })
     );
   }
 
@@ -292,90 +419,15 @@ export class TronService implements CoinService {
     account: TronAccount,
     to: string,
     amount: BigNumber
-  ): Observable<string> {
-    return combineLatest([
-      this.getTxPayload(account.address, to, amount),
-      this.getTxSkeleton(account)
-    ]).pipe(
-      map(([payload, txSkeleton]) => ({
-        ...txSkeleton,
-        ["unstakeMessage"]: {
-          ...payload
-        }
-      })),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx)))
-    );
-  }
-
-  getStakePendingBalance(): Observable<BigNumber> {
-    return this.tronUnboundInfoService.getPendingBalance();
-  }
-
-  getStakingRewards(): Observable<BigNumber> {
-    return this.tronUnboundInfoService.getRewards();
-  }
-
-  getUnstakingDate(): Observable<Date> {
-    return this.tronUnboundInfoService.getReleaseDate();
-  }
-
-  getStakingInfo(): Observable<TronStakingInfo> {
-    return this.tronUnboundInfoService.getStakingInfo();
-  }
-
-  broadcastTx(tx: string): Observable<TronBroadcastResult> {
-    return this.tronRpc.rpc.pipe(
-      switchMap(rpc => {
-        console.log("broadcast tx");
-        return from(rpc.broadcastTransaction(tx));
-      })
-    );
-  }
-
-  prepareStakeTx(
-    action: StakeAction,
-    addressTo: string,
-    amount: BigNumber
   ): Observable<TronBroadcastResult> {
-    return this.getAddress().pipe(
-      switchMap(address => {
-        return this.getAccountOnce(address);
-      }),
-      switchMap((account: TronAccount) => {
-        if (action === StakeAction.STAKE) {
-          return this.stake(account, addressTo, amount);
-        } else {
-          return this.unstake(account, addressTo, amount);
-        }
-      }),
-      switchMap(result => {
-        return this.broadcastTx(result);
+    return this.buildUnfreezeTransaction(account.address).pipe(
+      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
+      switchMap(tx => this.broadcastTx(tx)),
+      map(result => {
+        if (result.result) { return result; }
+        const message = new TextDecoder("utf-8").decode(Utils.fromHex(result.message));
+        throw Error(`TronBroadcastError: ${message}`);
       })
-    );
-  }
-
-  getStakedToValidator(validator: string): Observable<BigNumber> {
-    return this.getStakeHolders().pipe(
-      map(stakeholders => {
-        const validatorStaked = stakeholders.find(
-          holder => holder.id === validator
-        );
-        if (validatorStaked) {
-          return validatorStaked.amount;
-        }
-        return new BigNumber(0);
-      }),
-      first()
-    );
-  }
-
-  getValidators(): Observable<BlockatlasValidator[]> {
-    return this.atlasService.getValidatorsFromBlockatlas(CoinType.tron);
-  }
-  getValidatorsById(validatorId: string): Observable<BlockatlasValidator> {
-    return this.atlasService.getValidatorFromBlockatlasById(
-      CoinType.tron,
-      validatorId
     );
   }
 }

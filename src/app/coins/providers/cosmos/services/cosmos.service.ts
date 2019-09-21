@@ -238,7 +238,7 @@ export class CosmosService implements CoinService {
               amount: new BigNumber(config.fee).toFixed()
             }
           ],
-          gas: config.gas
+          gas: config.gas.toFixed()
         }
       }))
     );

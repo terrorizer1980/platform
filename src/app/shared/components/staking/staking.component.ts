@@ -11,7 +11,6 @@ import {
   StakeAction
 } from "../../../coins/coin-provider-config";
 import { map, shareReplay, switchMap, tap } from "rxjs/operators";
-import { CosmosUtils } from "@trustwallet/rpc/lib";
 import { CoinService } from "../../../coins/services/coin.service";
 
 @Component({
@@ -46,19 +45,19 @@ export class StakingComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    const amount = new BigNumber(this.stakeForm.get("amount").value).times(
-      new BigNumber(1000000)
-    );
 
-    this.dataSource
-      .prepareStakeTx(StakeAction.STAKE, this.validatorId, amount)
-      .pipe(
-        tap(() => (this.isLoading = false), e => (this.isLoading = false)),
-        switchMap(_ => this.config)
-      )
-      .subscribe(config => {
-        this.congratulate(config, this.stakeForm.get("amount").value);
-      });
+    this.config.pipe(
+      switchMap(cfg => {
+        const amount = new BigNumber(this.stakeForm.get("amount").value).times(
+          new BigNumber(10).pow(cfg.digits)
+        );
+        return this.dataSource.prepareStakeTx(StakeAction.STAKE, this.validatorId, amount);
+      }),
+      tap(() => (this.isLoading = false), e => (this.isLoading = false)),
+      switchMap(_ => this.config)
+    ).subscribe(config => {
+      this.congratulate(config, this.stakeForm.get("amount").value);
+    });
   }
 
   setMax() {
@@ -101,7 +100,7 @@ export class StakingComponent implements OnInit, OnDestroy {
   getMax(): Observable<{ min: BigNumber; normal: BigNumber }> {
     return combineLatest([this.dataSource.getBalance(), this.config]).pipe(
       map(([balance, config]) => {
-        const additional = CosmosUtils.toAtom(new BigNumber(config.fee));
+        const additional = new BigNumber(config.fee);
         const normal = balance.minus(additional.multipliedBy(2));
         const min = balance.minus(additional);
         return {

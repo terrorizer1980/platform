@@ -5,7 +5,7 @@ import { CoinType } from "@trustwallet/types";
 import BigNumber from "bignumber.js";
 
 export enum StakeAction {
-  STAKE,
+  STAKE = 0,
   UNSTAKE
 }
 
@@ -18,8 +18,9 @@ export interface CoinProviderConfig<T = any> {
   currencyName: string;
   currencySymbol: string;
   iconUri: string;
-  gas: number;
-  fee: number;
+  gas: BigNumber;
+  fee: BigNumber;
+  digits: number;
   config: CoinConfig<T>;
 }
 

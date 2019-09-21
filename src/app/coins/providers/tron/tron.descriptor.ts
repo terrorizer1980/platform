@@ -28,6 +28,4 @@ export function TronChainId(
 export interface TronProviderConfig extends CoinProviderConfig<TronService> {
   endpoint: string;
   chainId: (http: HttpClient, endpoint: string) => Observable<string>;
-  gas: number;
-  fee: number;
 }
