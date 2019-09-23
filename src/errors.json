@@ -1,4 +1,5 @@
 {
   "default": "Something went wrong",
-  "network_error": "There is network error occurred"
+  "network_error": "There is network error occurred",
+  "wallet_coin_not_supported": "Your wallet does not support this coin"
 }

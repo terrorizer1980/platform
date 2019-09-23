@@ -1,10 +1,10 @@
-import {Component} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
-import {Router} from "@angular/router";
-import {filter, map, startWith} from "rxjs/operators";
-import {Location} from "@angular/common";
-import {AuthProviderService} from "./shared/services/auth-provider.service";
+import { Component } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { Router } from "@angular/router";
+import { filter, map, startWith } from "rxjs/operators";
+import { Location } from "@angular/common";
+import { AuthProviderService } from "./shared/services/auth-provider.service";
 
 @Component({
   selector: "app-root",
@@ -18,17 +18,13 @@ export class AppComponent {
     private http: HttpClient,
     private router: Router,
     private location: Location,
-    private auth: AuthProviderService,
+    private auth: AuthProviderService
   ) {
     this.showBackButton$ = this.router.events.pipe(
       filter((event: any) => event.url),
       map((event: any) => event.url !== "/"),
       startWith(false)
     );
-  }
-
-  get isTrustProviderAvailable(): boolean {
-    return this.auth.isProviderAvailable;
   }
 
   goBack() {

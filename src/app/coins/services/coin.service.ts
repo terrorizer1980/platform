@@ -28,4 +28,5 @@ export interface CoinService {
   broadcastTx(tx: string): Observable<any>;
   getValidators(): Observable<BlockatlasValidator[]>;
   getValidatorsById(validatorId: string): Observable<BlockatlasValidator>;
+  hasProvider(): Observable<boolean>;
 }

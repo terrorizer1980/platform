@@ -1,7 +1,7 @@
 import { ErrorHandler, Injectable, Injector } from "@angular/core";
 import { ErrorsService } from "./shared/services/errors/errors.service";
 import * as Sentry from "@sentry/browser";
-import { CoinNotSupportedException } from "./exceptions/coin-not-supported-exception";
+import { CoinNotSupportedException } from "./auth/services/coin-not-supported-exception";
 import { Router } from "@angular/router";
 import { environment } from "../environments/environment";
 

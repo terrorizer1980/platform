@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { AccountService } from "../../../../shared/services/account.service";
 import { combineLatest, Observable, of } from "rxjs";
 import { map, switchMap, tap } from "rxjs/operators";
 import { CoinType } from "@trustwallet/types";
@@ -7,6 +6,7 @@ import { fromPromise } from "rxjs/internal-compatibility";
 import BigNumber from "bignumber.js";
 import { TronRpcService } from "./tron-rpc.service";
 import { TronFrozen, TronStakingInfo } from "@trustwallet/rpc/lib";
+import { AuthService } from "../../../../auth/services/auth.service";
 
 @Injectable({
   providedIn: "root"
@@ -14,13 +14,13 @@ import { TronFrozen, TronStakingInfo } from "@trustwallet/rpc/lib";
 export class TronUnboundInfoService {
   constructor(
     private tronRpcService: TronRpcService,
-    private accountService: AccountService
+    private authService: AuthService
   ) {}
 
   getUnbonds(): Observable<TronFrozen[]> {
     return combineLatest([
       this.tronRpcService.rpc,
-      this.accountService.getAddress(CoinType.tron)
+      this.authService.getAddressFromAuthorized(CoinType.tron)
     ]).pipe(
       switchMap(([rpc, address]) => fromPromise(rpc.listFrozen(address)))
     );
@@ -29,7 +29,7 @@ export class TronUnboundInfoService {
   getReleaseDate(): Observable<Date> {
     return combineLatest([
       this.tronRpcService.rpc,
-      this.accountService.getAddress(CoinType.tron)
+      this.authService.getAddressFromAuthorized(CoinType.tron)
     ]).pipe(
       switchMap(([rpc, address]) =>
         fromPromise(rpc.unstakingReleaseDate(address))

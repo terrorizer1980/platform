@@ -11,7 +11,6 @@ import {
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
 import { first, map, switchMap } from "rxjs/operators";
-import { AccountService } from "../../../../shared/services/account.service";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
 import { CoinService } from "../../../services/coin.service";
 import {
@@ -35,11 +34,12 @@ import {
   TronUtils,
   TronVote
 } from "@trustwallet/rpc/lib";
+import { AuthService } from "../../../../auth/services/auth.service";
 
 export const TronServiceInjectable = [
   TronConfigService,
   HttpClient,
-  AccountService,
+  AuthService,
   ExchangeRateService,
   TronRpcService,
   TronUnboundInfoService,
@@ -60,7 +60,7 @@ export class TronService implements CoinService {
     @Inject(TronConfigService)
     private config: Observable<TronProviderConfig>,
     private http: HttpClient,
-    private accountService: AccountService,
+    private authService: AuthService,
     private exchangeRateService: ExchangeRateService,
     private tronRpc: TronRpcService,
     private tronUnboundInfoService: TronUnboundInfoService,
@@ -126,8 +126,8 @@ export class TronService implements CoinService {
   private validatorsAndDelegations(): any[] {
     return [
       this.getValidators(),
-      this.accountService
-        .getAddress(CoinType.tron)
+      this.authService
+        .getAddressFromAuthorized(CoinType.tron)
         .pipe(switchMap(address => this.getAddressDelegations(address)))
     ];
   }
@@ -265,7 +265,9 @@ export class TronService implements CoinService {
 
   getAddress(): Observable<string> {
     return this.config.pipe(
-      switchMap(config => this.accountService.getAddress(config.coin))
+      switchMap(config =>
+        this.authService.getAddressFromAuthorized(config.coin)
+      )
     );
   }
 
@@ -284,7 +286,7 @@ export class TronService implements CoinService {
           ...payload
         }
       })),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx)))
+      switchMap(tx => from(this.authService.signTransaction(CoinType.tron, tx)))
     );
   }
 
@@ -303,7 +305,7 @@ export class TronService implements CoinService {
           ...payload
         }
       })),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx)))
+      switchMap(tx => from(this.authService.signTransaction(CoinType.tron, tx)))
     );
   }
 
@@ -377,5 +379,9 @@ export class TronService implements CoinService {
       CoinType.tron,
       validatorId
     );
+  }
+
+  hasProvider(): Observable<boolean> {
+    return this.authService.hasProvider(CoinType.tron);
   }
 }

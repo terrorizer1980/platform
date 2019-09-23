@@ -1,9 +1,11 @@
-<div *ngIf="isTrustProviderAvailable">
+<div>
   <div class="text-center text-sm-left header-bg p-3">
     <div class="container">
-    <div class="logo">
-      <a routerLink="/"><img src="assets/images/trust_logo.svg" alt="trust"/></a>
-    </div>
+      <div class="logo">
+        <a routerLink="/"
+          ><img src="assets/images/trust_logo.svg" alt="trust"
+        /></a>
+      </div>
     </div>
   </div>
 
@@ -18,8 +20,4 @@
       <router-outlet></router-outlet>
     </div>
   </div>
-</div>
-
-<div *ngIf="!isTrustProviderAvailable">
-  <app-use-trust-wallet></app-use-trust-wallet>
 </div>
