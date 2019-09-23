@@ -20,7 +20,7 @@ import {
   TronUtils,
   TronVote
 } from "@trustwallet/rpc";
-import { CoinType, Utils } from "@trustwallet/types";
+import { CoinType, Utils, Hex, Base64 } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider";
 import { CoinService } from "../../../services/coin.service";
 import { AccountService } from "../../../../shared/services/account.service";
@@ -173,7 +173,7 @@ export class TronService implements CoinService {
           case StakeAction.STAKE:
             return this.stake(account, addressTo, amount);
           case StakeAction.UNSTAKE:
-            return this.unstake(account, addressTo, amount);
+            return this.unstake(account, addressTo);
         }
       })
     );
@@ -319,43 +319,49 @@ export class TronService implements CoinService {
     return this.getNowBlock().pipe(
       map(block => ({
         timestamp: timestamp,
-        txTrieRoot: Utils.toBase64(Utils.fromHex(block.blockHeader.rawData.txTrieRoot)),
-        parentHash: Utils.toBase64(Utils.fromHex(block.blockID)),
-        witnessAddress: Utils.toBase64(Utils.fromHex(block.blockHeader.rawData.witnessAddress)),
+        txTrieRoot: Base64.toBase64(Hex.fromHex(block.blockHeader.rawData.txTrieRoot)),
+        parentHash: Base64.toBase64(Hex.fromHex(block.blockID)),
+        witnessAddress: Base64.toBase64(Hex.fromHex(block.blockHeader.rawData.witnessAddress)),
         version: block.blockHeader.rawData.version
       }))
     );
   }
 
-  private buildFreezeTransaction(address: string, frozenBalance: BigNumber, frozenDuration: number): Observable<string> {
+  private buildFreezeTransaction(address: string, to: string, amount: BigNumber, duration: number): Observable<any> {
     const timestamp = new Date().getTime();
     return this.buildBlockHeader(timestamp).pipe(
-      map(blockHeader => JSON.stringify({
+      map(blockHeader => ({
         transaction: {
           timestamp: timestamp,
           blockHeader: blockHeader,
           freezeBalance: {
             ownerAddress: address,
-            frozenBalance: frozenBalance.toNumber(),
-            frozenDuration: frozenDuration,
+            receiverAddress: to,
+            frozenBalance: amount.toFixed(),
+            frozenDuration: duration,
             resource: "BANDWIDTH"
           }
         }
       })),
-      tap(tx => console.log(tx))
+      tap(tx => console.log(JSON.stringify(tx)))
     );
   }
 
-  private buildVoteTransaction(address: string, votes: { address: string, count: number }[]): Observable<string> {
+  private buildVoteTransaction(address: string, to: string, amount: BigNumber): Observable<any> {
     const timestamp = new Date().getTime();
     return this.buildBlockHeader(timestamp).pipe(
-      map(blockHeader => JSON.stringify({
+      map(blockHeader => ({
         transaction: {
           timestamp: timestamp,
           blockHeader: blockHeader,
           voteWitness: {
             ownerAddress: address,
-            votes: votes.map(v => ({ vote_address: v.address, vote_count: v.count }))
+            votes: [
+              {
+                vote_address: to,
+                vote_count: amount.toString
+              }
+            ]
           }
         }
       })),
@@ -363,33 +369,36 @@ export class TronService implements CoinService {
     );
   }
 
-  private buildUnfreezeTransaction(address: string): Observable<string> {
+  private buildUnfreezeTransaction(address: string, to: string): Observable<any> {
     const timestamp = new Date().getTime();
     return this.buildBlockHeader(timestamp).pipe(
-      map(blockHeader => JSON.stringify({
+      map(blockHeader => ({
         transaction: {
           timestamp: timestamp,
           blockHeader: blockHeader,
           unfreezeBalance: {
             ownerAddress: address,
+            receiverAddress: to,
             resource: "BANDWIDTH",
           }
         }
-      }))
+      })),
+      tap(tx => console.log(tx))
     );
   }
 
   private freezeBalance(
     account: TronAccount,
+    to: string,
     amount: BigNumber
   ): Observable<TronBroadcastResult> {
-    return this.buildFreezeTransaction(account.address, amount, 3).pipe(
+    return this.buildFreezeTransaction(account.address, to, amount, 3).pipe(
       switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
+      tap(signed => console.log(signed)),
       switchMap(tx => this.broadcastTx(tx)),
       map(result => {
         if (result.result) { return result; }
-        const message = new TextDecoder("utf-8").decode(Utils.fromHex(result.message));
-        throw Error(`TronBroadcastError: ${message}`);
+        throw Error(`TronBroadcastError: ${result.message}`);
       })
     );
   }
@@ -403,30 +412,27 @@ export class TronService implements CoinService {
       { address: to, count: amount.toNumber() }
     ];
 
-    return this.freezeBalance(account, amount).pipe(
-      switchMap( _ => this.buildVoteTransaction(account.address, votes)),
+    return this.freezeBalance(account, to, amount).pipe(
+      switchMap( _ => this.buildVoteTransaction(account.address, to, amount)),
       switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
       switchMap(tx => this.broadcastTx(tx)),
       map(result => {
         if (result.result) { return result; }
-        const message = new TextDecoder("utf-8").decode(Utils.fromHex(result.message));
-        throw Error(`TronBroadcastError: ${message}`);
+        throw Error(`TronBroadcastError: ${result.message}`);
       })
     );
   }
 
   private unstake(
     account: TronAccount,
-    to: string,
-    amount: BigNumber
+    to: string
   ): Observable<TronBroadcastResult> {
-    return this.buildUnfreezeTransaction(account.address).pipe(
+    return this.buildUnfreezeTransaction(account.address, to).pipe(
       switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
       switchMap(tx => this.broadcastTx(tx)),
       map(result => {
         if (result.result) { return result; }
-        const message = new TextDecoder("utf-8").decode(Utils.fromHex(result.message));
-        throw Error(`TronBroadcastError: ${message}`);
+        throw Error(`TronBroadcastError: ${result.message}`);
       })
     );
   }
