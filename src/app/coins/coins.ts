@@ -45,7 +45,7 @@ if (!environment.production) {
       config: TronCoinConfig,
       gas: new BigNumber(0),
       fee: new BigNumber(0),
-      digits: 0
+      digits: 6
     })
   );
 }

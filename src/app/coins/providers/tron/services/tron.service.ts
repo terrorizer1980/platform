@@ -315,13 +315,14 @@ export class TronService implements CoinService {
     );
   }
 
-  private buildBlockHeader(timestamp: number): Observable<any> {
+  private buildBlockHeader(): Observable<any> {
     return this.getNowBlock().pipe(
       map(block => ({
-        timestamp: timestamp,
+        number: block.blockHeader.rawData.number.toNumber(),
         txTrieRoot: Base64.toBase64(Hex.fromHex(block.blockHeader.rawData.txTrieRoot)),
-        parentHash: Base64.toBase64(Hex.fromHex(block.blockID)),
+        parentHash: Base64.toBase64(Hex.fromHex(block.blockHeader.rawData.parentHash)),
         witnessAddress: Base64.toBase64(Hex.fromHex(block.blockHeader.rawData.witnessAddress)),
+        timestamp: block.blockHeader.rawData.timestamp.toNumber(),
         version: block.blockHeader.rawData.version
       }))
     );
@@ -329,56 +330,59 @@ export class TronService implements CoinService {
 
   private buildFreezeTransaction(address: string, to: string, amount: BigNumber, duration: number): Observable<any> {
     const timestamp = new Date().getTime();
-    return this.buildBlockHeader(timestamp).pipe(
+    return this.buildBlockHeader().pipe(
       map(blockHeader => ({
         transaction: {
           timestamp: timestamp,
           blockHeader: blockHeader,
           freezeBalance: {
             ownerAddress: address,
-            receiverAddress: to,
             frozenBalance: amount.toFixed(),
             frozenDuration: duration,
             resource: "BANDWIDTH"
           }
         }
-      })),
-      tap(tx => console.log(JSON.stringify(tx)))
+      }))
     );
   }
 
   private buildVoteTransaction(address: string, to: string, amount: BigNumber): Observable<any> {
     const timestamp = new Date().getTime();
-    return this.buildBlockHeader(timestamp).pipe(
-      map(blockHeader => ({
-        transaction: {
-          timestamp: timestamp,
-          blockHeader: blockHeader,
-          voteWitness: {
-            ownerAddress: address,
-            votes: [
-              {
-                vote_address: to,
-                vote_count: amount.toString
-              }
-            ]
+    // TODO: Improve configuration to calculate unit values for each blockchain
+    const denom = (digits: number): BigNumber => (new BigNumber(10)).pow(digits);
+
+    return combineLatest([
+      this.config,
+      this.buildBlockHeader()
+    ]).pipe(
+        map(([ config, blockHeader ]) => ({
+          transaction: {
+            timestamp: timestamp,
+            blockHeader: blockHeader,
+            voteWitness: {
+              ownerAddress: address,
+              votes: [
+                {
+                  vote_address: to,
+                  vote_count: amount.dividedBy(denom(config.digits)).toNumber()
+                }
+              ]
+            }
           }
-        }
-      })),
-      tap(tx => console.log(tx))
-    );
+        })),
+        tap(tx => console.log(tx))
+      );
   }
 
   private buildUnfreezeTransaction(address: string, to: string): Observable<any> {
     const timestamp = new Date().getTime();
-    return this.buildBlockHeader(timestamp).pipe(
+    return this.buildBlockHeader().pipe(
       map(blockHeader => ({
         transaction: {
           timestamp: timestamp,
           blockHeader: blockHeader,
           unfreezeBalance: {
             ownerAddress: address,
-            receiverAddress: to,
             resource: "BANDWIDTH",
           }
         }
@@ -394,7 +398,6 @@ export class TronService implements CoinService {
   ): Observable<TronBroadcastResult> {
     return this.buildFreezeTransaction(account.address, to, amount, 3).pipe(
       switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
-      tap(signed => console.log(signed)),
       switchMap(tx => this.broadcastTx(tx)),
       map(result => {
         if (result.result) { return result; }
