@@ -409,9 +409,7 @@ export class TronService implements CoinService {
   ): Observable<TronBroadcastResult> {
     return this.freezeBalance(account.address, amount).pipe(
       switchMap(_ => this.addVote(account, to, amount)),
-      switchMap( votes => this.buildVoteTransaction(account.address, votes)),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
-      switchMap(tx => this.broadcastTx(tx))
+      switchMap( votes => this.updateVotes(account.address, votes)),
     );
   }
 
@@ -419,9 +417,15 @@ export class TronService implements CoinService {
     account: TronAccount,
     to: string
   ): Observable<TronBroadcastResult> {
+    const votes = this.removeVote(account, to);
+    const frozenBalance = new BigNumber(votes.reduce((acc, v) => acc + v.vote_count, 0));
+
     return this.buildUnfreezeTransaction(account.address, to).pipe(
       switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
-      switchMap(tx => this.broadcastTx(tx))
+      switchMap(tx => this.broadcastTx(tx)),
+      switchMap(_ => this.config),
+      switchMap(cfg => this.freezeBalance(account.address, cfg.toUnits(frozenBalance))),
+      switchMap(_ => this.updateVotes(account.address, votes)),
     );
   }
 
@@ -441,6 +445,22 @@ export class TronService implements CoinService {
         }
       ])),
       shareReplay(1)
+    );
+  }
+
+  private removeVote(account: TronAccount, to: string): { vote_address: string, vote_count: number }[] {
+    return account.votes
+      .map(v => ({
+        vote_address: v.voteAddress,
+        vote_count: v.voteCount
+      }))
+      .filter(v => v.vote_address !== to);
+  }
+
+  private updateVotes(address: string, votes: { vote_address: string, vote_count: number }[]): Observable<TronBroadcastResult> {
+    return this.buildVoteTransaction(address, votes).pipe(
+      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
+      switchMap(tx => this.broadcastTx(tx))
     );
   }
 
