@@ -6,6 +6,7 @@ import { map } from "rxjs/operators";
 import { TronProviderModule } from "./tron-provider.module";
 import { TronService, TronServiceInjectable } from "./services/tron.service";
 import { TronConfigService } from "./services/tron-config.service";
+import BigNumber from "bignumber.js";
 
 export function TronModuleLoader(): Promise<Type<TronProviderModule>> {
   return import("./tron-provider.module").then(mod => mod.TronProviderModule);

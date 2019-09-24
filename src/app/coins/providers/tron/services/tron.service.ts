@@ -10,7 +10,7 @@ import {
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { first, map, switchMap, tap } from "rxjs/operators";
+import { first, map, shareReplay, switchMap, tap } from "rxjs/operators";
 import {
   BlockatlasValidator,
   TronAccount,
@@ -23,7 +23,13 @@ import {
 import { CoinType, Hex, Base64 } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider";
 import { CoinService } from "../../../services/coin.service";
-import { BALANCE_REFRESH_INTERVAL, STAKE_REFRESH_INTERVAL, StakeAction, StakeHolderList } from "../../../coin-provider-config";
+import {
+  BALANCE_REFRESH_INTERVAL,
+  UnitConverter,
+  STAKE_REFRESH_INTERVAL,
+  StakeAction,
+  StakeHolderList
+} from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { TronConfigService } from "./tron-config.service";
@@ -63,6 +69,7 @@ export class TronService implements CoinService {
     private atlasService: CoinAtlasService
   ) {
     this.tronRpc.setConfig(config);
+
     // Fires on address change or manual refresh
     const buildPipeline = (milliSeconds): Observable<string> =>
       combineLatest([this.getAddress(), this._manualRefresh]).pipe(
@@ -147,8 +154,11 @@ export class TronService implements CoinService {
   broadcastTx(tx: string): Observable<TronBroadcastResult> {
     return this.tronRpc.rpc.pipe(
       switchMap(rpc => {
-        console.log("broadcast tx");
         return from(rpc.broadcastTransaction(tx));
+      }),
+      map(result => {
+        if (result.result) { return result; }
+        throw Error(`TronBroadcastError: ${result.message}`);
       })
     );
   }
@@ -322,7 +332,7 @@ export class TronService implements CoinService {
     );
   }
 
-  private buildFreezeTransaction(address: string, to: string, amount: BigNumber, duration: number): Observable<any> {
+  private buildFreezeTransaction(address: string, amount: BigNumber, duration: number): Observable<any> {
     const timestamp = new Date().getTime();
     return this.buildBlockHeader().pipe(
       map(blockHeader => ({
@@ -347,27 +357,17 @@ export class TronService implements CoinService {
       )
     );
   }
-  private buildVoteTransaction(address: string, to: string, amount: BigNumber): Observable<any> {
+  private buildVoteTransaction(address: string, votes: { vote_address: string, vote_count: number }[]): Observable<any> {
     const timestamp = new Date().getTime();
-    // TODO: Improve configuration to calculate unit values for each blockchain
-    const denom = (digits: number): BigNumber => (new BigNumber(10)).pow(digits);
 
-    return combineLatest([
-      this.config,
-      this.buildBlockHeader()
-    ]).pipe(
-        map(([ config, blockHeader ]) => ({
+    return this.buildBlockHeader().pipe(
+        map((blockHeader) => ({
           transaction: {
             timestamp: timestamp,
             blockHeader: blockHeader,
             voteWitness: {
               ownerAddress: address,
-              votes: [
-                {
-                  vote_address: to,
-                  vote_count: amount.dividedBy(denom(config.digits)).toNumber()
-                }
-              ]
+              votes: votes
             }
           }
         })),
@@ -393,17 +393,12 @@ export class TronService implements CoinService {
   }
 
   private freezeBalance(
-    account: TronAccount,
-    to: string,
+    address: string,
     amount: BigNumber
   ): Observable<TronBroadcastResult> {
-    return this.buildFreezeTransaction(account.address, to, amount, 3).pipe(
+    return this.buildFreezeTransaction(address, amount, 3).pipe(
       switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
-      switchMap(tx => this.broadcastTx(tx)),
-      map(result => {
-        if (result.result) { return result; }
-        throw Error(`TronBroadcastError: ${result.message}`);
-      })
+      switchMap(tx => this.broadcastTx(tx))
     );
   }
 
@@ -412,18 +407,11 @@ export class TronService implements CoinService {
     to: string,
     amount: BigNumber
   ): Observable<TronBroadcastResult> {
-    const votes = [
-      { address: to, count: amount.toNumber() }
-    ];
-
-    return this.freezeBalance(account, to, amount).pipe(
-      switchMap( _ => this.buildVoteTransaction(account.address, to, amount)),
+    return this.freezeBalance(account.address, amount).pipe(
+      switchMap(_ => this.addVote(account, to, amount)),
+      switchMap( votes => this.buildVoteTransaction(account.address, votes)),
       switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
-      switchMap(tx => this.broadcastTx(tx)),
-      map(result => {
-        if (result.result) { return result; }
-        throw Error(`TronBroadcastError: ${result.message}`);
-      })
+      switchMap(tx => this.broadcastTx(tx))
     );
   }
 
@@ -433,11 +421,26 @@ export class TronService implements CoinService {
   ): Observable<TronBroadcastResult> {
     return this.buildUnfreezeTransaction(account.address, to).pipe(
       switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
-      switchMap(tx => this.broadcastTx(tx)),
-      map(result => {
-        if (result.result) { return result; }
-        throw Error(`TronBroadcastError: ${result.message}`);
-      })
+      switchMap(tx => this.broadcastTx(tx))
+    );
+  }
+
+  private addVote(account: TronAccount, to: string, amount: BigNumber): Observable<{ vote_address: string, vote_count: number }[]> {
+    const curr_votes = account.votes
+      .map(v => ({
+        vote_address: v.voteAddress,
+        vote_count: v.voteCount
+      }));
+
+    return this.config.pipe(
+      map(cfg => ([
+        ...curr_votes,
+        {
+          vote_address: to,
+          vote_count: cfg.toCoin(amount).toNumber()
+        }
+      ])),
+      shareReplay(1)
     );
   }
 

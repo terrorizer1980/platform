@@ -22,6 +22,8 @@ export interface CoinProviderConfig<T = any> {
   fee: BigNumber;
   digits: number;
   config: CoinConfig<T>;
+  toUnits: (amount: BigNumber) => BigNumber;
+  toCoin: (amount: BigNumber) => BigNumber;
 }
 
 export interface CoinProviderModuleLoader {
@@ -43,6 +45,20 @@ export type StakeHolderList = Array<StakeHolder>;
 export interface StakeHolder extends BlockatlasValidator {
   coin: CoinProviderConfig;
   amount: BigNumber;
+}
+
+export class UnitConverter<T extends CoinProviderConfig> {
+  private BASE = new BigNumber(10);
+
+  constructor(private config: CoinProviderConfig) {}
+
+  toUnits(amount: BigNumber): BigNumber {
+    return amount.multipliedBy(this.BASE.pow(this.config.digits));
+  }
+
+  toCoin(amount: BigNumber): BigNumber {
+    return amount.dividedBy(this.BASE.pow(this.config.digits));
+  }
 }
 
 // CONSTS
