@@ -14,7 +14,6 @@ import BigNumber from "bignumber.js";
 interface CoinDescriptor {
   item: CoinProviderConfig;
   annual: number;
-  address: string;
   pending: BigNumber;
   unstakingDate: Date;
   stakingInfo: any;
@@ -39,11 +38,10 @@ export class MainComponent implements OnInit {
         return forkJoin({
           item: of(coin).pipe(first()),
           annual: service.getAnnualPercent().pipe(first()),
-          address: service.getAddress().pipe(
-            catchError(_ => of(true)),
+          pending: service.getStakePendingBalance().pipe(
+            catchError(_ => of(new BigNumber(0))),
             first()
           ),
-          pending: service.getStakePendingBalance().pipe(first()),
           unstakingDate: service.getUnstakingDate().pipe(
             catchError(_ => of(null)),
             first()
@@ -53,7 +51,6 @@ export class MainComponent implements OnInit {
       })
     ).pipe(
       catchError(err => {
-        console.log(err);
         return throwError(err);
       })
     ) as Observable<CoinDescriptor[]>;
@@ -62,7 +59,7 @@ export class MainComponent implements OnInit {
   ngOnInit(): void {
     this.myStakeHolders$ = forkJoin(
       this.coinsReceiverService.blochchainServices.map(service =>
-        service.getStakeHolders()
+        service.getStakeHolders().pipe(catchError(_ => of([])))
       )
     ).pipe(
       map(holder => {

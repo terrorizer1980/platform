@@ -1,7 +1,8 @@
 import { Component } from "@angular/core";
-import { combineLatest, Observable } from "rxjs";
-import { map, shareReplay } from "rxjs/operators";
+import { combineLatest, Observable, of } from "rxjs";
+import { catchError, map, shareReplay } from "rxjs/operators";
 import { CoinsReceiverService } from "../../../shared/services/coins-receiver.service";
+import BigNumber from "bignumber.js";
 
 @Component({
   selector: "app-coin-account-info",
@@ -15,7 +16,7 @@ export class CoinAccountInfoComponent {
   constructor(private coinsReceiverService: CoinsReceiverService) {
     this.fiatBalance$ = combineLatest(
       this.coinsReceiverService.blochchainServices.map(service =>
-        service.getBalanceUSD()
+        service.getBalanceUSD().pipe(catchError(_ => of(new BigNumber(0))))
       )
     ).pipe(
       map(balances => balances.reduce((acc, balance) => acc.plus(balance))),
@@ -25,7 +26,7 @@ export class CoinAccountInfoComponent {
 
     this.fiatStaked$ = combineLatest(
       this.coinsReceiverService.blochchainServices.map(service =>
-        service.getStakedUSD()
+        service.getStakedUSD().pipe(catchError(_ => of(new BigNumber(0))))
       )
     ).pipe(
       map(staked => staked.reduce((acc, balance) => acc.plus(balance))),

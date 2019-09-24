@@ -1,12 +1,19 @@
-<form [formGroup]="stakeForm" *ngIf="config | async as config">
+<form
+  [formGroup]="stakeForm"
+  *ngIf="details$ | async as details; else loadingDetails"
+>
   <div class="row small">
     <div class="card col-12 pt-2 pb-2 p-0">
       <div class="card-body p-1 mt-4 mb-4">
         <div class="col-12 text-center">
           <div>
             <div class="pb-4">
-              <h5>Stake {{ config.currencySymbol }}</h5>
-              <div class="col-12 available p-0 pb-1" (click)="setMax()">
+              <h5>Stake {{ details.config.currencySymbol }}</h5>
+              <div
+                class="col-12 available p-0 pb-1"
+                (click)="setMax()"
+                *ngIf="details.hasProvider"
+              >
                 <span class="btn-link" *ngIf="max$ | async; let max"
                   ><span
                     >Available: {{ Math.floor(max.normal * 1000) / 1000 }}</span
@@ -26,7 +33,7 @@
               <input
                 type="number"
                 formControlName="amount"
-                placeholder="Amount in {{ config.currencySymbol }}"
+                placeholder="Amount in {{ details.config.currencySymbol }}"
                 class="form-control"
                 aria-label="Large"
                 [ngClass]="{ 'is-invalid': stakeForm.invalid }"
@@ -73,7 +80,7 @@
                 >
                   <h6 *ngIf="monthlyEarnings">
                     +{{ Math.floor(monthlyEarnings * 1000) / 1000 }}
-                    {{ config.currencySymbol }}
+                    {{ details.config.currencySymbol }}
                   </h6>
                 </span>
               </div>
@@ -94,3 +101,11 @@
     </div>
   </div>
 </form>
+
+<ng-template #loadingDetails>
+  <div class="card w-100">
+    <div class="card-body pl-5 pr-5 pt-5 pb-0">
+      <app-content-placeholder></app-content-placeholder>
+    </div>
+  </div>
+</ng-template>

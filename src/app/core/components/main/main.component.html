@@ -78,10 +78,6 @@
                   blockchain.item.currencySymbol
                 }}</span>
                 <div class="pl-2">
-                  <div class="add-coin" *ngIf="blockchain.address === true">
-                    Add coin in Wallet menu
-                  </div>
-
                   <div *ngIf="blockchain.pending > 0">
                     <span>
                       Pending: {{ blockchain.pending }}

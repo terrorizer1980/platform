@@ -17,16 +17,15 @@ import {
   CosmosUtils
 } from "@trustwallet/rpc";
 import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
-import { AccountService } from "../../../../shared/services/account.service";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
 import { CosmosConfigService } from "./cosmos-config.service";
 import { CosmosProviderConfig } from "../cosmos.descriptor";
 import { CoinService } from "../../../services/coin.service";
 import {
-  StakeAction,
-  StakeHolderList,
   BALANCE_REFRESH_INTERVAL,
-  STAKE_REFRESH_INTERVAL
+  STAKE_REFRESH_INTERVAL,
+  StakeAction,
+  StakeHolderList
 } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinType } from "@trustwallet/types";
@@ -35,6 +34,7 @@ import { CosmosRpcService } from "./cosmos-rpc.service";
 import { CosmosUnboundInfoService } from "./cosmos-unbound-info.service";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
 import { CoinAtlasService } from "../../../services/coin-atlas.service";
+import { AuthService } from "../../../../auth/services/auth.service";
 
 // TODO: There is plenty of old boilerplate here yet. Need to be refactored.
 
@@ -42,7 +42,7 @@ import { CoinAtlasService } from "../../../services/coin-atlas.service";
 export const CosmosServiceInjectable = [
   CosmosConfigService,
   HttpClient,
-  AccountService,
+  AuthService,
   ExchangeRateService,
   CosmosRpcService,
   CosmosUnboundInfoService,
@@ -63,7 +63,7 @@ export class CosmosService implements CoinService {
     @Inject(CosmosConfigService)
     private config: Observable<CosmosProviderConfig>,
     private http: HttpClient,
-    private accountService: AccountService,
+    private authService: AuthService,
     private exchangeRateService: ExchangeRateService,
     private cosmosRpc: CosmosRpcService,
     private cosmosUnboundInfoService: CosmosUnboundInfoService,
@@ -140,8 +140,8 @@ export class CosmosService implements CoinService {
   private validatorsAndDelegations(): any[] {
     return [
       this.getValidators(),
-      this.accountService
-        .getAddress(CoinType.cosmos)
+      this.authService
+        .getAddressFromAuthorized(CoinType.cosmos)
         .pipe(switchMap(address => this.getAddressDelegations(address)))
     ];
   }
@@ -293,7 +293,9 @@ export class CosmosService implements CoinService {
 
   getAddress(): Observable<string> {
     return this.config.pipe(
-      switchMap(config => this.accountService.getAddress(config.coin))
+      switchMap(config =>
+        this.authService.getAddressFromAuthorized(config.coin)
+      )
     );
   }
 
@@ -312,7 +314,9 @@ export class CosmosService implements CoinService {
           ...payload
         }
       })),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.cosmos, tx)))
+      switchMap(tx =>
+        from(this.authService.signTransaction(CoinType.cosmos, tx))
+      )
     );
   }
 
@@ -331,7 +335,9 @@ export class CosmosService implements CoinService {
           ...payload
         }
       })),
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.cosmos, tx)))
+      switchMap(tx =>
+        from(this.authService.signTransaction(CoinType.cosmos, tx))
+      )
     );
   }
 
@@ -405,5 +411,9 @@ export class CosmosService implements CoinService {
       CoinType.cosmos,
       validatorId
     );
+  }
+
+  hasProvider(): Observable<boolean> {
+    return this.authService.hasProvider(CoinType.cosmos);
   }
 }

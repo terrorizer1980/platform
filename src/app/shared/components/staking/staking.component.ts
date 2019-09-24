@@ -1,5 +1,12 @@
 import { Component, Input, OnDestroy, OnInit } from "@angular/core";
-import { combineLatest, Observable, Subscription } from "rxjs";
+import {
+  combineLatest,
+  forkJoin,
+  Observable,
+  of,
+  Subscription,
+  throwError
+} from "rxjs";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import BigNumber from "bignumber.js";
@@ -10,8 +17,26 @@ import {
   CoinProviderConfig,
   StakeAction
 } from "../../../coins/coin-provider-config";
-import { map, shareReplay, switchMap, tap } from "rxjs/operators";
+import {
+  catchError,
+  first,
+  map,
+  shareReplay,
+  switchMap,
+  tap
+} from "rxjs/operators";
+import { CosmosUtils } from "@trustwallet/rpc/lib";
 import { CoinService } from "../../../coins/services/coin.service";
+import { DetailsValidatorInterface } from "../details/details.component";
+import { AuthService } from "../../../auth/services/auth.service";
+import { SelectAuthProviderComponent } from "../select-auth-provider/select-auth-provider.component";
+import { AuthProvider } from "../../../auth/services/auth-provider";
+import { ErrorsService } from "../../services/errors/errors.service";
+
+interface StakeDetails {
+  config: CoinProviderConfig;
+  hasProvider: boolean;
+}
 
 @Component({
   selector: "app-shared-staking",
@@ -29,6 +54,7 @@ export class StakingComponent implements OnInit, OnDestroy {
   monthlyEarnings$: Observable<BigNumber>;
   Math = Math;
   isLoading = false;
+  details$: Observable<StakeDetails>;
 
   confSubs: Subscription;
 
@@ -36,7 +62,8 @@ export class StakingComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private fb: FormBuilder,
     private dialogService: DialogsService,
-    private router: Router
+    private router: Router,
+    private errorsService: ErrorsService
   ) {}
 
   stake() {
@@ -98,7 +125,10 @@ export class StakingComponent implements OnInit, OnDestroy {
     );
   }
   getMax(): Observable<{ min: BigNumber; normal: BigNumber }> {
-    return combineLatest([this.dataSource.getBalance(), this.config]).pipe(
+    return combineLatest([
+      this.dataSource.getBalance().pipe(catchError(_ => of(new BigNumber(0)))),
+      this.config
+    ]).pipe(
       map(([balance, config]) => {
         const additional = new BigNumber(config.fee);
         const normal = balance.minus(additional.multipliedBy(2));
@@ -141,6 +171,10 @@ export class StakingComponent implements OnInit, OnDestroy {
     this.max$ = this.getMax();
     this.warn$ = this.warn();
     this.monthlyEarnings$ = this.getMonthlyEarnings();
+    this.details$ = forkJoin({
+      config: this.config.pipe(first()),
+      hasProvider: this.dataSource.hasProvider()
+    });
   }
 
   ngOnDestroy(): void {

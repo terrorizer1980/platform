@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { AccountService } from "../../../../shared/services/account.service";
 import { CosmosRpcService } from "./cosmos-rpc.service";
 import { combineLatest, Observable } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
@@ -8,6 +7,7 @@ import { fromPromise } from "rxjs/internal-compatibility";
 import BigNumber from "bignumber.js";
 import { CosmosUnbond } from "@trustwallet/rpc/lib/cosmos/models/CosmosUnbond";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
+import { AuthService } from "../../../../auth/services/auth.service";
 
 @Injectable({
   providedIn: "root"
@@ -15,13 +15,13 @@ import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStak
 export class CosmosUnboundInfoService {
   constructor(
     private cosmosRpcService: CosmosRpcService,
-    private accountService: AccountService
+    private authService: AuthService
   ) {}
 
   getUnbonds(): Observable<CosmosUnbond[]> {
     return combineLatest([
       this.cosmosRpcService.rpc,
-      this.accountService.getAddress(CoinType.cosmos)
+      this.authService.getAddressFromAuthorized(CoinType.cosmos)
     ]).pipe(
       switchMap(([rpc, address]) =>
         fromPromise(rpc.listUnbondDelegations(address))
@@ -32,7 +32,7 @@ export class CosmosUnboundInfoService {
   getReleaseDate(): Observable<Date> {
     return combineLatest([
       this.cosmosRpcService.rpc,
-      this.accountService.getAddress(CoinType.cosmos)
+      this.authService.getAddressFromAuthorized(CoinType.cosmos)
     ]).pipe(
       switchMap(([rpc, address]) =>
         fromPromise(rpc.unstakingReleaseDate(address))
@@ -64,7 +64,7 @@ export class CosmosUnboundInfoService {
   getRewards(): Observable<BigNumber> {
     return combineLatest([
       this.cosmosRpcService.rpc,
-      this.accountService.getAddress(CoinType.cosmos)
+      this.authService.getAddressFromAuthorized(CoinType.cosmos)
     ]).pipe(
       switchMap(([rpc, address]) => fromPromise(rpc.getRewards(address)))
     );

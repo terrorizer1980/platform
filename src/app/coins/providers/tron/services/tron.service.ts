@@ -20,10 +20,9 @@ import {
   TronUtils,
   TronVote
 } from "@trustwallet/rpc";
-import { CoinType, Utils, Hex, Base64 } from "@trustwallet/types";
+import { CoinType, Hex, Base64 } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider";
 import { CoinService } from "../../../services/coin.service";
-import { AccountService } from "../../../../shared/services/account.service";
 import { BALANCE_REFRESH_INTERVAL, STAKE_REFRESH_INTERVAL, StakeAction, StakeHolderList } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinAtlasService } from "../../../services/coin-atlas.service";
@@ -31,11 +30,12 @@ import { TronConfigService } from "./tron-config.service";
 import { TronProviderConfig } from "../tron.descriptor";
 import { TronRpcService } from "./tron-rpc.service";
 import { TronUnboundInfoService } from "./tron-unbound-info.service";
+import { AuthService } from "../../../../auth/services/auth.service";
 
 export const TronServiceInjectable = [
   TronConfigService,
   HttpClient,
-  AccountService,
+  AuthService,
   ExchangeRateService,
   TronRpcService,
   TronUnboundInfoService,
@@ -56,7 +56,7 @@ export class TronService implements CoinService {
     @Inject(TronConfigService)
     private config: Observable<TronProviderConfig>,
     private http: HttpClient,
-    private accountService: AccountService,
+    private authService: AuthService,
     private exchangeRateService: ExchangeRateService,
     private tronRpc: TronRpcService,
     private tronUnboundInfoService: TronUnboundInfoService,
@@ -125,12 +125,6 @@ export class TronService implements CoinService {
   getPriceUSD(): Observable<BigNumber> {
     return this.config.pipe(
       switchMap(config => this.exchangeRateService.getRate(config.coin))
-    );
-  }
-
-  getAddress(): Observable<string> {
-    return this.config.pipe(
-      switchMap(config => this.accountService.getAddress(config.coin))
     );
   }
 
@@ -241,8 +235,8 @@ export class TronService implements CoinService {
   private validatorsAndDelegations(): any[] {
     return [
       this.getValidators(),
-      this.accountService
-        .getAddress(CoinType.tron)
+      this.authService
+        .getAddressFromAuthorized(CoinType.tron)
         .pipe(switchMap(address => this.getAddressDelegations(address)))
     ];
   }
@@ -346,6 +340,13 @@ export class TronService implements CoinService {
     );
   }
 
+  getAddress(): Observable<string> {
+    return this.config.pipe(
+      switchMap(config =>
+        this.authService.getAddressFromAuthorized(config.coin)
+      )
+    );
+  }
   private buildVoteTransaction(address: string, to: string, amount: BigNumber): Observable<any> {
     const timestamp = new Date().getTime();
     // TODO: Improve configuration to calculate unit values for each blockchain
@@ -438,5 +439,9 @@ export class TronService implements CoinService {
         throw Error(`TronBroadcastError: ${result.message}`);
       })
     );
+  }
+
+  hasProvider(): Observable<boolean> {
+    return this.authService.hasProvider(CoinType.tron);
   }
 }

@@ -1,16 +1,11 @@
 import { NgModule } from "@angular/core";
 import { PreloadAllModules, RouterModule, Routes } from "@angular/router";
 import { MainComponent } from "./core/components/main/main.component";
-import { CoinNotSupportedComponent } from "./core/components/coin-not-supported/coin-not-supported.component";
 
 const routes: Routes = [
   {
     path: "",
     component: MainComponent
-  },
-  {
-    path: "coin-not-supported",
-    component: CoinNotSupportedComponent
   },
   {
     path: "blockchain",

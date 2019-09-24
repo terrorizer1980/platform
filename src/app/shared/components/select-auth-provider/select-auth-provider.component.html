@@ -1,0 +1,24 @@
+<div class="mb-3 p-2">
+  <div class="col-12 text-right mt-3">
+    <img
+      src="assets/images/close.svg"
+      aria-label="Close"
+      (click)="close('Cross click')"
+      aria-hidden="true"
+    />
+  </div>
+  <div class="pb-4 text-center">
+    <h4 class="modal-title" id="modal-basic-title">
+      Please choose Auth provider
+    </h4>
+    <div class="list-group mt-4">
+      <div
+        (click)="onSelect(provider)"
+        class="provider list-group-item list-group-item-action"
+        *ngFor="let provider of providers | async"
+      >
+        <span>{{ provider.name }}</span>
+      </div>
+    </div>
+  </div>
+</div>

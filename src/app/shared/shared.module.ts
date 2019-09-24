@@ -5,12 +5,14 @@ import { HttpClientModule } from "@angular/common/http";
 import { ComponentsModule } from "./components/components.module";
 import { SuccessPopupComponent } from "./components/success-popup/success-popup.component";
 import { ErrorPopupComponent } from "./components/error-popup/error-popup.component";
+import { AuthModule } from "../auth/auth.module";
 
 const modules = [
   CommonModule,
   HttpClientModule,
   NgxLoadersCssModule,
-  ComponentsModule
+  ComponentsModule,
+  AuthModule
 ];
 
 @NgModule({
