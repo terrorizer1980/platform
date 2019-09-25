@@ -7,6 +7,7 @@ import { fromPromise } from "rxjs/internal-compatibility";
 import { from, Observable, ReplaySubject, Subject } from "rxjs";
 import { map, switchMap } from "rxjs/operators";
 import { CoinType } from "@trustwallet/types";
+import { Errors } from "../../../../shared/consts";
 
 @Injectable({ providedIn: AuthModule })
 export class WalletConnectService {
@@ -26,7 +27,7 @@ export class WalletConnectService {
         const uri = this.connector.uri;
         // display QR Code modal
         WalletConnectQRCodeModal.open(uri, () => {
-          result.error("rejectedByUser");
+          result.error(Errors.REJECTED_BY_USER);
         });
         this.connector.on("connect", (error, payload) => {
           if (error) {

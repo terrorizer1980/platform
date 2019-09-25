@@ -51,3 +51,5 @@
   font-size:100%;
   color: #dc9f47
 }
+
+.list-group-flush li:first-child,div:first-child { border-top: none; }

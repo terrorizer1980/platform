@@ -32,6 +32,7 @@ import { AuthService } from "../../../auth/services/auth.service";
 import { SelectAuthProviderComponent } from "../select-auth-provider/select-auth-provider.component";
 import { AuthProvider } from "../../../auth/services/auth-provider";
 import { ErrorsService } from "../../services/errors/errors.service";
+import { Errors } from "../../consts";
 
 interface StakeDetails {
   config: CoinProviderConfig;
@@ -63,7 +64,8 @@ export class StakingComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private dialogService: DialogsService,
     private router: Router,
-    private errorsService: ErrorsService
+    private errorsService: ErrorsService,
+    private auth: AuthService
   ) {}
 
   stake() {
@@ -73,18 +75,60 @@ export class StakingComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    this.config.pipe(
+    const stake$ = this.config.pipe(
       switchMap(cfg => {
-        const amount = new BigNumber(this.stakeForm.get("amount").value).times(
-          new BigNumber(10).pow(cfg.digits)
-        );
+        const amount = cfg.toUnits(new BigNumber(this.stakeForm.get("amount").value));
         return this.dataSource.prepareStakeTx(StakeAction.STAKE, this.validatorId, amount);
       }),
       tap(() => (this.isLoading = false), e => (this.isLoading = false)),
       switchMap(_ => this.config)
-    ).subscribe(config => {
-      this.congratulate(config, this.stakeForm.get("amount").value);
-    });
+    );
+
+    this.details$
+      .pipe(
+        switchMap(({ hasProvider }) => {
+          if (hasProvider) {
+            return stake$;
+          } else {
+            const modal = this.dialogService.showModal(
+              SelectAuthProviderComponent
+            );
+            return modal.componentInstance.select.pipe(
+              switchMap((provider: AuthProvider) =>
+                combineLatest([
+                  this.auth.authorize(provider),
+                  of(provider),
+                  this.config
+                ])
+              ),
+              switchMap(([authorized, provider, config]) =>
+                authorized
+                  ? provider.getAddress(config.coin)
+                  : throwError("closed")
+              ),
+              catchError(error => {
+                if (error === "closed") {
+                  return throwError(Errors.REJECTED_BY_USER);
+                }
+                return throwError(error);
+              })
+            );
+          }
+        }),
+        tap(() => (this.isLoading = false), e => (this.isLoading = false))
+      )
+      .subscribe(
+        (result: any) => {
+          if (typeof result === "string") {
+            location.reload();
+          } else {
+            this.congratulate(result, this.stakeForm.get("amount").value);
+          }
+        },
+        error => {
+          this.errorsService.showError(error);
+        }
+      );
   }
 
   setMax() {

@@ -12,6 +12,7 @@ import { UnstakingComponent } from "./unstaking/unstaking.component";
 import { DetailsComponent } from "./details/details.component";
 import { ReactiveFormsModule } from "@angular/forms";
 import { SelectAuthProviderComponent } from "./select-auth-provider/select-auth-provider.component";
+import { LogoutComponent } from "./logout/logout.component";
 
 const components = [
   LoadingButtonComponent,
@@ -21,12 +22,13 @@ const components = [
   StakingComponent,
   UnstakingComponent,
   DetailsComponent,
-  SelectAuthProviderComponent
+  SelectAuthProviderComponent,
+  LogoutComponent
 ];
 
 @NgModule({
   declarations: [...components],
-  entryComponents: [SelectAuthProviderComponent],
+  entryComponents: [SelectAuthProviderComponent, LogoutComponent],
   imports: [
     CommonModule,
     HttpClientModule,

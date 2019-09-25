@@ -1,12 +1,5 @@
 import { AuthProvider } from "../../auth-provider";
-import {
-  BehaviorSubject,
-  from,
-  Observable,
-  of,
-  ReplaySubject,
-  throwError
-} from "rxjs";
+import { Observable, ReplaySubject } from "rxjs";
 import { map, switchMap, tap } from "rxjs/operators";
 import { Account, CoinType } from "@trustwallet/types";
 import { CoinNotSupportedException } from "../../coin-not-supported-exception";
@@ -17,7 +10,7 @@ import { WalletConnectService } from "./wallet-connect.service";
 
 @Injectable({ providedIn: AuthModule })
 export class WalletConnectAuthProvider implements AuthProvider {
-  private authorized: ReplaySubject<boolean> = new ReplaySubject(1);
+  private authorized: ReplaySubject<Account[]> = new ReplaySubject(1);
 
   constructor(
     private readonly db: DbService,
@@ -26,13 +19,13 @@ export class WalletConnectAuthProvider implements AuthProvider {
     this.getDataFromDB().subscribe(
       data => {
         if (data) {
-          this.authorized.next(true);
+          this.authorized.next(data.items);
         } else {
-          this.authorized.next(false);
+          this.authorized.next(null);
         }
       },
       error => {
-        this.authorized.next(false);
+        this.authorized.next(null);
       }
     );
   }
@@ -56,22 +49,17 @@ export class WalletConnectAuthProvider implements AuthProvider {
     );
   }
 
-  authorize(): Observable<boolean> {
+  authorize(): Observable<Account[]> {
     return this.wc.connect().pipe(
-      switchMap(accounts =>
-        this.db.put(this.id, {
-          items: accounts
-        })
-      ),
-      tap(_ => {
-        this.authorized.next(true);
+      tap((accounts: any) => {
+        this.authorized.next(accounts);
       }),
       switchMap(_ => this.authorized)
     );
   }
 
   isAuthorized(): Observable<boolean> {
-    return this.authorized;
+    return this.authorized.pipe(map(data => !!data));
   }
 
   private getDataFromDB(): Observable<any> {
@@ -88,5 +76,13 @@ export class WalletConnectAuthProvider implements AuthProvider {
 
   get id(): string {
     return "walletconnect";
+  }
+
+  get icon(): string {
+    return "icon_walletconnect.svg";
+  }
+
+  get active(): boolean {
+    return true;
   }
 }

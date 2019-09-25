@@ -1,33 +1,71 @@
-import { Component } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
-import { Router } from "@angular/router";
-import { filter, map, startWith } from "rxjs/operators";
-import { Location } from "@angular/common";
-import { AuthProviderService } from "./shared/services/auth-provider.service";
+import { Component, OnDestroy } from "@angular/core";
+import { combineLatest, Observable, Subscription, throwError } from "rxjs";
+import { catchError, switchMap } from "rxjs/operators";
+import { AuthService } from "./auth/services/auth.service";
+import { SelectAuthProviderComponent } from "./shared/components/select-auth-provider/select-auth-provider.component";
+import { DialogsService } from "./shared/services/dialogs.service";
+import { ErrorsService } from "./shared/services/errors/errors.service";
+import { AuthProvider } from "./auth/services/auth-provider";
+import { DbService } from "./shared/services/db.service";
+import { LogoutComponent } from "./shared/components/logout/logout.component";
+import { Errors } from "./shared/consts";
 
 @Component({
   selector: "app-root",
   templateUrl: "./app.component.html",
   styleUrls: ["./app.component.scss"]
 })
-export class AppComponent {
-  showBackButton$: Observable<boolean>;
+export class AppComponent implements OnDestroy {
+  loggedWith: Observable<AuthProvider> = this.auth.getAuthorizedProvider();
+  logoutS: Subscription;
 
   constructor(
-    private http: HttpClient,
-    private router: Router,
-    private location: Location,
-    private auth: AuthProviderService
-  ) {
-    this.showBackButton$ = this.router.events.pipe(
-      filter((event: any) => event.url),
-      map((event: any) => event.url !== "/"),
-      startWith(false)
-    );
+    private auth: AuthService,
+    private dialogService: DialogsService,
+    private errorsService: ErrorsService,
+    private dbService: DbService
+  ) {}
+
+  logout() {
+    const instance = this.dialogService.showModal(LogoutComponent);
+    if (this.logoutS) {
+      this.logoutS.unsubscribe();
+    }
+    this.logoutS = combineLatest([
+      this.loggedWith,
+      instance.componentInstance.logout
+    ])
+      .pipe(switchMap(([loggedWith]) => this.dbService.remove(loggedWith.id)))
+      .subscribe(() => {
+        location.reload();
+      });
   }
 
-  goBack() {
-    this.location.back();
+  connectWallet() {
+    const modal = this.dialogService.showModal(SelectAuthProviderComponent);
+    return modal.componentInstance.select
+      .pipe(
+        switchMap((provider: AuthProvider) => this.auth.authorize(provider)),
+        catchError(error => {
+          if (error === "closed") {
+            return throwError(Errors.REJECTED_BY_USER);
+          }
+          return throwError(error);
+        })
+      )
+      .subscribe(
+        ([provider]) => {
+          location.reload();
+        },
+        error => {
+          this.errorsService.showError(error);
+        }
+      );
+  }
+
+  ngOnDestroy(): void {
+    if (this.logoutS) {
+      this.logoutS.unsubscribe();
+    }
   }
 }

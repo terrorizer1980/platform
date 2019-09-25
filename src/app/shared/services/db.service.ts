@@ -9,7 +9,7 @@ import { catchError, first, switchMap } from "rxjs/operators";
 export class DbService {
   db: PouchDB.Database;
   constructor() {
-    this.db = new PouchDB(environment.dbName);
+    this.db = new PouchDB(environment.dbName, { auto_compaction: true });
     this.db.info().then(info => {
       console.log(info);
     });
@@ -18,6 +18,16 @@ export class DbService {
 
   get<T>(key: string): Observable<T> {
     return fromPromise(this.db.get(key)).pipe(first()) as Observable<T>;
+  }
+
+  getAll(): Observable<any> {
+    return fromPromise(this.db.allDocs({ include_docs: true })).pipe(first());
+  }
+
+  remove(id: string): Observable<any> {
+    return this.get(id).pipe(
+      switchMap((doc: any) => fromPromise(this.db.remove(doc)))
+    );
   }
 
   put<T>(key: string, value: T): Observable<T> {

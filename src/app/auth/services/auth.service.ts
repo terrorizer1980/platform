@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { forkJoin, Observable, of } from "rxjs";
+import { combineLatest, forkJoin, Observable, of } from "rxjs";
 import { AuthModule } from "../auth.module";
 import { CoinType, Account } from "@trustwallet/types";
 import { TrustAuthProvider } from "./providers/trust/trust-auth.provider";
@@ -7,12 +7,20 @@ import { AuthProvider } from "./auth-provider";
 import { catchError, first, map, switchMap } from "rxjs/operators";
 import { WalletConnectAuthProvider } from "./providers/wallet-connect/wallet-connect-auth.provider";
 import { CoinNotSupportedException } from "./coin-not-supported-exception";
+import { DbService } from "../../shared/services/db.service";
+import { TrustDeepLinkAuthProvider } from "./providers/trust-deep-link/trust-deep-link-auth.provider";
+import { LedgerAuthProvider } from "./providers/ledger/ledger-auth.provider";
+import { TrezorAuthProvider } from "./providers/trezor/trezor-auth.provider";
 
 @Injectable({ providedIn: AuthModule })
 export class AuthService {
   constructor(
     private trustAuth: TrustAuthProvider,
-    private walletConnectAuth: WalletConnectAuthProvider
+    private walletConnectAuth: WalletConnectAuthProvider,
+    private trustDeepLinkAuthProvider: TrustDeepLinkAuthProvider,
+    private ledgerAuthProvider: LedgerAuthProvider,
+    private trezorAuthProvider: TrezorAuthProvider,
+    private db: DbService
   ) {}
 
   // Returns address from the first authorized provider
@@ -36,17 +44,22 @@ export class AuthService {
     );
   }
 
-  getAuthorizedProvider(coin: CoinType): Observable<AuthProvider> {
+  getAuthorizedProvider(coin?: CoinType): Observable<AuthProvider> {
     return forkJoin(
       this.getProviders().map(provider =>
-        provider.getAddress(coin).pipe(
-          map(() => provider),
-          catchError(_ => of(null)),
-          first()
-        )
+        coin
+          ? provider.getAddress(coin).pipe(
+              map(() => provider),
+              catchError(_ => of(null)),
+              first()
+            )
+          : provider.isAuthorized().pipe(
+              map(authorized => (authorized ? provider : null)),
+              first()
+            )
       )
     ).pipe(
-      map(results => results.filter(result => result !== null)),
+      map(results => results.filter(result => result)),
       map(results => {
         if (!results.length) {
           throw new CoinNotSupportedException(coin);
@@ -70,12 +83,27 @@ export class AuthService {
     );
   }
 
-  // Authorize
   authorizeAndGetAddress(
     provider: AuthProvider,
     coin: CoinType
   ): Observable<string> {
-    return provider.authorize().pipe(switchMap(_ => provider.getAddress(coin)));
+    return this.authorize(provider).pipe(
+      switchMap(_ => provider.getAddress(coin))
+    );
+  }
+
+  authorize(provider: AuthProvider): Observable<Account[]> {
+    return provider.authorize().pipe(
+      switchMap(accounts =>
+        combineLatest([
+          of(accounts),
+          this.db.put(provider.id, {
+            items: accounts
+          })
+        ])
+      ),
+      map(([accounts]) => accounts)
+    );
   }
 
   getUnauthorized(): Observable<AuthProvider[]> {
@@ -91,6 +119,12 @@ export class AuthService {
   }
 
   public getProviders(): AuthProvider[] {
-    return [this.trustAuth, this.walletConnectAuth] as AuthProvider[];
+    return [
+      this.trustAuth,
+      this.walletConnectAuth,
+      this.trustDeepLinkAuthProvider,
+      this.ledgerAuthProvider,
+      this.trezorAuthProvider
+    ] as AuthProvider[];
   }
 }

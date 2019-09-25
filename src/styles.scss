@@ -1,6 +1,10 @@
 /* You can add global styles to this file, and also import other style files */
 
-@import 'assets/sass/variables.scss';
+//@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css");
+@import '~bootstrap/scss/functions';
+@import 'assets/sass/variables';
+@import "~bootstrap/scss/bootstrap";
+@import "~font-awesome/scss/font-awesome";
 
 body {
     background-color: $light !important;

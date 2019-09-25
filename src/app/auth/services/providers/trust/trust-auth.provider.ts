@@ -8,6 +8,7 @@ import { TrustProvider } from "@trustwallet/provider";
 import { CoinNotSupportedException } from "../../coin-not-supported-exception";
 import { Injectable } from "@angular/core";
 import { AuthModule } from "../../../auth.module";
+import { Errors } from "../../../../shared/consts";
 
 @Injectable({ providedIn: AuthModule })
 export class TrustAuthProvider implements AuthProvider {
@@ -39,8 +40,12 @@ export class TrustAuthProvider implements AuthProvider {
     }
   }
 
-  authorize(): Observable<boolean> {
-    return of(TrustProvider && TrustProvider.isAvailable);
+  authorize(): Observable<Account[]> {
+    if (TrustProvider && TrustProvider.isAvailable) {
+      return fromPromise(TrustProvider.getAccounts());
+    } else {
+      return of(null);
+    }
   }
 
   isAuthorized(): Observable<boolean> {
@@ -53,6 +58,14 @@ export class TrustAuthProvider implements AuthProvider {
 
   get id(): string {
     return "trustwallet";
+  }
+
+  get icon(): string {
+    return "icon_trust.svg";
+  }
+
+  get active(): boolean {
+    return true;
   }
 
   signTransaction(network: CoinType, transaction: any): Observable<string> {
