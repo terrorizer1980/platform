@@ -30,26 +30,23 @@ export const Coins: CoinProviderConfig[] = [
     digits: 6,
     toUnits(amount: BigNumber): BigNumber { return new UnitConverter(this).toUnits(amount); },
     toCoin(amount: BigNumber): BigNumber { return new UnitConverter(this).toCoin(amount); },
+  }),
+  CoinDescriptor<TronProviderConfig>({
+    network: CoinTypeUtils.id(CoinType.tron),
+    coin: CoinType.tron,
+    chainId: TronChainId,
+    endpoint: environment.rpcEndpoint(CoinType.tron),
+    currencyName: CoinTypeUtils.networkName(CoinType.tron),
+    currencySymbol: CoinTypeUtils.symbol(CoinType.tron),
+    iconUri: `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(
+      CoinType.tron
+    )}/info/logo.png`,
+    config: TronCoinConfig,
+    gas: new BigNumber(0),
+    fee: new BigNumber(0),
+    digits: 6,
+    toUnits(amount: BigNumber): BigNumber { return new UnitConverter(this).toUnits(amount); },
+    toCoin(amount: BigNumber): BigNumber { return new UnitConverter(this).toCoin(amount); },
   })
 ];
-if (!environment.production) {
-  Coins.push(
-    CoinDescriptor<TronProviderConfig>({
-      network: CoinTypeUtils.id(CoinType.tron),
-      coin: CoinType.tron,
-      chainId: TronChainId,
-      endpoint: environment.rpcEndpoint(CoinType.tron),
-      currencyName: CoinTypeUtils.networkName(CoinType.tron),
-      currencySymbol: CoinTypeUtils.symbol(CoinType.tron),
-      iconUri: `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(
-        CoinType.tron
-      )}/info/logo.png`,
-      config: TronCoinConfig,
-      gas: new BigNumber(0),
-      fee: new BigNumber(0),
-      digits: 6,
-      toUnits(amount: BigNumber): BigNumber { return new UnitConverter(this).toUnits(amount); },
-      toCoin(amount: BigNumber): BigNumber { return new UnitConverter(this).toCoin(amount); },
-    })
-  );
-}
+
