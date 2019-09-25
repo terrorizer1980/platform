@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@angular/core";
 import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of, timer } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { first, map, shareReplay, switchMap, tap } from "rxjs/operators";
+import { catchError, first, map, shareReplay, switchMap, tap } from "rxjs/operators";
 import { BlockatlasValidator, TronAccount, TronBlock, TronBroadcastResult, TronStakingInfo, TronVote } from "@trustwallet/rpc";
 import { Base64, CoinType, Hex } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider";
@@ -474,7 +474,8 @@ export class TronService implements CoinService {
     // This function checks if there is any frozen expire time in the future
     return this.authService.getAddressFromAuthorized(CoinType.tron).pipe(
       switchMap(address => this.getAccountOnce(address)),
-      map(account => account.frozen.filter(f => f.expireTime > now).length === 0)
+      map(account => account.frozen.filter(f => f.expireTime > now).length === 0),
+      catchError(_ => of(false))
     );
   }
 }
