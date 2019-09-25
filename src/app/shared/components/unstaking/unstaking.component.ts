@@ -43,16 +43,24 @@ export class UnstakingComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    this.config.pipe(
-      map(cfg => cfg.toUnits(new BigNumber(this.stakeForm.get("amount").value))),
-      switchMap(amount =>
-        this.dataSource.prepareStakeTx(StakeAction.UNSTAKE, this.validatorId, amount)
-      ),
-      tap(() => (this.isLoading = false), e => (this.isLoading = false)),
-      switchMap(_ => this.config)
-    ).subscribe(config => {
-      this.congratulate(config, this.stakeForm.get("amount").value);
-    });
+    this.config
+      .pipe(
+        map(cfg =>
+          cfg.toUnits(new BigNumber(this.stakeForm.get("amount").value))
+        ),
+        switchMap(amount =>
+          this.dataSource.prepareStakeTx(
+            StakeAction.UNSTAKE,
+            this.validatorId,
+            amount
+          )
+        ),
+        tap(() => (this.isLoading = false), e => (this.isLoading = false)),
+        switchMap(_ => this.config)
+      )
+      .subscribe(config => {
+        this.congratulate(config, this.stakeForm.get("amount").value);
+      });
   }
 
   setMax() {

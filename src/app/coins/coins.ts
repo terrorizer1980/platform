@@ -1,4 +1,8 @@
-import { CoinDescriptor, CoinProviderConfig, UnitConverter } from "./coin-provider-config";
+import {
+  CoinDescriptor,
+  CoinProviderConfig,
+  UnitConverter
+} from "./coin-provider-config";
 import { CoinType, CoinTypeUtils } from "@trustwallet/types";
 import { environment } from "../../environments/environment";
 import {
@@ -28,8 +32,12 @@ export const Coins: CoinProviderConfig[] = [
     gas: new BigNumber(250000),
     fee: new BigNumber(1000),
     digits: 6,
-    toUnits(amount: BigNumber): BigNumber { return new UnitConverter(this).toUnits(amount); },
-    toCoin(amount: BigNumber): BigNumber { return new UnitConverter(this).toCoin(amount); },
+    toUnits(amount: BigNumber): BigNumber {
+      return new UnitConverter(this).toUnits(amount);
+    },
+    toCoin(amount: BigNumber): BigNumber {
+      return new UnitConverter(this).toCoin(amount);
+    }
   }),
   CoinDescriptor<TronProviderConfig>({
     network: CoinTypeUtils.id(CoinType.tron),
@@ -45,8 +53,11 @@ export const Coins: CoinProviderConfig[] = [
     gas: new BigNumber(0),
     fee: new BigNumber(0),
     digits: 6,
-    toUnits(amount: BigNumber): BigNumber { return new UnitConverter(this).toUnits(amount); },
-    toCoin(amount: BigNumber): BigNumber { return new UnitConverter(this).toCoin(amount); },
+    toUnits(amount: BigNumber): BigNumber {
+      return new UnitConverter(this).toUnits(amount);
+    },
+    toCoin(amount: BigNumber): BigNumber {
+      return new UnitConverter(this).toCoin(amount);
+    }
   })
 ];
-

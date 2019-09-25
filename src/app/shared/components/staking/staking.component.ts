@@ -77,8 +77,14 @@ export class StakingComponent implements OnInit, OnDestroy {
 
     const stake$ = this.config.pipe(
       switchMap(cfg => {
-        const amount = cfg.toUnits(new BigNumber(this.stakeForm.get("amount").value));
-        return this.dataSource.prepareStakeTx(StakeAction.STAKE, this.validatorId, amount);
+        const amount = cfg.toUnits(
+          new BigNumber(this.stakeForm.get("amount").value)
+        );
+        return this.dataSource.prepareStakeTx(
+          StakeAction.STAKE,
+          this.validatorId,
+          amount
+        );
       }),
       tap(() => (this.isLoading = false), e => (this.isLoading = false)),
       switchMap(_ => this.config)

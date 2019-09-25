@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from "@angular/core";
-import { combineLatest, Observable, Subscription, throwError } from "rxjs";
+import { combineLatest, Observable, of, Subscription, throwError } from "rxjs";
 import { catchError, switchMap } from "rxjs/operators";
 import { AuthService } from "./auth/services/auth.service";
 import { SelectAuthProviderComponent } from "./shared/components/select-auth-provider/select-auth-provider.component";
@@ -16,7 +16,9 @@ import { Errors } from "./shared/consts";
   styleUrls: ["./app.component.scss"]
 })
 export class AppComponent implements OnDestroy {
-  loggedWith: Observable<AuthProvider> = this.auth.getAuthorizedProvider();
+  loggedWith: Observable<AuthProvider> = this.auth
+    .getAuthorizedProvider()
+    .pipe(catchError(() => of(null)));
   logoutS: Subscription;
 
   constructor(
