@@ -66,6 +66,7 @@ export class MainComponent implements OnInit {
         return holder.reduce((acc, stakeHolders, index) => {
           stakeHolders.forEach(sh => {
             sh.coin = Coins[index];
+            sh.amount = new BigNumber(sh.amount.toFixed(5));
           });
           return [...acc, ...stakeHolders];
         }, []);

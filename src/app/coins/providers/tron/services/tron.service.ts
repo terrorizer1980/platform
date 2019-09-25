@@ -241,7 +241,7 @@ export class TronService implements CoinService {
       const validator = validators.find(v => v.id === address);
       return {
         ...validator,
-        amount: TronUtils.toTron(address2stake[address]),
+        amount: new BigNumber(address2stake[address]),
         coin: config
       };
     });
