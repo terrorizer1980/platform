@@ -138,7 +138,8 @@ export class TronService implements CoinService {
   }
 
   getStakePendingBalance(): Observable<BigNumber> {
-    return this.tronUnboundInfoService.getPendingBalance();
+    // There is no pending value for TRON as we have in Cosmos
+    return of(new BigNumber(0));
   }
 
   getStakingRewards(): Observable<BigNumber> {
