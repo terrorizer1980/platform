@@ -72,58 +72,19 @@ export class StakingComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    const amount = new BigNumber(this.stakeForm.get("amount").value).times(
-      new BigNumber(1000000)
-    );
 
-    const obs = this.dataSource
-      .prepareStakeTx(StakeAction.STAKE, this.validatorId, amount)
-      .pipe(
-        tap(() => (this.isLoading = false), e => (this.isLoading = false)),
-        switchMap(_ => this.config)
-      );
-
-    this.details$
-      .pipe(
-        switchMap(({ hasProvider }) => {
-          if (hasProvider) {
-            return obs;
-          } else {
-            const modal = this.dialogService.showModal(
-              SelectAuthProviderComponent
-            );
-            return modal.componentInstance.select.pipe(
-              switchMap((provider: AuthProvider) =>
-                combineLatest([provider.authorize(), of(provider), this.config])
-              ),
-              switchMap(([authorized, provider, config]) =>
-                authorized
-                  ? provider.getAddress(config.coin)
-                  : throwError("closed")
-              ),
-              catchError(error => {
-                if (error === "closed") {
-                  return throwError("rejectedByUser");
-                }
-                return throwError(error);
-              })
-            );
-          }
-        }),
-        tap(() => (this.isLoading = false), e => (this.isLoading = false))
-      )
-      .subscribe(
-        (result: any) => {
-          if (typeof result === "string") {
-            location.reload();
-          } else {
-            this.congratulate(result, this.stakeForm.get("amount").value);
-          }
-        },
-        error => {
-          this.errorsService.showError(error);
-        }
-      );
+    this.config.pipe(
+      switchMap(cfg => {
+        const amount = new BigNumber(this.stakeForm.get("amount").value).times(
+          new BigNumber(10).pow(cfg.digits)
+        );
+        return this.dataSource.prepareStakeTx(StakeAction.STAKE, this.validatorId, amount);
+      }),
+      tap(() => (this.isLoading = false), e => (this.isLoading = false)),
+      switchMap(_ => this.config)
+    ).subscribe(config => {
+      this.congratulate(config, this.stakeForm.get("amount").value);
+    });
   }
 
   setMax() {
@@ -169,7 +130,7 @@ export class StakingComponent implements OnInit, OnDestroy {
       this.config
     ]).pipe(
       map(([balance, config]) => {
-        const additional = CosmosUtils.toAtom(new BigNumber(config.fee));
+        const additional = new BigNumber(config.fee);
         const normal = balance.minus(additional.multipliedBy(2));
         const min = balance.minus(additional);
         return {
