@@ -9,7 +9,7 @@ import { FormBuilder, FormGroup } from "@angular/forms";
 import BigNumber from "bignumber.js";
 import { ActivatedRoute, Router } from "@angular/router";
 import { DialogsService } from "../../services/dialogs.service";
-import { shareReplay, switchMap, tap } from "rxjs/operators";
+import { map, shareReplay, switchMap, tap } from "rxjs/operators";
 import { StakeValidator } from "../../../coins/validators/stake.validator";
 
 @Component({
@@ -42,19 +42,17 @@ export class UnstakingComponent implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    const amount = new BigNumber(this.stakeForm.get("amount").value).times(
-      new BigNumber(1000000)
-    );
 
-    this.dataSource
-      .prepareStakeTx(StakeAction.UNSTAKE, this.validatorId, amount)
-      .pipe(
-        tap(() => (this.isLoading = false), e => (this.isLoading = false)),
-        switchMap(_ => this.config)
-      )
-      .subscribe(config => {
-        this.congratulate(config, this.stakeForm.get("amount").value);
-      });
+    this.config.pipe(
+      map(cfg => cfg.toUnits(new BigNumber(this.stakeForm.get("amount").value))),
+      switchMap(amount =>
+        this.dataSource.prepareStakeTx(StakeAction.UNSTAKE, this.validatorId, amount)
+      ),
+      tap(() => (this.isLoading = false), e => (this.isLoading = false)),
+      switchMap(_ => this.config)
+    ).subscribe(config => {
+      this.congratulate(config, this.stakeForm.get("amount").value);
+    });
   }
 
   setMax() {

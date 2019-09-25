@@ -104,12 +104,14 @@ export class TronService implements CoinService {
       map(validators => this.selectValidatorWithBestInterestRate(validators))
     );
   }
+
   getBalanceUSD(): Observable<BigNumber> {
     return this.balance$.pipe(
       switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
       map(([balance, price]) => balance.multipliedBy(price))
     );
   }
+
   getBalance(): Observable<BigNumber> {
     return this.balance$;
   }
@@ -177,20 +179,23 @@ export class TronService implements CoinService {
           case StakeAction.STAKE:
             return this.stake(account, addressTo, amount);
           case StakeAction.UNSTAKE:
-            return this.unstake(account, addressTo);
+            return this.unstake(account, addressTo, amount);
         }
       })
     );
   }
 
   getStakedToValidator(validator: string): Observable<BigNumber> {
-    return this.getStakeHolders().pipe(
-      map(stakeholders => {
+    return combineLatest([
+      this.config,
+      this.getStakeHolders()
+    ]).pipe(
+      map(([ config, stakeholders ]) => {
         const validatorStaked = stakeholders.find(
           holder => holder.id === validator
         );
         if (validatorStaked) {
-          return validatorStaked.amount;
+          return config.toUnits(validatorStaked.amount);
         }
         return new BigNumber(0);
       }),
@@ -281,7 +286,7 @@ export class TronService implements CoinService {
             // TODO: Use BN or native browser BigInt() + polyfill
             const aggregatedAmount =
               acc[delegation.voteAddress] || new BigNumber(0);
-            const sharesAmount = +delegation.voteCount || new BigNumber(0);
+            const sharesAmount = + delegation.voteCount || new BigNumber(0);
             acc[delegation.voteAddress] = aggregatedAmount.plus(sharesAmount);
             return acc;
           },
@@ -415,17 +420,23 @@ export class TronService implements CoinService {
 
   private unstake(
     account: TronAccount,
-    to: string
+    to: string,
+    amount: BigNumber,
   ): Observable<TronBroadcastResult> {
-    const votes = this.removeVote(account, to);
-    const frozenBalance = new BigNumber(votes.reduce((acc, v) => acc + v.vote_count, 0));
-
-    return this.buildUnfreezeTransaction(account.address, to).pipe(
+    const votes$ = this.removeVote(account, to, amount);
+    const frozenBalance$ = combineLatest([ this.config, votes$ ]).pipe(
+      map(([ cfg, votes ]) => cfg.toUnits(new BigNumber(votes.reduce((acc, v) => acc + v.vote_count, 0))))
+    );
+    const unfreezeBalance$ = this.buildUnfreezeTransaction(account.address, to).pipe(
       switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
       switchMap(tx => this.broadcastTx(tx)),
-      switchMap(_ => this.config),
-      switchMap(cfg => this.freezeBalance(account.address, cfg.toUnits(frozenBalance))),
-      switchMap(_ => this.updateVotes(account.address, votes)),
+    );
+
+    return unfreezeBalance$.pipe(
+      switchMap(_ => frozenBalance$),
+      switchMap(frozenBalance => this.freezeBalance(account.address, frozenBalance)),
+      switchMap(_ => votes$),
+      switchMap(votes => this.updateVotes(account.address, votes)),
     );
   }
 
@@ -448,13 +459,24 @@ export class TronService implements CoinService {
     );
   }
 
-  private removeVote(account: TronAccount, to: string): { vote_address: string, vote_count: number }[] {
-    return account.votes
-      .map(v => ({
-        vote_address: v.voteAddress,
-        vote_count: v.voteCount
-      }))
-      .filter(v => v.vote_address !== to);
+  private removeVote(account: TronAccount, to: string, amount: BigNumber): Observable<{ vote_address: string, vote_count: number }[]> {
+    return this.config.pipe(
+      map(cfg => account.votes.map(v => {
+          if (v.voteAddress === to) {
+            return {
+              vote_address: v.voteAddress,
+              vote_count: Math.max(v.voteCount - cfg.toCoin(amount).toNumber(), 0)
+            };
+          }
+
+          return {
+            vote_address: v.voteAddress,
+            vote_count: v.voteCount
+          };
+        }
+      ).filter(v => v.vote_count > 0)),
+      shareReplay(1)
+    );
   }
 
   private updateVotes(address: string, votes: { vote_address: string, vote_count: number }[]): Observable<TronBroadcastResult> {
