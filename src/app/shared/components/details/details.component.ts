@@ -12,6 +12,7 @@ export interface DetailsValidatorInterface {
   stakedSum: string;
   additionals: AdditionalInfo[];
   hasProvider: boolean;
+  unstakeEnabled: boolean;
 }
 
 export interface AdditionalInfo {
@@ -75,6 +76,7 @@ export class DetailsComponent implements AfterViewInit {
         first()
       ),
       additionals: this.additionals.pipe(first()),
+      unstakeEnabled: this.dataSource.isUnstakeEnabled().pipe(first()),
       hasProvider: this.dataSource.hasProvider()
     });
   }

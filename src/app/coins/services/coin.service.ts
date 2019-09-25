@@ -29,4 +29,5 @@ export interface CoinService {
   getValidators(): Observable<BlockatlasValidator[]>;
   getValidatorsById(validatorId: string): Observable<BlockatlasValidator>;
   hasProvider(): Observable<boolean>;
+  isUnstakeEnabled(): Observable<boolean>;
 }

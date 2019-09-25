@@ -416,4 +416,8 @@ export class CosmosService implements CoinService {
   hasProvider(): Observable<boolean> {
     return this.authService.hasProvider(CoinType.cosmos);
   }
+
+  isUnstakeEnabled(): Observable<boolean> {
+    return of(true);
+  }
 }

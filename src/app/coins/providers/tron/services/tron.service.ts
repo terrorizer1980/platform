@@ -1,35 +1,13 @@
 import { Inject, Injectable } from "@angular/core";
-import {
-  BehaviorSubject,
-  Observable,
-  combineLatest,
-  forkJoin,
-  from,
-  of,
-  timer
-} from "rxjs";
+import { BehaviorSubject, combineLatest, forkJoin, from, Observable, of, timer } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
 import { first, map, shareReplay, switchMap, tap } from "rxjs/operators";
-import {
-  BlockatlasValidator,
-  TronAccount,
-  TronBlock,
-  TronBroadcastResult,
-  TronStakingInfo,
-  TronUtils,
-  TronVote
-} from "@trustwallet/rpc";
-import { CoinType, Hex, Base64 } from "@trustwallet/types";
+import { BlockatlasValidator, TronAccount, TronBlock, TronBroadcastResult, TronStakingInfo, TronVote } from "@trustwallet/rpc";
+import { Base64, CoinType, Hex } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider";
 import { CoinService } from "../../../services/coin.service";
-import {
-  BALANCE_REFRESH_INTERVAL,
-  UnitConverter,
-  STAKE_REFRESH_INTERVAL,
-  StakeAction,
-  StakeHolderList
-} from "../../../coin-provider-config";
+import { BALANCE_REFRESH_INTERVAL, STAKE_REFRESH_INTERVAL, StakeAction, StakeHolderList } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { TronConfigService } from "./tron-config.service";
@@ -489,5 +467,14 @@ export class TronService implements CoinService {
 
   hasProvider(): Observable<boolean> {
     return this.authService.hasProvider(CoinType.tron);
+  }
+
+  isUnstakeEnabled(): Observable<boolean> {
+    const now = new Date();
+    // This function checks if there is any frozen expire time in the future
+    return this.authService.getAddressFromAuthorized(CoinType.tron).pipe(
+      switchMap(address => this.getAccountOnce(address)),
+      map(account => account.frozen.filter(f => f.expireTime > now).length === 0)
+    );
   }
 }
