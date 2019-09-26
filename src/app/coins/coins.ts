@@ -83,9 +83,16 @@ export const Upcoming: UpcomingCoin[] = [
     message: "Coming soon",
   },
   {
+    symbol: "IOTX",
+    name: "IoTeX",
+    iconUri: icon(CoinType.iotex),
+    message: "Coming soon",
+  },
+  {
     symbol: "ETH",
     name: "Compound",
     iconUri: icon(CoinType.ethereum),
     message: "Coming soon",
   },
+
 ];
