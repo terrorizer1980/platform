@@ -1,30 +1,17 @@
 import { AuthProvider } from "../../auth-provider";
 import { from, Observable, of, throwError } from "rxjs";
-import { environment } from "../../../../../environments/environment";
 import { fromPromise } from "rxjs/internal-compatibility";
-import { catchError, map } from "rxjs/operators";
-import { CoinType, Account } from "@trustwallet/types";
+import { map } from "rxjs/operators";
+import { Account, CoinType } from "@trustwallet/types";
 import { TrustProvider } from "@trustwallet/provider";
 import { CoinNotSupportedException } from "../../coin-not-supported-exception";
 import { Injectable } from "@angular/core";
 import { AuthModule } from "../../../auth.module";
-import { Errors } from "../../../../shared/consts";
+import { STAKE_MEMO } from "../../../../shared/consts";
 
 @Injectable({ providedIn: AuthModule })
 export class TrustAuthProvider implements AuthProvider {
   getAddress(coin: CoinType): Observable<string> {
-    // if (environment.production === false) {
-    //   if (!TrustProvider.isAvailable) {
-    //     switch (coin) {
-    //       case CoinType.cosmos:
-    //         // return of("cosmos130q48agm6yal2uxp3rgv3ptlwmwwk099c5nwj4");
-    //         return of("cosmos1cj7u0wpe45j0udnsy306sna7peah054upxtkzk");
-    //       case CoinType.tron:
-    //         return of("TKYT8YiiL58h8USHkmVEhCYpNfgSyiWPcW");
-    //     }
-    //   }
-    // }
-
     if (TrustProvider && TrustProvider.isAvailable) {
       return fromPromise(TrustProvider.getAccounts()).pipe(
         map(accounts => {
@@ -69,6 +56,9 @@ export class TrustAuthProvider implements AuthProvider {
   }
 
   signTransaction(network: CoinType, transaction: any): Observable<string> {
+    if (network === CoinType.cosmos) {
+      transaction.memo = STAKE_MEMO;
+    }
     return from(TrustProvider.signTransaction(network, transaction));
   }
 }
