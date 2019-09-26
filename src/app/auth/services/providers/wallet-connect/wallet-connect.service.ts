@@ -25,14 +25,19 @@ export class WalletConnectService {
       switchMap(() => {
         const result = new Subject();
         const uri = this.connector.uri;
+        let ignoreClose = false;
         // display QR Code modal
         WalletConnectQRCodeModal.open(uri, () => {
-          result.error(Errors.REJECTED_BY_USER);
+          if (!ignoreClose) {
+            result.error(Errors.REJECTED_BY_USER);
+          }
         });
         this.connector.on("connect", (error, payload) => {
           if (error) {
             result.error(error);
           }
+
+          ignoreClose = true;
 
           // Close QR Code Modal
           WalletConnectQRCodeModal.close();

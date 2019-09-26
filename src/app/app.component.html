@@ -7,21 +7,42 @@
             ><img src="assets/images/trust_logo.svg" alt="trust"
           /></a>
         </div>
-        <div class="menu" *ngIf="loggedWith | async as logged; else login">
+        <div
+          class="menu d-flex align-content-center"
+          *ngIf="loggedWith | async as logged; else login"
+        >
           <button
-            class="btn btn-outline-light text-left logout"
-            (click)="logged.id !== 'trustwallet' ? logout() : null"
+            *ngIf="logged.id !== 'trustwallet'; else DisabledBtn"
+            class="btn btn-light text-left btn-sm logout"
+            (click)="logout()"
           >
             <div>
+              <img
+                class="icon"
+                src="assets/images/{{ logged.icon }}"
+                alt="trust"
+              />
               Connected
-              <i class="fa fa-sign-out" *ngIf="logged.id !== 'trustwallet'"></i>
+              <i class="fa fa-sign-out"></i>
             </div>
-            <small class="font-italic text-left">{{ logged.name }}</small>
           </button>
+          <ng-template #DisabledBtn>
+            <div class="text-white align-self-center">
+              <img
+                class="icon"
+                src="assets/images/{{ logged.icon }}"
+                alt="trust"
+              />
+              Connected
+            </div>
+          </ng-template>
         </div>
         <ng-template #login>
-          <div class="menu">
-            <button class="btn btn-outline-light" (click)="connectWallet()">
+          <div class="menu d-flex align-content-center">
+            <button
+              class="btn btn-outline-light btn-sm"
+              (click)="connectWallet()"
+            >
               Connect Wallet
             </button>
           </div>
