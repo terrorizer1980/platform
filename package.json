@@ -9,7 +9,7 @@
     "build:watch": "ng build --prod --watch",
     "postbuild": "rimraf dist/**/*.map",
     "test": "ng test --watch false",
-    "updateVersion": "npm version patch && git push",
+    "updateVersion": "npm version patch && git push origin master",
     "lint": "ng lint",
     "e2e": "ng e2e"
   },
