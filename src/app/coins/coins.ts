@@ -91,9 +91,9 @@ export const Upcoming: UpcomingCoin[] = [
     message: "Coming soon"
   },
   {
-    symbol: "ETH",
+    symbol: "",
     name: "Compound",
-    iconUri: icon(CoinType.ethereum),
+    iconUri: "/assets/images/icon_compound.svg",
     message: "Coming soon"
   }
 ];
