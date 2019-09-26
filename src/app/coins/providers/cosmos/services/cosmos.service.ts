@@ -314,9 +314,7 @@ export class CosmosService implements CoinService {
           ...payload
         }
       })),
-      switchMap(tx =>
-        from(this.authService.signTransaction(CoinType.cosmos, tx))
-      )
+      switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx))
     );
   }
 
@@ -335,9 +333,7 @@ export class CosmosService implements CoinService {
           ...payload
         }
       })),
-      switchMap(tx =>
-        from(this.authService.signTransaction(CoinType.cosmos, tx))
-      )
+      switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx))
     );
   }
 

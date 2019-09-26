@@ -46,7 +46,7 @@ export class WalletConnectService {
   }
 
   signTransaction(network: CoinType, transaction: any): Observable<string> {
-    if (!this.connector) {
+    if (!this.connector || !this.connector.connected) {
       return this.connect().pipe(
         switchMap(() =>
           from(this.connector.trustSignTransaction(network, transaction))

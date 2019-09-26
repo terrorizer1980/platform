@@ -27,7 +27,6 @@ import {
   TronVote
 } from "@trustwallet/rpc";
 import { Base64, CoinType, Hex } from "@trustwallet/types";
-import { TrustProvider } from "@trustwallet/provider";
 import { CoinService } from "../../../services/coin.service";
 import {
   BALANCE_REFRESH_INTERVAL,
@@ -422,7 +421,7 @@ export class TronService implements CoinService {
     amount: BigNumber
   ): Observable<TronBroadcastResult> {
     return this.buildFreezeTransaction(address, amount, 3).pipe(
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
+      switchMap(tx => this.authService.signTransaction(CoinType.tron, tx)),
       switchMap(tx => this.broadcastTx(tx))
     );
   }
@@ -455,7 +454,7 @@ export class TronService implements CoinService {
       account.address,
       to
     ).pipe(
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
+      switchMap(tx => this.authService.signTransaction(CoinType.tron, tx)),
       switchMap(tx => this.broadcastTx(tx))
     );
 
@@ -474,14 +473,9 @@ export class TronService implements CoinService {
     to: string,
     amount: BigNumber
   ): Observable<{ vote_address: string; vote_count: number }[]> {
-    const curr_votes = account.votes.map(v => ({
-      vote_address: v.voteAddress,
-      vote_count: v.voteCount
-    }));
-
     return this.config.pipe(
       map(cfg => [
-        ...curr_votes,
+        ...this.getVotes(account),
         {
           vote_address: to,
           vote_count: cfg.toCoin(amount).toNumber()
@@ -489,6 +483,15 @@ export class TronService implements CoinService {
       ]),
       shareReplay(1)
     );
+  }
+
+  private getVotes(account: TronAccount): any[] {
+    return account.votes
+      ? account.votes.map(v => ({
+          vote_address: v.voteAddress,
+          vote_count: v.voteCount
+        }))
+      : [];
   }
 
   private removeVote(
@@ -526,7 +529,7 @@ export class TronService implements CoinService {
     votes: { vote_address: string; vote_count: number }[]
   ): Observable<TronBroadcastResult> {
     return this.buildVoteTransaction(address, votes).pipe(
-      switchMap(tx => from(TrustProvider.signTransaction(CoinType.tron, tx))),
+      switchMap(tx => this.authService.signTransaction(CoinType.tron, tx)),
       switchMap(tx => this.broadcastTx(tx))
     );
   }
