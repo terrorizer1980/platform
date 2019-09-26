@@ -17,6 +17,10 @@ import {
 } from "./providers/tron/tron.descriptor";
 import BigNumber from "bignumber.js";
 
+function icon(type: CoinType): string {
+  return `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(type)}/info/logo.png`;
+}
+
 export const Coins: CoinProviderConfig[] = [
   CoinDescriptor<CosmosProviderConfig>({
     network: CoinTypeUtils.id(CoinType.cosmos),
@@ -25,9 +29,7 @@ export const Coins: CoinProviderConfig[] = [
     endpoint: environment.rpcEndpoint(CoinType.cosmos),
     currencyName: CoinTypeUtils.networkName(CoinType.cosmos),
     currencySymbol: CoinTypeUtils.symbol(CoinType.cosmos),
-    iconUri: `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(
-      CoinType.cosmos
-    )}/info/logo.png`,
+    iconUri: icon(CoinType.cosmos),
     config: CosmosCoinConfig,
     gas: new BigNumber(250000),
     fee: new BigNumber(1000),
@@ -46,9 +48,7 @@ export const Coins: CoinProviderConfig[] = [
     endpoint: environment.rpcEndpoint(CoinType.tron),
     currencyName: CoinTypeUtils.networkName(CoinType.tron),
     currencySymbol: CoinTypeUtils.symbol(CoinType.tron),
-    iconUri: `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(
-      CoinType.tron
-    )}/info/logo.png`,
+    iconUri: icon(CoinType.tron),
     config: TronCoinConfig,
     gas: new BigNumber(0),
     fee: new BigNumber(0),
@@ -60,4 +60,32 @@ export const Coins: CoinProviderConfig[] = [
       return new UnitConverter(this).toCoin(amount);
     }
   })
+];
+
+export interface UpcomingCoin {
+  symbol: string;
+  name: string;
+  iconUri: string;
+  message: string;
+}
+
+export const Upcoming: UpcomingCoin[] = [
+  {
+    symbol: "XTZ",
+    name: "Tezos",
+    iconUri: icon(CoinType.tezos),
+    message: "Coming after Oct 24 2019.",
+  },
+  {
+    symbol: "WAV",
+    name: "Waves",
+    iconUri: icon(CoinType.waves),
+    message: "Coming soon",
+  },
+  {
+    symbol: "ETH",
+    name: "Compound",
+    iconUri: icon(CoinType.ethereum),
+    message: "Coming soon",
+  },
 ];

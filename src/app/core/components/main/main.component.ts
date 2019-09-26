@@ -2,7 +2,7 @@ import { forkJoin, Observable, of, ReplaySubject, throwError } from "rxjs";
 import { Router } from "@angular/router";
 import { catchError, first, map, shareReplay } from "rxjs/operators";
 import { Component, OnInit } from "@angular/core";
-import { Coins } from "../../../coins/coins";
+import { Coins, Upcoming, UpcomingCoin } from "../../../coins/coins";
 import {
   CoinProviderConfig,
   StakeHolder,
@@ -27,6 +27,7 @@ interface CoinDescriptor {
 export class MainComponent implements OnInit {
   myStakeHolders$: Observable<StakeHolderList> = new ReplaySubject(1);
   blockchains$: Observable<CoinDescriptor[]>;
+  upcomings: UpcomingCoin[];
 
   constructor(
     private router: Router,
@@ -54,6 +55,8 @@ export class MainComponent implements OnInit {
         return throwError(err);
       })
     ) as Observable<CoinDescriptor[]>;
+
+    this.upcomings = Upcoming;
   }
 
   ngOnInit(): void {
