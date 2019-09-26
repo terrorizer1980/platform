@@ -180,7 +180,7 @@ export class StakingComponent implements OnInit, OnDestroy {
       this.config
     ]).pipe(
       map(([balance, config]) => {
-        const additional = new BigNumber(config.fee);
+        const additional = config.toCoin(new BigNumber(config.fee));
         const normal = balance.minus(additional.multipliedBy(2));
         const min = balance.minus(additional);
         return {

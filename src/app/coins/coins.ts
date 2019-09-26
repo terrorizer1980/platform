@@ -18,7 +18,9 @@ import {
 import BigNumber from "bignumber.js";
 
 function icon(type: CoinType): string {
-  return `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(type)}/info/logo.png`;
+  return `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(
+    type
+  )}/info/logo.png`;
 }
 
 export const Coins: CoinProviderConfig[] = [
@@ -74,25 +76,24 @@ export const Upcoming: UpcomingCoin[] = [
     symbol: "XTZ",
     name: "Tezos",
     iconUri: icon(CoinType.tezos),
-    message: "Coming after Oct 24 2019.",
+    message: "Coming after Oct 24 2019."
   },
   {
     symbol: "WAV",
     name: "Waves",
     iconUri: icon(CoinType.waves),
-    message: "Coming soon",
+    message: "Coming soon"
   },
   {
     symbol: "IOTX",
     name: "IoTeX",
     iconUri: icon(CoinType.iotex),
-    message: "Coming soon",
+    message: "Coming soon"
   },
   {
     symbol: "ETH",
     name: "Compound",
     iconUri: icon(CoinType.ethereum),
-    message: "Coming soon",
-  },
-
+    message: "Coming soon"
+  }
 ];

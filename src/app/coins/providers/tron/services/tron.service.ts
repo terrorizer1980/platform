@@ -42,6 +42,7 @@ import { TronProviderConfig } from "../tron.descriptor";
 import { TronRpcService } from "./tron-rpc.service";
 import { TronUnboundInfoService } from "./tron-unbound-info.service";
 import { AuthService } from "../../../../auth/services/auth.service";
+import { fromPromise } from "rxjs/internal-compatibility";
 
 export const TronServiceInjectable = [
   TronConfigService,
@@ -222,7 +223,7 @@ export class TronService implements CoinService {
   private requestBalance(address: string): Observable<BigNumber> {
     return this.getAccountOnce(address).pipe(
       map((account: TronAccount) => {
-        return account.balance;
+        return account.balance ? account.balance : new BigNumber(0);
       })
     );
   }
@@ -319,7 +320,7 @@ export class TronService implements CoinService {
 
   private getAccountOnce(address: string): Observable<TronAccount> {
     return this.tronRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.getAccount(address)))
+      switchMap(rpc => fromPromise(rpc.getAccount(address)))
     );
   }
 

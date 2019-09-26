@@ -103,25 +103,27 @@
     <div class="card mt-2">
       <div class="card-body p-0">
         <h6 class="m-2 ml-3">Coming soon</h6>
-          <div *ngFor="let upcoming of upcomings">
-            <div class="row row-container pb-1 pt-1 item">
-              <div class="col-8 col-auto mr-auto pl-2">
-                <img
-                  class="m-2 row-logo"
-                  src="{{ upcoming.iconUri }}"
-                  alt="{{ upcoming.name }}"
-                />
-                <span class="js-l">
-                  <span class="mr-1">{{ upcoming.name }}</span>
-                  <span class="text-muted">{{ upcoming.symbol }}</span>
-                  <div class="success">
-                    <small>{{ upcoming.message }}</small>
-                  </div>
-                </span>
-              </div>
-              <div class="col-1 ml-1 mr-3"><i class="text-muted fa fa-chevron-right"></i></div>
+        <div *ngFor="let upcoming of upcomings">
+          <div class="row row-container pb-1 pt-1 item">
+            <div class="col-8 col-auto mr-auto pl-2">
+              <img
+                class="m-2 row-logo"
+                src="{{ upcoming.iconUri }}"
+                alt="{{ upcoming.name }}"
+              />
+              <span class="js-l">
+                <span class="mr-1">{{ upcoming.name }}</span>
+                <span class="text-muted">{{ upcoming.symbol }}</span>
+                <div class="success">
+                  <small>{{ upcoming.message }}</small>
+                </div>
+              </span>
+            </div>
+            <div class="col-1 ml-1 mr-3">
+              <i class="text-muted fa fa-chevron-right"></i>
             </div>
           </div>
+        </div>
       </div>
     </div>
   </div>
