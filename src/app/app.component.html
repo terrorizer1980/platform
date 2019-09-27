@@ -12,7 +12,7 @@
           *ngIf="loggedWith | async as logged; else login"
         >
           <button
-            *ngIf="logged.id !== 'trustwallet'; else DisabledBtn"
+            *ngIf="logged.id !== 'trustwallet'"
             class="btn btn-light text-left btn-sm logout"
             (click)="logout()"
           >
@@ -26,16 +26,6 @@
               <i class="fa fa-sign-out"></i>
             </div>
           </button>
-          <ng-template #DisabledBtn>
-            <div class="text-white align-self-center">
-              <img
-                class="icon"
-                src="assets/images/{{ logged.icon }}"
-                alt="trust"
-              />
-              Connected
-            </div>
-          </ng-template>
         </div>
         <ng-template #login>
           <div class="menu d-flex align-content-center">
