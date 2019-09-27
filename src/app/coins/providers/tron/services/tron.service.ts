@@ -42,6 +42,7 @@ import { TronRpcService } from "./tron-rpc.service";
 import { TronUnboundInfoService } from "./tron-unbound-info.service";
 import { AuthService } from "../../../../auth/services/auth.service";
 import { fromPromise } from "rxjs/internal-compatibility";
+import { TronUtils } from "@trustwallet/rpc/lib";
 
 export const TronServiceInjectable = [
   TronConfigService,
@@ -432,8 +433,21 @@ export class TronService implements CoinService {
     amount: BigNumber
   ): Observable<TronBroadcastResult> {
     return this.freezeBalance(account.address, amount).pipe(
-      switchMap(_ => this.addVote(account, to, amount)),
+      switchMap(_ =>
+        this.addVote(account, to, amount.plus(this.getFrozen(account)))
+      ),
       switchMap(votes => this.updateVotes(account.address, votes))
+    );
+  }
+
+  private getFrozen(account: TronAccount): BigNumber {
+    return TronUtils.fromTron(
+      account.frozen
+        ? account.frozen.reduce(
+            (acc, frozen) => acc.plus(frozen.frozenBalance),
+            new BigNumber(0)
+          )
+        : new BigNumber(0)
     );
   }
 
