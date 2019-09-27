@@ -4,6 +4,7 @@ import {
   combineLatest,
   forkJoin,
   from,
+  interval,
   Observable,
   of,
   timer
@@ -15,6 +16,7 @@ import {
   first,
   map,
   shareReplay,
+  skipWhile,
   switchMap,
   tap
 } from "rxjs/operators";
@@ -32,7 +34,8 @@ import {
   BALANCE_REFRESH_INTERVAL,
   STAKE_REFRESH_INTERVAL,
   StakeAction,
-  StakeHolderList
+  StakeHolderList,
+  TX_WAIT_CHECK_INTERVAL
 } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinAtlasService } from "../../../services/coin-atlas.service";
@@ -42,7 +45,8 @@ import { TronRpcService } from "./tron-rpc.service";
 import { TronUnboundInfoService } from "./tron-unbound-info.service";
 import { AuthService } from "../../../../auth/services/auth.service";
 import { fromPromise } from "rxjs/internal-compatibility";
-import { TronUtils } from "@trustwallet/rpc/lib";
+import { TronTransaction, TronUtils } from "@trustwallet/rpc/lib";
+import { CosmosTx } from "@trustwallet/rpc/lib/cosmos/models/CosmosTx";
 
 export const TronServiceInjectable = [
   TronConfigService,
@@ -178,7 +182,7 @@ export class TronService implements CoinService {
     action: StakeAction,
     addressTo: string,
     amount: BigNumber
-  ): Observable<TronBroadcastResult> {
+  ): Observable<TronTransaction> {
     return this.getAddress().pipe(
       switchMap(address => {
         return this.getAccountOnce(address);
@@ -431,31 +435,40 @@ export class TronService implements CoinService {
     account: TronAccount,
     to: string,
     amount: BigNumber
-  ): Observable<TronBroadcastResult> {
+  ): Observable<TronTransaction> {
     return this.freezeBalance(account.address, amount).pipe(
       switchMap(_ =>
-        this.addVote(account, to, amount.plus(this.getFrozen(account)))
+        this.addVote(account, to, amount.plus(this.getFreeFrozen(account)))
       ),
-      switchMap(votes => this.updateVotes(account.address, votes))
+      switchMap(votes => this.updateVotes(account.address, votes)),
+      switchMap(result => this.waitForTx(result.code))
     );
   }
 
-  private getFrozen(account: TronAccount): BigNumber {
-    return TronUtils.fromTron(
-      account.frozen
-        ? account.frozen.reduce(
+  private getFreeFrozen(account: TronAccount): BigNumber {
+    const freeFrozen = account.frozen
+      ? account.frozen
+          .reduce(
             (acc, frozen) => acc.plus(frozen.frozenBalance),
             new BigNumber(0)
           )
-        : new BigNumber(0)
+          .integerValue()
+      : new BigNumber(0);
+
+    const result = freeFrozen.minus(
+      account.votes.reduce((acc, vote) => vote.voteCount + acc, 0)
     );
+
+    return result.isGreaterThan(0)
+      ? TronUtils.fromTron(result)
+      : new BigNumber(0);
   }
 
   private unstake(
     account: TronAccount,
     to: string,
     amount: BigNumber
-  ): Observable<TronBroadcastResult> {
+  ): Observable<TronTransaction> {
     const votes$ = this.removeVote(account, to, amount);
     const frozenBalance$ = combineLatest([this.config, votes$]).pipe(
       map(([cfg, votes]) =>
@@ -478,7 +491,8 @@ export class TronService implements CoinService {
         this.freezeBalance(account.address, frozenBalance)
       ),
       switchMap(_ => votes$),
-      switchMap(votes => this.updateVotes(account.address, votes))
+      switchMap(votes => this.updateVotes(account.address, votes)),
+      switchMap(result => this.waitForTx(result.code))
     );
   }
 
@@ -561,6 +575,21 @@ export class TronService implements CoinService {
         account => account.frozen.filter(f => f.expireTime > now).length === 0
       ),
       catchError(_ => of(false))
+    );
+  }
+
+  waitForTx(txhash: string): Observable<TronTransaction> {
+    return interval(TX_WAIT_CHECK_INTERVAL).pipe(
+      switchMap(() => this.getStakingTransaction(txhash)),
+      skipWhile(tx => !tx),
+      first()
+    );
+  }
+
+  getStakingTransaction(txhash: string): Observable<TronTransaction> {
+    return this.tronRpc.rpc.pipe(
+      switchMap(rpc => rpc.getTransaction(txhash)),
+      catchError(_ => of(null))
     );
   }
 }

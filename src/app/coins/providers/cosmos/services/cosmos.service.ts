@@ -4,13 +4,14 @@ import {
   combineLatest,
   forkJoin,
   from,
+  interval,
   Observable,
   of,
   timer
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { first, map, switchMap } from "rxjs/operators";
+import { first, map, skipWhile, switchMap } from "rxjs/operators";
 import {
   CosmosAccount,
   CosmosBroadcastResult,
@@ -25,7 +26,8 @@ import {
   BALANCE_REFRESH_INTERVAL,
   STAKE_REFRESH_INTERVAL,
   StakeAction,
-  StakeHolderList
+  StakeHolderList,
+  TX_WAIT_CHECK_INTERVAL
 } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinType } from "@trustwallet/types";
@@ -35,6 +37,7 @@ import { CosmosUnboundInfoService } from "./cosmos-unbound-info.service";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
 import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { AuthService } from "../../../../auth/services/auth.service";
+import { CosmosTx } from "@trustwallet/rpc/lib/cosmos/models/CosmosTx";
 
 // TODO: There is plenty of old boilerplate here yet. Need to be refactored.
 
@@ -366,7 +369,7 @@ export class CosmosService implements CoinService {
     action: StakeAction,
     addressTo: string,
     amount: BigNumber
-  ): Observable<CosmosBroadcastResult> {
+  ): Observable<CosmosTx> {
     return this.getAddress().pipe(
       switchMap(address => {
         return this.getAccountOnce(address);
@@ -380,7 +383,8 @@ export class CosmosService implements CoinService {
       }),
       switchMap(result => {
         return this.broadcastTx(result);
-      })
+      }),
+      switchMap(result => this.waitForTx(result.txhash))
     );
   }
 
@@ -415,5 +419,20 @@ export class CosmosService implements CoinService {
 
   isUnstakeEnabled(): Observable<boolean> {
     return of(true);
+  }
+
+  waitForTx(txhash: string): Observable<CosmosTx> {
+    return interval(TX_WAIT_CHECK_INTERVAL).pipe(
+      switchMap(() => this.getStakingTransactions()),
+      map(txs => txs.find(tx => tx.txhash === txhash)),
+      skipWhile(tx => !tx),
+      first()
+    );
+  }
+
+  getStakingTransactions(): Observable<CosmosTx[]> {
+    return combineLatest([this.cosmosRpc.rpc, this.getAddress()]).pipe(
+      switchMap(([rpc, address]) => rpc.listStakingTransactions(address))
+    );
   }
 }
