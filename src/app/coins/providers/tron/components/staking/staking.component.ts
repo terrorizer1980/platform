@@ -4,6 +4,7 @@ import { ActivatedRoute } from "@angular/router";
 import { TronProviderConfig } from "../../tron.descriptor";
 import { TronConfigService } from "../../services/tron-config.service";
 import { TronService } from "../../services/tron.service";
+import BigNumber from "bignumber.js";
 
 @Component({
   selector: "app-staking",
@@ -19,4 +20,8 @@ export class StakingComponent {
     public tron: TronService,
     private activatedRoute: ActivatedRoute
   ) {}
+
+  formatMax(max: BigNumber): string {
+    return max.integerValue().toString();
+  }
 }

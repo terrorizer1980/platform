@@ -4,6 +4,7 @@ import { CosmosService } from "../../services/cosmos.service";
 import { ActivatedRoute } from "@angular/router";
 import { CosmosConfigService } from "../../services/cosmos-config.service";
 import { CosmosProviderConfig } from "../../cosmos.descriptor";
+import BigNumber from "bignumber.js";
 
 @Component({
   selector: "app-test",
@@ -19,4 +20,8 @@ export class StakingComponent {
     public cosmos: CosmosService,
     private activatedRoute: ActivatedRoute
   ) {}
+
+  formatMax(max: BigNumber): string {
+    return (Math.floor(max.toNumber() * 1000) / 1000).toString();
+  }
 }

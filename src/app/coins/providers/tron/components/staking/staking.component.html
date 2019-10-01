@@ -2,4 +2,18 @@
   [validatorId]="validatorId"
   [dataSource]="tron"
   [config]="config"
-></app-shared-staking>
+  [formatMax]="formatMax"
+>
+  <ng-template content let-form="form" let-details="details">
+    <ng-container [formGroup]="form">
+      <input
+        formControlName="amount"
+        placeholder="Amount in {{ details.config.currencySymbol }}"
+        class="form-control"
+        aria-label="Large"
+        [mask]="'0*'"
+        [ngClass]="{ 'is-invalid': form.invalid }"
+      />
+    </ng-container>
+  </ng-template>
+</app-shared-staking>

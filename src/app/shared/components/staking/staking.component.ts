@@ -1,4 +1,11 @@
-import { Component, Input, OnDestroy, OnInit } from "@angular/core";
+import {
+  Component,
+  ContentChild,
+  Input,
+  OnDestroy,
+  OnInit,
+  TemplateRef
+} from "@angular/core";
 import {
   combineLatest,
   forkJoin,
@@ -33,6 +40,7 @@ import { SelectAuthProviderComponent } from "../select-auth-provider/select-auth
 import { AuthProvider } from "../../../auth/services/auth-provider";
 import { ErrorsService } from "../../services/errors/errors.service";
 import { Errors } from "../../consts";
+import { ContentDirective } from "../../directives/content.directive";
 
 interface StakeDetails {
   config: CoinProviderConfig;
@@ -48,6 +56,10 @@ export class StakingComponent implements OnInit, OnDestroy {
   @Input() validatorId: string;
   @Input() dataSource: CoinService;
   @Input() config: Observable<CoinProviderConfig>;
+  @Input() formatMax: (max: BigNumber) => BigNumber;
+  @ContentChild(ContentDirective, { read: TemplateRef, static: false })
+  contentTemplate;
+
   info: Observable<CosmosStakingInfo>;
   stakeForm: FormGroup;
   max$: Observable<any>;
@@ -139,7 +151,7 @@ export class StakingComponent implements OnInit, OnDestroy {
 
   setMax() {
     this.max$.subscribe(({ normal }) => {
-      this.stakeForm.get("amount").setValue(normal);
+      this.stakeForm.get("amount").setValue(this.formatMax(normal));
     });
   }
 

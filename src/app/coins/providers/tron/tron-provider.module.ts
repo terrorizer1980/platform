@@ -12,6 +12,7 @@ import { DelegatorsComponent } from "./components/delegators/delegators.componen
 import { DetailsComponent } from "./components/details/details.component";
 import { StakingComponent } from "./components/staking/staking.component";
 import { UnstakingComponent } from "./components/unstaking/unstaking.component";
+import { ReactiveFormsModule } from "@angular/forms";
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { UnstakingComponent } from "./components/unstaking/unstaking.component";
     SharedModule,
     RouterDataModule,
     RouterModule,
-    TronProviderRoutingModule
+    TronProviderRoutingModule,
+    ReactiveFormsModule
   ],
   providers: [
     TronService,

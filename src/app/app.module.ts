@@ -10,6 +10,7 @@ import { SharedModule } from "./shared/shared.module";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import * as Sentry from "@sentry/browser";
 import { SentryErrorHandler } from "./sentry.service";
+import { IConfig, NgxMaskModule } from "ngx-mask";
 
 Sentry.init({
   dsn: "https://2083a18ff4264ba2a86704ee8d8bc445@sentry.io/1678583",
@@ -24,7 +25,8 @@ Sentry.init({
     SharedModule,
     RouterModule,
     BrowserModule,
-    NgbModule
+    NgbModule,
+    NgxMaskModule.forRoot()
   ],
   providers: [{ provide: ErrorHandler, useClass: SentryErrorHandler }],
   bootstrap: [AppComponent]

@@ -2,6 +2,17 @@
   [formGroup]="stakeForm"
   *ngIf="details$ | async as details; else loadingDetails"
 >
+  <ng-template #defaultInput>
+    <input
+      type="number"
+      formControlName="amount"
+      placeholder="Amount in {{ details.config.currencySymbol }}"
+      class="form-control"
+      aria-label="Large"
+      [ngClass]="{ 'is-invalid': stakeForm.invalid }"
+    />
+  </ng-template>
+
   <div class="row small">
     <div class="card col-12 pt-2 pb-2 p-0">
       <div class="card-body p-1 mt-4 mb-4">
@@ -15,9 +26,7 @@
                 *ngIf="details.hasProvider"
               >
                 <span class="btn-link" *ngIf="max$ | async; let max"
-                  ><span
-                    >Available: {{ Math.floor(max.normal * 1000) / 1000 }}</span
-                  ></span
+                  ><span>Available: {{ formatMax(max.normal) }}</span></span
                 >
               </div>
             </div>
@@ -30,14 +39,12 @@
 
           <div class="form-group mb-2">
             <div class="input-group input-group-lg">
-              <input
-                type="number"
-                formControlName="amount"
-                placeholder="Amount in {{ details.config.currencySymbol }}"
-                class="form-control"
-                aria-label="Large"
-                [ngClass]="{ 'is-invalid': stakeForm.invalid }"
-              />
+              <ng-container
+                *ngTemplateOutlet="
+                  contentTemplate ? contentTemplate : defaultInput;
+                  context: { form: stakeForm, details: details }
+                "
+              ></ng-container>
             </div>
             <div class="feedback text-left">
               <div
