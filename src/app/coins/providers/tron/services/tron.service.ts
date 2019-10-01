@@ -455,8 +455,9 @@ export class TronService implements CoinService {
           .integerValue()
       : new BigNumber(0);
 
+    const votes = this.getVotes(account);
     const result = freeFrozen.minus(
-      account.votes.reduce((acc, vote) => vote.voteCount + acc, 0)
+      votes.reduce((acc, vote) => vote.vote_count + acc, 0)
     );
 
     return result.isGreaterThan(0)
@@ -513,7 +514,7 @@ export class TronService implements CoinService {
     );
   }
 
-  private getVotes(account: TronAccount): any[] {
+  private getVotes(account: TronAccount): { vote_address: string; vote_count: number }[] {
     return account.votes
       ? account.votes.map(v => ({
           vote_address: v.voteAddress,
@@ -529,22 +530,16 @@ export class TronService implements CoinService {
   ): Observable<{ vote_address: string; vote_count: number }[]> {
     return this.config.pipe(
       map(cfg =>
-        account.votes
+        this.getVotes(account)
           .map(v => {
-            if (v.voteAddress === to) {
+            if (v.vote_address === to) {
               return {
-                vote_address: v.voteAddress,
-                vote_count: Math.max(
-                  v.voteCount - cfg.toCoin(amount).toNumber(),
-                  0
-                )
+                vote_address: v.vote_address,
+                vote_count: Math.max(v.vote_count - cfg.toCoin(amount).toNumber(), 0)
               };
             }
 
-            return {
-              vote_address: v.voteAddress,
-              vote_count: v.voteCount
-            };
+            return v;
           })
           .filter(v => v.vote_count > 0)
       ),
