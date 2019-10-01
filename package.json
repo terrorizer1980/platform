@@ -47,7 +47,7 @@
     "localforage": "^1.7.3",
     "ngforage": "^5.0.1",
     "ngx-loaders-css": "^1.0.2",
-    "ngx-mask": "^8.0.6",
+    "ngx-mask": "6.5.18",
     "pouchdb": "^7.1.1",
     "rxjs": "^6.5.3",
     "tslib": "^1.9.0",
