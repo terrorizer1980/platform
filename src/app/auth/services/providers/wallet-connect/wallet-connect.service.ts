@@ -5,7 +5,7 @@ import WalletConnectQRCodeModal from "@walletconnect/qrcode-modal";
 import { environment } from "../../../../../environments/environment";
 import { fromPromise } from "rxjs/internal-compatibility";
 import { from, Observable, ReplaySubject, Subject } from "rxjs";
-import { map, switchMap } from "rxjs/operators";
+import { catchError, map, switchMap, tap, timeout } from "rxjs/operators";
 import { CoinType } from "@trustwallet/types";
 import { Errors } from "../../../../shared/consts";
 
@@ -19,14 +19,21 @@ export class WalletConnectService {
     });
   }
 
-  connect(): Observable<Account[]> {
+  connect(reinit: boolean = false): Observable<Account[]> {
     let result: Observable<Account[]>;
-    if (!this.connector || !this.connector.connected) {
+    if (!this.connector || !this.connector.connected || reinit) {
+      // Initialize connector with cached session and killed it as it no longer used
       this.connector = new WalletConnect({
         bridge: environment.walletConnectBridge
       });
 
       result = (fromPromise(this.connector.killSession()).pipe(
+        tap(_ => {
+          // create new instance of connector
+          this.connector = new WalletConnect({
+            bridge: environment.walletConnectBridge
+          });
+        }),
         switchMap(() => fromPromise(this.connector.createSession())),
         switchMap(() => {
           const result = new Subject();
@@ -55,9 +62,12 @@ export class WalletConnectService {
         switchMap(() => fromPromise(this.connector.getAccounts()))
       ) as unknown) as Observable<Account[]>;
     } else {
-      result = (fromPromise(
+      result = ((fromPromise(
         this.connector.getAccounts()
-      ) as unknown) as Observable<Account[]>;
+      ) as unknown) as Observable<Account[]>).pipe(
+        timeout(1000),
+        catchError(error => this.connect(true))
+      );
     }
 
     this.connector.on("disconnect", (error, payload) => {});
