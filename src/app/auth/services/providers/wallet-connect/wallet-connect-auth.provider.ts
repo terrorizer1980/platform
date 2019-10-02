@@ -85,4 +85,8 @@ export class WalletConnectAuthProvider implements AuthProvider {
   get active(): boolean {
     return true;
   }
+
+  disconnected(): Observable<boolean> {
+    return this.wc.disconnected();
+  }
 }

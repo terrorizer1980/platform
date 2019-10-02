@@ -24,8 +24,7 @@ export class AppComponent implements OnDestroy {
   constructor(
     private auth: AuthService,
     private dialogService: DialogsService,
-    private errorsService: ErrorsService,
-    private dbService: DbService
+    private errorsService: ErrorsService
   ) {}
 
   logout() {
@@ -37,7 +36,7 @@ export class AppComponent implements OnDestroy {
       this.loggedWith,
       instance.componentInstance.logout
     ])
-      .pipe(switchMap(([loggedWith]) => this.dbService.remove(loggedWith.id)))
+      .pipe(switchMap(([loggedWith]) => this.auth.logout(loggedWith)))
       .subscribe(() => {
         location.reload();
       });

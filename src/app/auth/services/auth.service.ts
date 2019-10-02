@@ -21,8 +21,24 @@ export class AuthService {
     private ledgerAuthProvider: LedgerAuthProvider,
     private trezorAuthProvider: TrezorAuthProvider,
     private db: DbService
-  ) {}
-
+  ) {
+    this.getAuthorizedProvider()
+      .pipe(
+        switchMap(provider =>
+          combineLatest([of(provider), provider.disconnected()])
+        ),
+        switchMap(([provider, disconnected]) =>
+          disconnected ? this.logout(provider) : of(null)
+        )
+      )
+      .subscribe(
+        _ => {
+          console.log("disconnected");
+          location.reload();
+        },
+        error => {}
+      );
+  }
   // Returns address from the first authorized provider
   getAddressFromAuthorized(coin: CoinType): Observable<string> {
     return forkJoin(
@@ -116,6 +132,10 @@ export class AuthService {
           .filter(result => result !== null);
       })
     );
+  }
+
+  logout(provider: AuthProvider): Observable<any> {
+    return this.db.remove(provider.id);
   }
 
   public getProviders(): AuthProvider[] {

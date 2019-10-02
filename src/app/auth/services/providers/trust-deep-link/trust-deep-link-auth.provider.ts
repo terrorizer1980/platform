@@ -41,6 +41,10 @@ export class TrustDeepLinkAuthProvider implements AuthProvider {
     return true;
   }
 
+  disconnected(): Observable<boolean> {
+    return of(false);
+  }
+
   signTransaction(network: CoinType, transaction: any): Observable<string> {
     return of(null);
   }

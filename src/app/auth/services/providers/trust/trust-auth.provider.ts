@@ -55,6 +55,10 @@ export class TrustAuthProvider implements AuthProvider {
     return true;
   }
 
+  disconnected(): Observable<boolean> {
+    return of(false);
+  }
+
   signTransaction(network: CoinType, transaction: any): Observable<string> {
     if (network === CoinType.cosmos) {
       transaction.memo = STAKE_MEMO;

@@ -47,4 +47,8 @@ export class TrezorAuthProvider implements AuthProvider {
   signTransaction(network: CoinType, transaction: any): Observable<string> {
     return of(null);
   }
+
+  disconnected(): Observable<boolean> {
+    return of(false);
+  }
 }

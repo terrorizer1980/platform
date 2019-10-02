@@ -6,6 +6,7 @@ export interface AuthProvider {
   authorize(): Observable<Account[]>;
   isAuthorized(): Observable<boolean>;
   signTransaction(network: number, transaction: any): Observable<string>;
+  disconnected(): Observable<boolean>;
   name: string;
   description?: string;
   active: boolean;
