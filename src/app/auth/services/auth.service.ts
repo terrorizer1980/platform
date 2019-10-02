@@ -4,7 +4,7 @@ import { AuthModule } from "../auth.module";
 import { CoinType, Account } from "@trustwallet/types";
 import { TrustAuthProvider } from "./providers/trust/trust-auth.provider";
 import { AuthProvider } from "./auth-provider";
-import { catchError, first, map, switchMap } from "rxjs/operators";
+import { catchError, first, map, skipWhile, switchMap } from "rxjs/operators";
 import { WalletConnectAuthProvider } from "./providers/wallet-connect/wallet-connect-auth.provider";
 import { CoinNotSupportedException } from "./coin-not-supported-exception";
 import { DbService } from "../../shared/services/db.service";
@@ -27,9 +27,8 @@ export class AuthService {
         switchMap(provider =>
           combineLatest([of(provider), provider.disconnected()])
         ),
-        switchMap(([provider, disconnected]) =>
-          disconnected ? this.logout(provider) : of(null)
-        )
+        skipWhile(([provider, disconnected]) => !disconnected),
+        switchMap(([provider]) => this.logout(provider))
       )
       .subscribe(
         _ => {
