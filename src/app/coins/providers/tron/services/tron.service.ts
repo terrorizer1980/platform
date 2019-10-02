@@ -452,7 +452,7 @@ export class TronService implements CoinService {
             (acc, frozen) => acc.plus(frozen.frozenBalance),
             new BigNumber(0)
           )
-          .integerValue()
+          .integerValue(BigNumber.ROUND_DOWN)
       : new BigNumber(0);
 
     const votes = this.getVotes(account);
@@ -514,7 +514,9 @@ export class TronService implements CoinService {
     );
   }
 
-  private getVotes(account: TronAccount): { vote_address: string; vote_count: number }[] {
+  private getVotes(
+    account: TronAccount
+  ): { vote_address: string; vote_count: number }[] {
     return account.votes
       ? account.votes.map(v => ({
           vote_address: v.voteAddress,
@@ -535,7 +537,10 @@ export class TronService implements CoinService {
             if (v.vote_address === to) {
               return {
                 vote_address: v.vote_address,
-                vote_count: Math.max(v.vote_count - cfg.toCoin(amount).toNumber(), 0)
+                vote_count: Math.max(
+                  v.vote_count - cfg.toCoin(amount).toNumber(),
+                  0
+                )
               };
             }
 

@@ -22,6 +22,6 @@ export class StakingComponent {
   ) {}
 
   formatMax(max: BigNumber): string {
-    return max.integerValue().toString();
+    return max.integerValue(BigNumber.ROUND_DOWN).toString();
   }
 }
