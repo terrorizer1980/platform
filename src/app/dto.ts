@@ -1,6 +1,8 @@
 // DTO - data transmission object
 // We use interfaces in binding etc.
 
+import BigNumber from "bignumber.js";
+
 export interface ICoinPrice {
   price: string;
   contract: string;
@@ -11,4 +13,9 @@ export interface IPriceResponse {
   status: boolean;
   docs: ICoinPrice[];
   currency: string;
+}
+
+export interface Delegation {
+  address: string;
+  amount: BigNumber;
 }

@@ -46,7 +46,7 @@ import { TronUnboundInfoService } from "./tron-unbound-info.service";
 import { AuthService } from "../../../../auth/services/auth.service";
 import { fromPromise } from "rxjs/internal-compatibility";
 import { TronTransaction, TronUtils } from "@trustwallet/rpc/lib";
-import { CosmosTx } from "@trustwallet/rpc/lib/cosmos/models/CosmosTx";
+import { Delegation } from "../../../../dto";
 
 export const TronServiceInjectable = [
   TronConfigService,
@@ -97,15 +97,21 @@ export class TronService implements CoinService {
 
     this.stakedAmount$ = buildPipeline(STAKE_REFRESH_INTERVAL).pipe(
       switchMap(address => {
-        return this.requestStakedAmount(address);
+        return combineLatest([this.config, this.requestStakedAmount(address)]);
       }),
-      map(amount => amount || new BigNumber(0))
+      map(([cfg, amount]) => cfg.toCoin(amount) || new BigNumber(0))
     );
   }
 
-  getAddressDelegations(address: string): Observable<TronVote[]> {
+  getAddressDelegations(address: string): Observable<Delegation[]> {
     return this.tronRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.listDelegations(address)))
+      switchMap(rpc =>
+        forkJoin([this.config, from(rpc.listDelegations(address))])
+      ),
+      map(([config, list]) => list.map(d => ({
+        address: d.voteAddress,
+        amount: config.toUnits(new BigNumber(d.voteCount))
+      })))
     );
   }
 
@@ -234,9 +240,9 @@ export class TronService implements CoinService {
 
   private requestStakedAmount(address: string): Observable<BigNumber> {
     return this.getAddressDelegations(address).pipe(
-      map((delegations: TronVote[]) => {
+      map(delegations => {
         return delegations && delegations.length
-          ? BigNumber.sum(...delegations.map(vote => vote.voteCount))
+          ? BigNumber.sum(...delegations.map(vote => vote.amount))
           : new BigNumber(0);
       })
     );
@@ -251,7 +257,7 @@ export class TronService implements CoinService {
       const validator = validators.find(v => v.id === address);
       return {
         ...validator,
-        amount: new BigNumber(address2stake[address]),
+        amount: config.toCoin(address2stake[address]),
         coin: config
       };
     });
@@ -273,7 +279,7 @@ export class TronService implements CoinService {
     ]).pipe(
       map((data: any[]) => {
         const approvedValidators: BlockatlasValidator[] = data[0];
-        const myDelegations: TronVote[] = data[1];
+        const myDelegations: Delegation[] = data[1];
         const config: TronProviderConfig = data[2];
 
         // TODO: double check most probably we no need that check
@@ -284,24 +290,20 @@ export class TronService implements CoinService {
         const addresses = approvedValidators.map(d => d.id);
 
         // Ignore delegations to validators that isn't in a list of approved validators
-        const filteredDelegations = myDelegations.filter(
-          (delegation: TronVote) => {
+        const filteredDelegations = myDelegations.filter((delegation: Delegation) => {
             // TODO: use map(Object) in case we have more that 10 approved validators
-            return addresses.includes(delegation.voteAddress);
+            return addresses.includes(delegation.address);
           }
         );
 
-        const address2stakeMap = filteredDelegations.reduce(
-          (acc: IAggregatedDelegationMap, delegation: TronVote) => {
+        const address2stakeMap = filteredDelegations.reduce((acc: IAggregatedDelegationMap, delegation) => {
             // TODO: Use BN or native browser BigInt() + polyfill
             const aggregatedAmount =
-              acc[delegation.voteAddress] || new BigNumber(0);
-            const sharesAmount = +delegation.voteCount || new BigNumber(0);
-            acc[delegation.voteAddress] = aggregatedAmount.plus(sharesAmount);
+              acc[delegation.address] || new BigNumber(0);
+            const sharesAmount = +delegation.amount || new BigNumber(0);
+            acc[delegation.address] = aggregatedAmount.plus(sharesAmount);
             return acc;
-          },
-          {}
-        );
+          }, {});
 
         return this.map2List(config, address2stakeMap, approvedValidators);
       }),
@@ -591,5 +593,9 @@ export class TronService implements CoinService {
       switchMap(rpc => rpc.getTransaction(txhash)),
       catchError(_ => of(null))
     );
+  }
+
+  getConfig(): Observable<TronProviderConfig> {
+    return this.config;
   }
 }

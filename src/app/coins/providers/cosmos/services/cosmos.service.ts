@@ -1,23 +1,9 @@
 import { Inject, Injectable } from "@angular/core";
-import {
-  BehaviorSubject,
-  combineLatest,
-  forkJoin,
-  from,
-  interval,
-  Observable,
-  of,
-  timer
-} from "rxjs";
+import { BehaviorSubject, combineLatest, forkJoin, from, interval, Observable, of, timer } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
 import { first, map, skipWhile, switchMap } from "rxjs/operators";
-import {
-  CosmosAccount,
-  CosmosBroadcastResult,
-  CosmosUtils
-} from "@trustwallet/rpc";
-import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
+import { CosmosAccount, CosmosBroadcastResult, CosmosUtils } from "@trustwallet/rpc";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
 import { CosmosConfigService } from "./cosmos-config.service";
 import { CosmosProviderConfig } from "../cosmos.descriptor";
@@ -31,13 +17,13 @@ import {
 } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { CoinType } from "@trustwallet/types";
-import { TrustProvider } from "@trustwallet/provider/lib";
 import { CosmosRpcService } from "./cosmos-rpc.service";
 import { CosmosUnboundInfoService } from "./cosmos-unbound-info.service";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
 import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { AuthService } from "../../../../auth/services/auth.service";
 import { CosmosTx } from "@trustwallet/rpc/lib/cosmos/models/CosmosTx";
+import { Delegation } from "../../../../dto";
 
 // TODO: There is plenty of old boilerplate here yet. Need to be refactored.
 
@@ -114,10 +100,8 @@ export class CosmosService implements CoinService {
 
   private requestStakedAmount(address: string): Observable<BigNumber> {
     return this.getAddressDelegations(address).pipe(
-      map((delegations: CosmosDelegation[]) => {
-        const shares =
-          (delegations && delegations.map((d: CosmosDelegation) => d.shares)) ||
-          [];
+      map(delegations => {
+        const shares = (delegations && delegations.map(d => d.amount)) || [];
         return shares && shares.length
           ? BigNumber.sum(...shares)
           : new BigNumber(0);
@@ -134,7 +118,7 @@ export class CosmosService implements CoinService {
       const validator = validators.find(v => v.id === address);
       return {
         ...validator,
-        amount: CosmosUtils.toAtom(address2stake[address]),
+        amount: config.toCoin(address2stake[address]),
         coin: config
       };
     });
@@ -156,7 +140,7 @@ export class CosmosService implements CoinService {
     ]).pipe(
       map((data: any[]) => {
         const approvedValidators: BlockatlasValidator[] = data[0];
-        const myDelegations: CosmosDelegation[] = data[1];
+        const myDelegations: Delegation[] = data[1];
         const config: CosmosProviderConfig = data[2];
 
         // TODO: double check most probably we no need that check
@@ -167,26 +151,19 @@ export class CosmosService implements CoinService {
         const addresses = approvedValidators.map(d => d.id);
 
         // Ignore delegations to validators that isn't in a list of approved validators
-        const filteredDelegations = myDelegations.filter(
-          (delegation: CosmosDelegation) => {
+        const filteredDelegations = myDelegations.filter(delegation => {
             // TODO: use map(Object) in case we have more that 10 approved validators
-            return addresses.includes(delegation.validatorAddress);
+            return addresses.includes(delegation.address);
           }
         );
 
-        const address2stakeMap = filteredDelegations.reduce(
-          (acc: IAggregatedDelegationMap, delegation: CosmosDelegation) => {
+        const address2stakeMap = filteredDelegations.reduce((acc: IAggregatedDelegationMap, delegation) => {
             // TODO: Use BN or native browser BigInt() + polyfill
-            const aggregatedAmount =
-              acc[delegation.validatorAddress] || new BigNumber(0);
-            const sharesAmount = +delegation.shares || new BigNumber(0);
-            acc[delegation.validatorAddress] = aggregatedAmount.plus(
-              sharesAmount
-            );
+            const aggregatedAmount = acc[delegation.address] || new BigNumber(0);
+            const sharesAmount = delegation.amount || new BigNumber(0);
+            acc[delegation.address] = aggregatedAmount.plus(sharesAmount);
             return acc;
-          },
-          {}
-        );
+          }, {});
 
         return this.map2List(config, address2stakeMap, approvedValidators);
       }),
@@ -247,9 +224,13 @@ export class CosmosService implements CoinService {
     );
   }
 
-  getAddressDelegations(address: string): Observable<CosmosDelegation[]> {
+  getAddressDelegations(address: string): Observable<Delegation[]> {
     return this.cosmosRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.listDelegations(address)))
+      switchMap(rpc => from(rpc.listDelegations(address))),
+      map(list => list.map(d => ({
+        address: d.validatorAddress,
+        amount: d.shares
+      })))
     );
   }
 
@@ -434,5 +415,9 @@ export class CosmosService implements CoinService {
     return combineLatest([this.cosmosRpc.rpc, this.getAddress()]).pipe(
       switchMap(([rpc, address]) => rpc.listStakingTransactions(address))
     );
+  }
+
+  getConfig(): Observable<CosmosProviderConfig> {
+    return this.config;
   }
 }

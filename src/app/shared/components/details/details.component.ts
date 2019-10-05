@@ -1,24 +1,18 @@
-import { AfterViewInit, Component, Input, OnDestroy } from "@angular/core";
-import {
-  combineLatest,
-  forkJoin,
-  Observable,
-  of,
-  Subscription,
-  throwError
-} from "rxjs";
+import { AfterViewInit, Component, Input } from "@angular/core";
+import { combineLatest, forkJoin, Observable, of, throwError } from "rxjs";
 import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator";
 import { ActivatedRoute, Router } from "@angular/router";
 import { catchError, first, map, switchMap } from "rxjs/operators";
 import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
 import { CoinService } from "../../../coins/services/coin.service";
-import BigNumber from "bignumber.js";
 import { SelectAuthProviderComponent } from "../select-auth-provider/select-auth-provider.component";
 import { AuthProvider } from "../../../auth/services/auth-provider";
 import { Errors } from "../../consts";
 import { DialogsService } from "../../services/dialogs.service";
 import { AuthService } from "../../../auth/services/auth.service";
 import { fromPromise } from "rxjs/internal-compatibility";
+import { Delegation } from "../../../dto";
+import BigNumber from "bignumber.js";
 
 export interface DetailsValidatorInterface {
   validator: BlockatlasValidator;
@@ -54,21 +48,19 @@ export class DetailsComponent implements AfterViewInit {
 
   // Staked amount per validator - we have that
   getStakedAmount(address: string): Observable<string> {
-    return this.dataSource.getAddressDelegations(address).pipe(
-      catchError(_ => of([])),
-      map((response: CosmosDelegation[]) => {
-        if (!response) {
+    return combineLatest([
+      this.dataSource.getConfig(),
+      this.dataSource.getAddressDelegations(address)
+    ]).pipe(
+      map(([config, delegations]) => {
+        if (!delegations) {
           return "0";
         }
 
-        const stakedSumArray = [];
-        response.forEach((i: CosmosDelegation) => {
-          if (i.validatorAddress === this.validatorId) {
-            stakedSumArray.push(Number(i.shares) / 1000000);
-          }
-        });
-
-        return stakedSumArray.reduce((a, b) => a + b, 0).toFixed(6);
+        return delegations
+          .filter(d => d.address === this.validatorId)
+          .reduce((acc, d) => acc.plus(config.toCoin(d.amount)), new BigNumber(0))
+          .toFixed(6);
       })
     );
   }
