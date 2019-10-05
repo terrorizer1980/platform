@@ -108,7 +108,7 @@ export class TronService implements CoinService {
       switchMap(rpc =>
         forkJoin([this.config, from(rpc.listDelegations(address))])
       ),
-      map(([config, list]) => list.map(d => ({
+      map(([config, list]) => (list || []).map(d => ({
         address: d.voteAddress,
         amount: config.toUnits(new BigNumber(d.voteCount))
       })))
