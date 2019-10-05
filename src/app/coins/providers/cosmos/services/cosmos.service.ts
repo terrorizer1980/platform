@@ -227,7 +227,7 @@ export class CosmosService implements CoinService {
   getAddressDelegations(address: string): Observable<Delegation[]> {
     return this.cosmosRpc.rpc.pipe(
       switchMap(rpc => from(rpc.listDelegations(address))),
-      map(list => list.map(d => ({
+      map(list => (list || []).map(d => ({
         address: d.validatorAddress,
         amount: d.shares
       })))
