@@ -6,6 +6,7 @@ import { TronConfigService } from "../../services/tron-config.service";
 import { TronProviderConfig } from "../../tron.descriptor";
 import { TronService } from "../../services/tron.service";
 import BigNumber from "bignumber.js";
+import {TronUtils} from "@trustwallet/rpc/lib";
 
 @Component({
   selector: "app-unstaking",
@@ -17,7 +18,7 @@ export class UnstakingComponent {
   validator = this.tron.getValidatorsById(this.validatorId);
   staked = this.tron.getStakedToValidator(this.validatorId).pipe(
     catchError(_ => of(new BigNumber(0))),
-    map(staked => staked.toFormat(2, BigNumber.ROUND_DOWN))
+    map(staked => TronUtils.toTron(staked))
   );
   balance = this.tron.getBalance().pipe(catchError(_ => of(new BigNumber(0))));
   prepareTx = this.tron.prepareStakeTx.bind(this.tron);

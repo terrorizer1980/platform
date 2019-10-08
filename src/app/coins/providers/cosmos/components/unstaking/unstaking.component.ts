@@ -17,7 +17,6 @@ export class UnstakingComponent {
   validator = this.cosmos.getValidatorsById(this.validatorId);
   staked = this.cosmos.getStakedToValidator(this.validatorId).pipe(
     catchError(_ => of(new BigNumber(0))),
-    map(staked => staked.toFormat(2, BigNumber.ROUND_DOWN))
   );
   balance = this.cosmos
     .getBalance()
