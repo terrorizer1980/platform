@@ -12,6 +12,6 @@ export class AppPage {
   }
 
   async getValidators() {
-    return element.all(by.css(".validator")).count();
+    return element.all(by.css(".card-body .item")).count();
   }
 }
