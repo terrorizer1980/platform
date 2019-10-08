@@ -24,5 +24,11 @@ exports.config = {
     jasmine
       .getEnv()
       .addReporter(new SpecReporter({ spec: { displayStacktrace: true } }));
-  }
+  },
+  plugins: [
+    {
+      package: "protractor-console-plugin",
+      exclude: []
+    }
+  ]
 };

@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { combineLatest, forkJoin, Observable, of } from "rxjs";
 import { AuthModule } from "../auth.module";
-import { CoinType, Account } from "@trustwallet/types";
+import { Account, CoinType } from "@trustwallet/types";
 import { TrustAuthProvider } from "./providers/trust/trust-auth.provider";
 import { AuthProvider } from "./auth-provider";
 import { catchError, first, map, skipWhile, switchMap } from "rxjs/operators";

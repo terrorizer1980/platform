@@ -1,4 +1,8 @@
 import "./global-shim";
+/***************************************************************************************************
+ * Zone JS is required by default for Angular itself.
+ */
+import "zone.js/dist/zone"; // Included with Angular CLI.
 
 /**
  * This file includes polyfills needed by Angular and is loaded before the app.
@@ -75,11 +79,6 @@ import "./global-shim";
  *  (window as any).__Zone_enable_cross_context_check = true;
  *
  */
-
-/***************************************************************************************************
- * Zone JS is required by default for Angular itself.
- */
-import "zone.js/dist/zone"; // Included with Angular CLI.
 
 /***************************************************************************************************
  * APPLICATION IMPORTS

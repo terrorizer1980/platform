@@ -4,8 +4,8 @@ import WalletConnect from "@trustwallet/walletconnect";
 import WalletConnectQRCodeModal from "@walletconnect/qrcode-modal";
 import { environment } from "../../../../../environments/environment";
 import { fromPromise } from "rxjs/internal-compatibility";
-import { from, Observable, ReplaySubject, Subject } from "rxjs";
-import { catchError, map, switchMap, tap, timeout } from "rxjs/operators";
+import { from, Observable, Subject } from "rxjs";
+import { catchError, switchMap, tap, timeout } from "rxjs/operators";
 import { CoinType } from "@trustwallet/types";
 import { Errors } from "../../../../shared/consts";
 

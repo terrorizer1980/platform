@@ -6,7 +6,6 @@ import { SelectAuthProviderComponent } from "./shared/components/select-auth-pro
 import { DialogsService } from "./shared/services/dialogs.service";
 import { ErrorsService } from "./shared/services/errors/errors.service";
 import { AuthProvider } from "./auth/services/auth-provider";
-import { DbService } from "./shared/services/db.service";
 import { LogoutComponent } from "./shared/components/logout/logout.component";
 import { Errors } from "./shared/consts";
 

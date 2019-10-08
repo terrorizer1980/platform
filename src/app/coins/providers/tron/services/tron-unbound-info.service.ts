@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { combineLatest, Observable, of } from "rxjs";
-import { map, switchMap, tap } from "rxjs/operators";
+import { map, switchMap } from "rxjs/operators";
 import { CoinType } from "@trustwallet/types";
 import { fromPromise } from "rxjs/internal-compatibility";
 import BigNumber from "bignumber.js";

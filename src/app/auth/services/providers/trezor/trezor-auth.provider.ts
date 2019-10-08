@@ -1,14 +1,9 @@
 import { AuthProvider } from "../../auth-provider";
-import { from, Observable, of, throwError, timer } from "rxjs";
-import { environment } from "../../../../../environments/environment";
-import { fromPromise } from "rxjs/internal-compatibility";
-import { catchError, map } from "rxjs/operators";
-import { CoinType, Account } from "@trustwallet/types";
-import { TrustProvider } from "@trustwallet/provider";
+import { Observable, of, throwError } from "rxjs";
+import { Account, CoinType } from "@trustwallet/types";
 import { CoinNotSupportedException } from "../../coin-not-supported-exception";
 import { Injectable } from "@angular/core";
 import { AuthModule } from "../../../auth.module";
-import { Errors } from "../../../../shared/consts";
 
 @Injectable({ providedIn: AuthModule })
 export class TrezorAuthProvider implements AuthProvider {

@@ -1,11 +1,17 @@
 import { browser, by, element } from "protractor";
 
 export class AppPage {
-  navigateTo() {
-    return browser.get("/");
+  async navigateTo(path: string) {
+    const result = browser.get(path);
+    await browser.waitForAngular();
+    return result;
   }
 
-  getTitleText() {
-    return element(by.css("app-root h1")).getText();
+  async getTitleText() {
+    return browser.getTitle();
+  }
+
+  async getValidators() {
+    return element.all(by.css(".validator")).count();
   }
 }

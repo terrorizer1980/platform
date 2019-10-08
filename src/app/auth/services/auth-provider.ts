@@ -1,5 +1,5 @@
 import { Observable } from "rxjs";
-import { CoinType, Account } from "@trustwallet/types";
+import { Account, CoinType } from "@trustwallet/types";
 
 export interface AuthProvider {
   getAddress(coin: CoinType): Observable<string>;

@@ -12,10 +12,10 @@ export class ErrorsService {
   constructor(private dialogService: DialogsService) {}
 
   // TODO: There are raw errors values for each error code now. They gonna be replaced with translation codes in the future
-  showError(error: ErrorModel): void {
-    console.error(error);
+  showError(error: ErrorModel): ErrorModel {
     if (Errors[error.code]) {
       this.dialogService.showError(Errors[error.code]);
+      return error;
     } else {
       if (
         (typeof error === "string" &&
@@ -25,7 +25,10 @@ export class ErrorsService {
         console.log(`Ignore error ${JSON.stringify(error)}`);
       } else {
         this.dialogService.showError((Errors as any).default);
+        return error;
       }
     }
+
+    return null;
   }
 }
