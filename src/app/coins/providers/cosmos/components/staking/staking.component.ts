@@ -21,7 +21,7 @@ export class StakingComponent {
     map(staked => staked.toFormat(2, BigNumber.ROUND_DOWN))
   );
   balance = this.cosmos
-    .getBalance()
+    .getBalanceCoins()
     .pipe(catchError(_ => of(new BigNumber(0))));
   info = this.cosmos.getStakingInfo();
   prepareTx = this.cosmos.prepareStakeTx.bind(this.cosmos);

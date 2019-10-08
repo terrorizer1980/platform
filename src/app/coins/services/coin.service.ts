@@ -1,12 +1,17 @@
 // Interface should be implemented by each coin provider
 import { Observable } from "rxjs";
-import { CoinProviderConfig, StakeAction, StakeHolderList } from "../coin-provider-config";
+import {
+  CoinProviderConfig,
+  StakeAction,
+  StakeHolderList
+} from "../coin-provider-config";
 import BigNumber from "bignumber.js";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
 
 export interface CoinService {
   getAnnualPercent(): Observable<number>;
-  getBalance(): Observable<BigNumber>;
+  getBalanceUnits(): Observable<BigNumber>;
+  getBalanceCoins(): Observable<BigNumber>;
   getBalanceUSD(): Observable<BigNumber>;
   getStaked(): Observable<BigNumber>;
   getStakedUSD(): Observable<BigNumber>;

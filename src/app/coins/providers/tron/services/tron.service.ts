@@ -117,8 +117,12 @@ export class TronService implements CoinService {
     );
   }
 
-  getBalance(): Observable<BigNumber> {
+  getBalanceUnits(): Observable<BigNumber> {
     return this.balance$;
+  }
+
+  getBalanceCoins(): Observable<BigNumber> {
+    return this.balance$.pipe(map(balance => TronUtils.fromTron(balance)));
   }
 
   getStakedUSD(): Observable<BigNumber> {

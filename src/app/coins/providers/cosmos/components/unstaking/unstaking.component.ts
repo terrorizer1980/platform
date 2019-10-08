@@ -15,11 +15,11 @@ import BigNumber from "bignumber.js";
 export class UnstakingComponent {
   validatorId = this.activatedRoute.snapshot.params.validatorId;
   validator = this.cosmos.getValidatorsById(this.validatorId);
-  staked = this.cosmos.getStakedToValidator(this.validatorId).pipe(
-    catchError(_ => of(new BigNumber(0))),
-  );
+  staked = this.cosmos
+    .getStakedToValidator(this.validatorId)
+    .pipe(catchError(_ => of(new BigNumber(0))));
   balance = this.cosmos
-    .getBalance()
+    .getBalanceCoins()
     .pipe(catchError(_ => of(new BigNumber(0))));
   prepareTx = this.cosmos.prepareStakeTx.bind(this.cosmos);
   timeFrame = this.cosmos

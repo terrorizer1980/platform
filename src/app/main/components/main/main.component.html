@@ -1,49 +1,16 @@
 <app-listview
-  header="Staked"
-  [dataSource]="myStakeHolders$"
-  [placeholdersCount]="1"
-  (select)="navigateToMyStakeHoldersList($event)"
-  class="small"
->
-  <ng-container *item="let item">
-    <app-block-between>
-      <ng-template left>
-        <app-label [image]="item.info.image">
-          <ng-template content>
-            <span>{{ item.info.name }}</span>
-            <span class="success"
-              >{{ item.reward.annual | number: "1.2-2" }}%</span
-            >
-          </ng-template>
-        </app-label>
-      </ng-template>
-      <ng-template right>
-        <div class="text-nowrap">
-          <span>{{ item.amount }} {{ item.coin.currencySymbol }}</span>
-          <span class="ml-2"
-            ><i class="text-muted fa fa-chevron-right"></i
-          ></span>
-        </div>
-      </ng-template>
-    </app-block-between>
-  </ng-container>
-  <ng-template noitems>
-    <div class="m-3">The stakes list is empty</div>
-  </ng-template>
-  <ng-template placeholder>
-    <div class="pb-3 pt-3 pl-3">
-      <app-stake-placeholder></app-stake-placeholder>
-    </div>
-  </ng-template>
-</app-listview>
-
-<app-listview
   header="Available"
   [dataSource]="blockchains$"
-  [placeholdersCount]="1"
+  [placeholdersCount]="coinsCount"
   (select)="navigateToPosDelegatorsList($event.item)"
   class="d-block mt-2"
 >
+  <ng-template section>
+    <app-block-between>
+      <ng-template left>Coins</ng-template>
+      <ng-template right>Current APY</ng-template>
+    </app-block-between>
+  </ng-template>
   <ng-container *item="let blockchain">
     <app-block-between>
       <ng-template left>
@@ -52,14 +19,9 @@
           [alt]="blockchain.item.currencyName"
         >
           <ng-template content>
-            <span>{{ blockchain.item.currencyName }} </span>
-            <span class="text-muted">{{ blockchain.item.currencySymbol }}</span>
-            <div *ngIf="blockchain.pending > 0">
-              <span>
-                Pending: {{ blockchain.pending }}
-                {{ blockchain.item.currencySymbol }}s
-              </span>
-              <span> to {{ blockchain.unstakingDate | date }} </span>
+            <div>{{ blockchain.item.currencyName }}</div>
+            <div class="text-muted small">
+              Available: {{ blockchain.available }}
             </div>
           </ng-template>
         </app-label>
@@ -82,41 +44,43 @@
       <app-stake-placeholder></app-stake-placeholder>
     </div>
   </ng-template>
-</app-listview>
-
-<app-listview
-  header="Coming soon"
-  [dataSource]="upcomings"
-  [placeholdersCount]="3"
-  class="d-block mt-2"
->
-  <ng-container *item="let upcoming">
-    <app-block-between>
-      <ng-template left>
-        <app-label [image]="upcoming.iconUri" [alt]="upcoming.name">
-          <ng-template content>
-            <span class="mr-1">{{ upcoming.name }}</span>
-            <span class="text-muted">{{ upcoming.symbol }}</span>
-            <div class="success">
-              <small>{{ upcoming.message }}</small>
-            </div>
+  <ng-template footer>
+    <app-listview
+      [dataSource]="upcomings"
+      [placeholdersCount]="3"
+      [containerized]="false"
+    >
+      <ng-template section>
+        Coming soon
+      </ng-template>
+      <ng-container *item="let upcoming">
+        <app-block-between>
+          <ng-template left>
+            <app-label [image]="upcoming.iconUri" [alt]="upcoming.name">
+              <ng-template content>
+                <span class="mr-1">{{ upcoming.name }}</span>
+                <div class="text-muted small">
+                  <small>{{ upcoming.message }}</small>
+                </div>
+              </ng-template>
+            </app-label>
           </ng-template>
-        </app-label>
+          <ng-template right>
+            <span class="success text-nowrap">
+              <span class="ml-1"
+                ><i class="text-muted fa fa-chevron-right"></i></span
+            ></span>
+          </ng-template>
+        </app-block-between>
+      </ng-container>
+      <ng-template noitems>
+        <div class="m-3">The chains list is empty</div>
       </ng-template>
-      <ng-template right>
-        <span class="success text-nowrap">
-          <span class="ml-1"
-            ><i class="text-muted fa fa-chevron-right"></i></span
-        ></span>
+      <ng-template placeholder>
+        <div class="pb-3 pt-3 pl-3">
+          <app-stake-placeholder></app-stake-placeholder>
+        </div>
       </ng-template>
-    </app-block-between>
-  </ng-container>
-  <ng-template noitems>
-    <div class="m-3">The chains list is empty</div>
-  </ng-template>
-  <ng-template placeholder>
-    <div class="pb-3 pt-3 pl-3">
-      <app-stake-placeholder></app-stake-placeholder>
-    </div>
+    </app-listview>
   </ng-template>
 </app-listview>

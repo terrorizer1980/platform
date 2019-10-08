@@ -6,15 +6,10 @@ import { LoadingButtonComponent } from "./loading-button/loading-button.componen
 import { StakePlaceholderComponent } from "./stake-placeholder/stake-placeholder.component";
 import { ContentLoaderModule } from "@ngneat/content-loader";
 import { ContentPlaceholderComponent } from "./content-placeholder/content-placeholder.component";
-import { DelegatorsComponent } from "../../coins/components/delegators/delegators.component";
-import { StakingComponent } from "../../coins/components/staking/staking.component";
-import { UnstakingComponent } from "../../coins/components/unstaking/unstaking.component";
-import { DetailsComponent } from "../../coins/components/details/details.component";
 import { ReactiveFormsModule } from "@angular/forms";
 import { SelectAuthProviderComponent } from "./select-auth-provider/select-auth-provider.component";
 import { LogoutComponent } from "./logout/logout.component";
 import { ContentComponent } from "./content/content.component";
-import { SharedModule } from "../shared.module";
 import { ContentDirective } from "../directives/content.directive";
 import { SuccessPopupComponent } from "./success-popup/success-popup.component";
 import { ErrorPopupComponent } from "./error-popup/error-popup.component";
@@ -26,6 +21,8 @@ import { LabelComponent } from "./label/label.component";
 import { BlockBetweenComponent } from "./block-between/block-between.component";
 import { BlockLeftDirective } from "../directives/block-left.directive";
 import { BlockRightDirective } from "../directives/block-right.directive";
+import { SectionDirective } from "../directives/section.directive";
+import { FooterDirective } from "../directives/footer.directive";
 
 const components = [
   LoadingButtonComponent,
@@ -39,6 +36,8 @@ const components = [
   NoItemsDirective,
   BlockLeftDirective,
   BlockRightDirective,
+  SectionDirective,
+  FooterDirective,
   SuccessPopupComponent,
   ErrorPopupComponent,
   StakePlaceholderComponent,

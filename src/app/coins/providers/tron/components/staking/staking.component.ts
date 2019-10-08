@@ -21,10 +21,9 @@ export class StakingComponent {
     catchError(_ => of(new BigNumber(0))),
     map(staked => staked.toFormat(2, BigNumber.ROUND_DOWN))
   );
-  balance = this.tron.getBalance().pipe(
-    map(balance => TronUtils.fromTron(balance)),
-    catchError(_ => of(new BigNumber(0)))
-  );
+  balance = this.tron
+    .getBalanceCoins()
+    .pipe(catchError(_ => of(new BigNumber(0))));
   info = this.tron.getStakingInfo();
   prepareTx = this.tron.prepareStakeTx.bind(this.tron);
 
