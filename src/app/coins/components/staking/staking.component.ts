@@ -18,12 +18,9 @@ import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStak
 import { FormBuilder, FormGroup } from "@angular/forms";
 import BigNumber from "bignumber.js";
 import { ActivatedRoute, Router } from "@angular/router";
-import { DialogsService } from "../../services/dialogs.service";
-import { StakeValidator } from "../../../coins/validators/stake.validator";
-import {
-  CoinProviderConfig,
-  StakeAction
-} from "../../../coins/coin-provider-config";
+import { DialogsService } from "../../../shared/services/dialogs.service";
+import { StakeValidator } from "../../validators/stake.validator";
+import { CoinProviderConfig, StakeAction } from "../../coin-provider-config";
 import {
   catchError,
   first,
@@ -32,15 +29,15 @@ import {
   switchMap,
   tap
 } from "rxjs/operators";
-import { CosmosUtils } from "@trustwallet/rpc/lib";
-import { CoinService } from "../../../coins/services/coin.service";
+import { BlockatlasValidator, CosmosUtils } from "@trustwallet/rpc/lib";
+import { CoinService } from "../../services/coin.service";
 import { DetailsValidatorInterface } from "../details/details.component";
 import { AuthService } from "../../../auth/services/auth.service";
-import { SelectAuthProviderComponent } from "../select-auth-provider/select-auth-provider.component";
+import { SelectAuthProviderComponent } from "../../../shared/components/select-auth-provider/select-auth-provider.component";
 import { AuthProvider } from "../../../auth/services/auth-provider";
-import { ErrorsService } from "../../services/errors/errors.service";
-import { Errors } from "../../consts";
-import { ContentDirective } from "../../directives/content.directive";
+import { ErrorsService } from "../../../shared/services/errors/errors.service";
+import { Errors } from "../../../shared/consts";
+import { ContentDirective } from "../../../shared/directives/content.directive";
 
 interface StakeDetails {
   config: CoinProviderConfig;
@@ -53,14 +50,23 @@ interface StakeDetails {
   styleUrls: ["./staking.component.scss"]
 })
 export class StakingComponent implements OnInit, OnDestroy {
-  @Input() validatorId: string;
-  @Input() dataSource: CoinService;
   @Input() config: Observable<CoinProviderConfig>;
+  @Input() validator: Observable<BlockatlasValidator>;
+  @Input() balance: Observable<BigNumber>;
+  @Input() hasProvider: Observable<boolean>;
+  @Input() staked: Observable<BigNumber>;
+  @Input() info: Observable<any>;
+  @Input() max: number;
+  @Input() prepareTx: (
+    action: StakeAction,
+    validatorId: string,
+    amount: BigNumber
+  ) => Observable<any>;
   @Input() formatMax: (max: BigNumber) => BigNumber;
+
   @ContentChild(ContentDirective, { read: TemplateRef, static: false })
   contentTemplate;
 
-  info: Observable<CosmosStakingInfo>;
   stakeForm: FormGroup;
   max$: Observable<any>;
   warn$: Observable<BigNumber>;
@@ -87,16 +93,12 @@ export class StakingComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    const stake$ = this.config.pipe(
-      switchMap(cfg => {
+    const stake$ = combineLatest([this.config, this.validator]).pipe(
+      switchMap(([cfg, validator]) => {
         const amount = cfg.toUnits(
           new BigNumber(this.stakeForm.get("amount").value)
         );
-        return this.dataSource.prepareStakeTx(
-          StakeAction.STAKE,
-          this.validatorId,
-          amount
-        );
+        return this.prepareTx(StakeAction.STAKE, validator.id, amount);
       }),
       tap(() => (this.isLoading = false), e => (this.isLoading = false)),
       switchMap(_ => this.config)
@@ -174,7 +176,7 @@ export class StakingComponent implements OnInit, OnDestroy {
   getMonthlyEarnings(): Observable<BigNumber> {
     return combineLatest([
       this.stakeForm.get("amount").valueChanges,
-      this.dataSource.getValidatorsById(this.validatorId)
+      this.validator
     ]).pipe(
       map(([value, validator]) => {
         const val = new BigNumber(value);
@@ -187,10 +189,7 @@ export class StakingComponent implements OnInit, OnDestroy {
     );
   }
   getMax(): Observable<{ min: BigNumber; normal: BigNumber }> {
-    return combineLatest([
-      this.dataSource.getBalance().pipe(catchError(_ => of(new BigNumber(0)))),
-      this.config
-    ]).pipe(
+    return combineLatest([this.balance, this.config]).pipe(
       map(([balance, config]) => {
         const additional = config.toCoin(new BigNumber(config.fee));
         const normal = balance.minus(additional.multipliedBy(2));
@@ -219,13 +218,12 @@ export class StakingComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.info = this.dataSource.getStakingInfo();
     this.confSubs = this.config.subscribe(config => {
       this.stakeForm = this.fb.group({
         amount: [
           "",
           [],
-          [StakeValidator(true, config, this.dataSource, this.validatorId)]
+          [StakeValidator(true, config, this.balance, this.staked, this.max)]
         ]
       });
     });
@@ -235,7 +233,7 @@ export class StakingComponent implements OnInit, OnDestroy {
     this.monthlyEarnings$ = this.getMonthlyEarnings();
     this.details$ = forkJoin({
       config: this.config.pipe(first()),
-      hasProvider: this.dataSource.hasProvider()
+      hasProvider: this.hasProvider
     });
   }
 

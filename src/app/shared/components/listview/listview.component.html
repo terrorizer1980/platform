@@ -1,0 +1,31 @@
+<app-content header="{{ header }}">
+  <ng-template content>
+    <ng-container *ngIf="dataSource | async as data; else loadingItems">
+      <ng-template #emptyList>
+        <div class="m-3">The list is empty</div>
+      </ng-template>
+      <ng-container *ngIf="data.length === 0">
+        <ng-container
+          *ngTemplateOutlet="noItemTemplate ? noItemTemplate : emptyList"
+        ></ng-container>
+      </ng-container>
+      <ng-container *ngFor="let item of data">
+        <div
+          (click)="click(item)"
+          [ngClass]="{
+            'row row-container item pb-2 pt-2 pl-3 pr-3': custmized
+          }"
+        >
+          <ng-container
+            *ngTemplateOutlet="itemTemplate; context: { $implicit: item }"
+          ></ng-container>
+        </div>
+      </ng-container>
+    </ng-container>
+    <ng-template #loadingItems>
+      <ng-template ngFor let-i [ngForOf]="placeholders">
+        <ng-container *ngTemplateOutlet="placeholderTemplate"></ng-container>
+      </ng-template>
+    </ng-template>
+  </ng-template>
+</app-content>

@@ -1,5 +1,5 @@
 import { FormControl } from "@angular/forms";
-import { combineLatest, of } from "rxjs";
+import { combineLatest, Observable, of } from "rxjs";
 import { catchError, first, map, shareReplay } from "rxjs/operators";
 import BigNumber from "bignumber.js";
 import { CosmosUtils } from "@trustwallet/rpc/lib";
@@ -9,15 +9,13 @@ import { CoinService } from "../services/coin.service";
 export const StakeValidator = (
   isStake: boolean,
   config: CoinProviderConfig,
-  dataSource: CoinService,
-  validatorId: string,
-  minValue: BigNumber = new BigNumber(0.001)
+  balance: Observable<BigNumber>,
+  staked: Observable<BigNumber>,
+  minValue: number = 0.001
 ) => {
   const data = combineLatest([
-    dataSource.getBalance().pipe(catchError(_ => of(new BigNumber(Infinity)))),
-    dataSource
-      .getStakedToValidator(validatorId)
-      .pipe(catchError(_ => of(new BigNumber(0))))
+    balance.pipe(catchError(_ => of(new BigNumber(Infinity)))),
+    staked
   ]).pipe(shareReplay(1));
 
   return (input: FormControl) => {

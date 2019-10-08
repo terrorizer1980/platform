@@ -13,6 +13,7 @@ import { DetailsComponent } from "./components/details/details.component";
 import { StakingComponent } from "./components/staking/staking.component";
 import { UnstakingComponent } from "./components/unstaking/unstaking.component";
 import { ReactiveFormsModule } from "@angular/forms";
+import { CoinsComponentsModule } from "../../components/coins-components.module";
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { ReactiveFormsModule } from "@angular/forms";
     RouterDataModule,
     RouterModule,
     TronProviderRoutingModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    CoinsComponentsModule
   ],
   providers: [
     TronService,

@@ -1,7 +1,9 @@
 import { Component } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { CosmosService } from "../../services/cosmos.service";
-import { map } from "rxjs/operators";
+import { catchError, map } from "rxjs/operators";
+import { of } from "rxjs";
+import BigNumber from "bignumber.js";
 
 @Component({
   selector: "app-details",
@@ -10,6 +12,13 @@ import { map } from "rxjs/operators";
 })
 export class DetailsComponent {
   validatorId = this.activatedRoute.snapshot.params.validatorId;
+  validator = this.cosmos.getValidatorsById(this.validatorId);
+  isUnstakeEnabled = this.cosmos.isUnstakeEnabled();
+  hasProvider = this.cosmos.hasProvider();
+  staked = this.cosmos.getStakedToValidator(this.validatorId).pipe(
+    catchError(_ => of(new BigNumber(0))),
+    map(staked => staked.toFormat(2, BigNumber.ROUND_DOWN))
+  );
   additionalInfo = this.cosmos.getStakingInfo().pipe(
     map(info => [
       {

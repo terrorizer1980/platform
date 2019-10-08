@@ -1,18 +1,24 @@
-import { AfterViewInit, Component, Input } from "@angular/core";
-import { combineLatest, forkJoin, Observable, of, throwError } from "rxjs";
+import { AfterViewInit, Component, Input, OnDestroy } from "@angular/core";
+import {
+  combineLatest,
+  forkJoin,
+  Observable,
+  of,
+  Subscription,
+  throwError
+} from "rxjs";
 import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator";
 import { ActivatedRoute, Router } from "@angular/router";
 import { catchError, first, map, switchMap } from "rxjs/operators";
 import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
-import { CoinService } from "../../../coins/services/coin.service";
-import { SelectAuthProviderComponent } from "../select-auth-provider/select-auth-provider.component";
+import { CoinService } from "../../services/coin.service";
+import BigNumber from "bignumber.js";
+import { SelectAuthProviderComponent } from "../../../shared/components/select-auth-provider/select-auth-provider.component";
 import { AuthProvider } from "../../../auth/services/auth-provider";
-import { Errors } from "../../consts";
-import { DialogsService } from "../../services/dialogs.service";
+import { Errors } from "../../../shared/consts";
+import { DialogsService } from "../../../shared/services/dialogs.service";
 import { AuthService } from "../../../auth/services/auth.service";
 import { fromPromise } from "rxjs/internal-compatibility";
-import { Delegation } from "../../../dto";
-import BigNumber from "bignumber.js";
 
 export interface DetailsValidatorInterface {
   validator: BlockatlasValidator;
@@ -33,8 +39,10 @@ export interface AdditionalInfo {
   styleUrls: ["./details.component.scss"]
 })
 export class DetailsComponent implements AfterViewInit {
-  @Input() validatorId: string;
-  @Input() dataSource: CoinService;
+  @Input() validator: Observable<BlockatlasValidator>;
+  @Input() isUnstakeEnabled: Observable<boolean>;
+  @Input() hasProvider: Observable<boolean>;
+  @Input() staked: Observable<string>;
   @Input() additionals: Observable<AdditionalInfo[]>;
 
   details$: Observable<DetailsValidatorInterface>;
@@ -45,25 +53,6 @@ export class DetailsComponent implements AfterViewInit {
     private dialogService: DialogsService,
     private auth: AuthService
   ) {}
-
-  // Staked amount per validator - we have that
-  getStakedAmount(address: string): Observable<string> {
-    return combineLatest([
-      this.dataSource.getConfig(),
-      this.dataSource.getAddressDelegations(address)
-    ]).pipe(
-      map(([config, delegations]) => {
-        if (!delegations) {
-          return "0";
-        }
-
-        return delegations
-          .filter(d => d.address === this.validatorId)
-          .reduce((acc, d) => acc.plus(config.toCoin(d.amount)), new BigNumber(0))
-          .toFixed(6);
-      })
-    );
-  }
 
   navigateToStake(hasProvider: boolean) {
     if (hasProvider) {
@@ -109,19 +98,11 @@ export class DetailsComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.details$ = forkJoin({
-      validator: this.dataSource
-        .getValidatorsById(this.validatorId)
-        .pipe(first()),
-      stakedSum: this.dataSource.getAddress().pipe(
-        switchMap((address: string) => {
-          return this.getStakedAmount(address);
-        }),
-        catchError(_ => of("0")),
-        first()
-      ),
+      validator: this.validator.pipe(first()),
+      stakedSum: this.staked.pipe(first()),
       additionals: this.additionals.pipe(first()),
-      unstakeEnabled: this.dataSource.isUnstakeEnabled().pipe(first()),
-      hasProvider: this.dataSource.hasProvider()
+      unstakeEnabled: this.isUnstakeEnabled.pipe(first()),
+      hasProvider: this.hasProvider
     });
   }
 }

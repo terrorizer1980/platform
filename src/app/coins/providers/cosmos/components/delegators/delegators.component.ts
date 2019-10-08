@@ -1,5 +1,5 @@
 import { Component } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { CosmosService } from "../../services/cosmos.service";
@@ -15,11 +15,17 @@ export class DelegatorsComponent {
   validators$: Observable<
     Array<BlockatlasValidator>
   > = this.cosmos.getValidators();
-  placeholderValidators = Array(20).fill(0);
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private http: HttpClient,
-    private cosmos: CosmosService
+    private cosmos: CosmosService,
+    private router: Router
   ) {}
+
+  select(item: BlockatlasValidator) {
+    this.router.navigate([`details/${item.id}`], {
+      relativeTo: this.activatedRoute
+    });
+  }
 }

@@ -1,8 +1,13 @@
 <app-shared-staking
-  [validatorId]="validatorId"
-  [dataSource]="tron"
   [config]="config"
   [formatMax]="formatMax"
+  [validator]="validator"
+  [staked]="staked"
+  [hasProvider]="hasProvider"
+  [balance]="balance"
+  [info]="info"
+  [prepareTx]="prepareTx"
+  [max]="1"
 >
   <ng-template content let-form="form" let-details="details">
     <ng-container [formGroup]="form">

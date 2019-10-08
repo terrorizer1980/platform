@@ -1,22 +1,19 @@
-<form
-  [formGroup]="stakeForm"
-  *ngIf="details$ | async as details; else loadingDetails"
->
-  <ng-template #defaultInput>
-    <input
-      type="number"
-      formControlName="amount"
-      placeholder="Amount in {{ details.config.currencySymbol }}"
-      class="form-control"
-      aria-label="Large"
-      [ngClass]="{ 'is-invalid': stakeForm.invalid }"
-    />
-  </ng-template>
+<app-content>
+  <ng-template content>
+    <form [formGroup]="stakeForm">
+      <ng-container *ngIf="details$ | async as details; else loadingDetails">
+        <ng-template #defaultInput>
+          <input
+            type="number"
+            formControlName="amount"
+            placeholder="Amount in {{ details.config.currencySymbol }}"
+            class="form-control"
+            aria-label="Large"
+            [ngClass]="{ 'is-invalid': stakeForm.invalid }"
+          />
+        </ng-template>
 
-  <div class="row small">
-    <div class="card col-12 pt-2 pb-2 p-0">
-      <div class="card-body p-1 mt-4 mb-4">
-        <div class="col-12 text-center">
+        <div class="col-12 text-center p-1 pl-4 pr-4 mt-4 mb-4 small">
           <div>
             <div class="pb-4">
               <h5>Stake {{ details.config.currencySymbol }}</h5>
@@ -104,15 +101,13 @@
             </loading-button>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</form>
+      </ng-container>
 
-<ng-template #loadingDetails>
-  <div class="card w-100">
-    <div class="card-body pl-5 pr-5 pt-5 pb-0">
-      <app-content-placeholder></app-content-placeholder>
-    </div>
-  </div>
-</ng-template>
+      <ng-template #loadingDetails>
+        <div class="]pl-5 pr-5 pt-5 pb-0">
+          <app-content-placeholder></app-content-placeholder>
+        </div>
+      </ng-template>
+    </form>
+  </ng-template>
+</app-content>

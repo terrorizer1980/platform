@@ -22,4 +22,10 @@ export class DelegatorsComponent {
     private tron: TronService,
     private router: Router
   ) {}
+
+  select(item: BlockatlasValidator) {
+    this.router.navigate([`details/${item.id}`], {
+      relativeTo: this.activatedRoute
+    });
+  }
 }

@@ -3,8 +3,6 @@ import { Observable } from "rxjs";
 import { CoinProviderConfig, StakeAction, StakeHolderList } from "../coin-provider-config";
 import BigNumber from "bignumber.js";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
-import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
-import { Delegation } from "../../dto";
 
 export interface CoinService {
   getAnnualPercent(): Observable<number>;
@@ -13,7 +11,7 @@ export interface CoinService {
   getStaked(): Observable<BigNumber>;
   getStakedUSD(): Observable<BigNumber>;
   getStakedToValidator(validator: string): Observable<BigNumber>;
-  getAddressDelegations(address: string): Observable<Delegation[]>;
+  getAddressDelegations(address: string): Observable<any[]>;
   getStakeHolders(): Observable<StakeHolderList>;
   getPriceUSD(): Observable<BigNumber>;
   getAddress(): Observable<string>;
@@ -31,5 +29,4 @@ export interface CoinService {
   getValidatorsById(validatorId: string): Observable<BlockatlasValidator>;
   hasProvider(): Observable<boolean>;
   isUnstakeEnabled(): Observable<boolean>;
-  getConfig(): Observable<CoinProviderConfig>;
 }

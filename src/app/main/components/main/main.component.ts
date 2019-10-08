@@ -27,7 +27,7 @@ interface CoinDescriptor {
 export class MainComponent implements OnInit {
   myStakeHolders$: Observable<StakeHolderList> = new ReplaySubject(1);
   blockchains$: Observable<CoinDescriptor[]>;
-  upcomings: UpcomingCoin[];
+  upcomings: Observable<UpcomingCoin[]>;
 
   constructor(
     private router: Router,
@@ -56,7 +56,7 @@ export class MainComponent implements OnInit {
       })
     ) as Observable<CoinDescriptor[]>;
 
-    this.upcomings = Upcoming;
+    this.upcomings = of(Upcoming);
   }
 
   ngOnInit(): void {
@@ -69,7 +69,10 @@ export class MainComponent implements OnInit {
         return holder.reduce((acc, stakeHolders, index) => {
           stakeHolders.forEach(sh => {
             sh.coin = Coins[index];
-            sh.amount = new BigNumber(sh.amount.toFixed(5));
+            sh.amount = new BigNumber(sh.amount).toFormat(
+              2,
+              BigNumber.ROUND_DOWN
+            );
           });
           return [...acc, ...stakeHolders];
         }, []);

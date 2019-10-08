@@ -1,16 +1,24 @@
 import { Inject, Injectable } from "@angular/core";
-import { BehaviorSubject, combineLatest, forkJoin, from, interval, Observable, of, timer } from "rxjs";
+import {
+  BehaviorSubject,
+  combineLatest,
+  forkJoin,
+  from,
+  interval,
+  Observable,
+  of,
+  timer
+} from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
 import { first, map, skipWhile, switchMap } from "rxjs/operators";
-import { CosmosAccount, CosmosBroadcastResult, CosmosUtils } from "@trustwallet/rpc";
+import { CosmosAccount, CosmosBroadcastResult } from "@trustwallet/rpc";
+import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
 import { CosmosConfigService } from "./cosmos-config.service";
 import { CosmosProviderConfig } from "../cosmos.descriptor";
 import { CoinService } from "../../../services/coin.service";
 import {
-  BALANCE_REFRESH_INTERVAL,
-  STAKE_REFRESH_INTERVAL,
   StakeAction,
   StakeHolderList,
   TX_WAIT_CHECK_INTERVAL
@@ -23,9 +31,7 @@ import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStak
 import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { AuthService } from "../../../../auth/services/auth.service";
 import { CosmosTx } from "@trustwallet/rpc/lib/cosmos/models/CosmosTx";
-import { Delegation } from "../../../../dto";
-
-// TODO: There is plenty of old boilerplate here yet. Need to be refactored.
+import { ProviderUtils } from "../../provider-utils";
 
 // Used for creating Cosmos service manually bypassing regular routing flow
 export const CosmosServiceInjectable = [
@@ -35,16 +41,12 @@ export const CosmosServiceInjectable = [
   ExchangeRateService,
   CosmosRpcService,
   CosmosUnboundInfoService,
-  CoinAtlasService
+  CoinAtlasService,
+  ProviderUtils
 ];
-
-interface IAggregatedDelegationMap {
-  [address: string]: BigNumber;
-}
 
 @Injectable()
 export class CosmosService implements CoinService {
-  private _manualRefresh: BehaviorSubject<boolean> = new BehaviorSubject(true);
   private readonly balance$: Observable<BigNumber>;
   private readonly stakedAmount$: Observable<BigNumber>;
 
@@ -56,40 +58,29 @@ export class CosmosService implements CoinService {
     private exchangeRateService: ExchangeRateService,
     private cosmosRpc: CosmosRpcService,
     private cosmosUnboundInfoService: CosmosUnboundInfoService,
-    private atlasService: CoinAtlasService
+    private atlasService: CoinAtlasService,
+    private providerUtils: ProviderUtils
   ) {
     this.cosmosRpc.setConfig(config);
-    // Fires on address change or manual refresh
-    const buildPipeline = (milliSeconds): Observable<string> =>
-      combineLatest([this.getAddress(), this._manualRefresh]).pipe(
-        switchMap((x: any[]) => {
-          const [address, skip] = x;
-          return timer(0, milliSeconds).pipe(map(() => address));
-        })
-      );
 
-    this.balance$ = buildPipeline(BALANCE_REFRESH_INTERVAL).pipe(
-      switchMap(address => {
-        return this.requestBalance(address);
-      }),
-      map(uAtom => CosmosUtils.toAtom(uAtom))
+    this.balance$ = this.providerUtils.updatableBalance(
+      this.getAddress.bind(this),
+      this.requestBalance.bind(this),
+      this.config
     );
 
-    this.stakedAmount$ = buildPipeline(STAKE_REFRESH_INTERVAL).pipe(
-      switchMap(address => {
-        return this.requestStakedAmount(address);
-      }),
-      map(uAtom => CosmosUtils.toAtom(uAtom) || new BigNumber(0))
+    this.stakedAmount$ = this.providerUtils.updatableStakedAmount(
+      this.getAddress.bind(this),
+      this.requestStakedAmount.bind(this),
+      this.config
     );
   }
 
   private requestBalance(address: string): Observable<BigNumber> {
     return this.getAccountOnce(address).pipe(
       map((account: CosmosAccount) => {
-        // TODO: add type annotation once it exported by library (Coin)
         const balances = (account as CosmosAccount).coins;
 
-        // TODO: check, probably with library toUpperCase is no needed here
         const result = balances.find(
           coin => coin.denom.toUpperCase() === "UATOM"
         );
@@ -100,87 +91,14 @@ export class CosmosService implements CoinService {
 
   private requestStakedAmount(address: string): Observable<BigNumber> {
     return this.getAddressDelegations(address).pipe(
-      map(delegations => {
-        const shares = (delegations && delegations.map(d => d.amount)) || [];
+      map((delegations: CosmosDelegation[]) => {
+        const shares =
+          (delegations && delegations.map((d: CosmosDelegation) => d.shares)) ||
+          [];
         return shares && shares.length
           ? BigNumber.sum(...shares)
           : new BigNumber(0);
       })
-    );
-  }
-
-  private map2List(
-    config: CosmosProviderConfig,
-    address2stake: IAggregatedDelegationMap,
-    validators: Array<BlockatlasValidator>
-  ): StakeHolderList {
-    return Object.keys(address2stake).map(address => {
-      const validator = validators.find(v => v.id === address);
-      return {
-        ...validator,
-        amount: config.toCoin(address2stake[address]),
-        coin: config
-      };
-    });
-  }
-
-  private validatorsAndDelegations(): any[] {
-    return [
-      this.getValidators(),
-      this.authService
-        .getAddressFromAuthorized(CoinType.cosmos)
-        .pipe(switchMap(address => this.getAddressDelegations(address)))
-    ];
-  }
-
-  private address2StakeMap(): Observable<StakeHolderList> {
-    return combineLatest([
-      ...this.validatorsAndDelegations(),
-      this.config
-    ]).pipe(
-      map((data: any[]) => {
-        const approvedValidators: BlockatlasValidator[] = data[0];
-        const myDelegations: Delegation[] = data[1];
-        const config: CosmosProviderConfig = data[2];
-
-        // TODO: double check most probably we no need that check
-        if (!approvedValidators || !myDelegations) {
-          return [];
-        }
-
-        const addresses = approvedValidators.map(d => d.id);
-
-        // Ignore delegations to validators that isn't in a list of approved validators
-        const filteredDelegations = myDelegations.filter(delegation => {
-            // TODO: use map(Object) in case we have more that 10 approved validators
-            return addresses.includes(delegation.address);
-          }
-        );
-
-        const address2stakeMap = filteredDelegations.reduce((acc: IAggregatedDelegationMap, delegation) => {
-            // TODO: Use BN or native browser BigInt() + polyfill
-            const aggregatedAmount = acc[delegation.address] || new BigNumber(0);
-            const sharesAmount = delegation.amount || new BigNumber(0);
-            acc[delegation.address] = aggregatedAmount.plus(sharesAmount);
-            return acc;
-          }, {});
-
-        return this.map2List(config, address2stakeMap, approvedValidators);
-      }),
-      first()
-    );
-  }
-
-  private selectValidatorWithBestInterestRate(
-    validators: BlockatlasValidator[]
-  ) {
-    return validators.reduce(
-      (maxRate: number, validator: BlockatlasValidator) => {
-        return maxRate < validator.reward.annual
-          ? validator.reward.annual
-          : maxRate;
-      },
-      0
     );
   }
 
@@ -224,13 +142,9 @@ export class CosmosService implements CoinService {
     );
   }
 
-  getAddressDelegations(address: string): Observable<Delegation[]> {
+  getAddressDelegations(address: string): Observable<CosmosDelegation[]> {
     return this.cosmosRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.listDelegations(address))),
-      map(list => (list || []).map(d => ({
-        address: d.validatorAddress,
-        amount: d.shares
-      })))
+      switchMap(rpc => from(rpc.listDelegations(address)))
     );
   }
 
@@ -242,7 +156,9 @@ export class CosmosService implements CoinService {
 
   getAnnualPercent(): Observable<number> {
     return this.getValidators().pipe(
-      map(validators => this.selectValidatorWithBestInterestRate(validators))
+      map(validators =>
+        this.providerUtils.selectValidatorWithBestInterestRate(validators)
+      )
     );
   }
   getBalanceUSD(): Observable<BigNumber> {
@@ -266,7 +182,13 @@ export class CosmosService implements CoinService {
   }
 
   getStakeHolders(): Observable<StakeHolderList> {
-    return this.address2StakeMap();
+    return this.providerUtils.address2StakeMap<CosmosDelegation>(
+      this.config,
+      this.getValidators.bind(this),
+      this.getAddressDelegations.bind(this),
+      delegation => delegation.validatorAddress,
+      delegation => delegation.shares
+    );
   }
 
   getPriceUSD(): Observable<BigNumber> {
@@ -403,6 +325,7 @@ export class CosmosService implements CoinService {
   }
 
   waitForTx(txhash: string): Observable<CosmosTx> {
+    console.log(`waiting for tx ${txhash}`);
     return interval(TX_WAIT_CHECK_INTERVAL).pipe(
       switchMap(() => this.getStakingTransactions()),
       map(txs => txs.find(tx => tx.txhash === txhash)),
@@ -413,11 +336,7 @@ export class CosmosService implements CoinService {
 
   getStakingTransactions(): Observable<CosmosTx[]> {
     return combineLatest([this.cosmosRpc.rpc, this.getAddress()]).pipe(
-      switchMap(([rpc, address]) => rpc.listStakingTransactions(address))
+      switchMap(([rpc, address]) => rpc.listDelegationsTransactions(address))
     );
-  }
-
-  getConfig(): Observable<CosmosProviderConfig> {
-    return this.config;
   }
 }

@@ -1,10 +1,11 @@
 import { Component, Inject } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, of } from "rxjs";
 import { CosmosService } from "../../services/cosmos.service";
 import { ActivatedRoute } from "@angular/router";
-import { map } from "rxjs/operators";
+import { catchError, map } from "rxjs/operators";
 import { CosmosConfigService } from "../../services/cosmos-config.service";
 import { CosmosProviderConfig } from "../../cosmos.descriptor";
+import BigNumber from "bignumber.js";
 
 @Component({
   selector: "app-unstaking",
@@ -12,7 +13,16 @@ import { CosmosProviderConfig } from "../../cosmos.descriptor";
   styleUrls: ["./unstaking.component.scss"]
 })
 export class UnstakingComponent {
-  validatorId: string = this.activatedRoute.snapshot.params.validatorId;
+  validatorId = this.activatedRoute.snapshot.params.validatorId;
+  validator = this.cosmos.getValidatorsById(this.validatorId);
+  staked = this.cosmos.getStakedToValidator(this.validatorId).pipe(
+    catchError(_ => of(new BigNumber(0))),
+    map(staked => staked.toFormat(2, BigNumber.ROUND_DOWN))
+  );
+  balance = this.cosmos
+    .getBalance()
+    .pipe(catchError(_ => of(new BigNumber(0))));
+  prepareTx = this.cosmos.prepareStakeTx.bind(this.cosmos);
   timeFrame = this.cosmos
     .getStakingInfo()
     .pipe(map(info => info.timeFrame.day));

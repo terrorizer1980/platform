@@ -1,9 +1,6 @@
-<div class="row">
-  <div
-    *ngIf="details$ | async as details; else loadingValidator"
-    class="card w-100"
-  >
-    <div class="card-body p-0">
+<app-content>
+  <ng-template content>
+    <ng-container *ngIf="details$ | async as details; else loadingValidator">
       <div class="col-12 mt-3">
         <img
           class="row-logo"
@@ -65,14 +62,11 @@
           Withdraw
         </button>
       </div>
-    </div>
-  </div>
-
-  <ng-template #loadingValidator>
-    <div class="card w-100">
-      <div class="card-body pl-5 pr-5 pt-5 pb-0">
+    </ng-container>
+    <ng-template #loadingValidator>
+      <div class="pl-5 pr-5 pt-5 pb-0">
         <app-content-placeholder></app-content-placeholder>
       </div>
-    </div>
+    </ng-template>
   </ng-template>
-</div>
+</app-content>

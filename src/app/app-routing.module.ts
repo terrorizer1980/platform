@@ -1,6 +1,6 @@
 import { NgModule } from "@angular/core";
 import { PreloadAllModules, RouterModule, Routes } from "@angular/router";
-import { MainComponent } from "./core/components/main/main.component";
+import { MainComponent } from "./main/components/main/main.component";
 
 const routes: Routes = [
   {

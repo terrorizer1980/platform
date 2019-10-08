@@ -1,8 +1,8 @@
-<form [formGroup]="stakeForm" *ngIf="config | async as config">
-  <div class="row small">
-    <div class="card col-12 pt-2 pb-2 p-0">
-      <div class="card-body p-1 mt-4 mb-4">
-        <div class="col-12 text-center">
+<app-content>
+  <ng-template content>
+    <form [formGroup]="stakeForm">
+      <ng-container *ngIf="config | async as config">
+        <div class="col-12 text-center p-1 pl-4 pr-4 mt-4 mb-4 small">
           <div class="pb-4">
             <h5>Withdraw {{ config.currencySymbol }}</h5>
             <div class="col-12 available p-0 pb-2" (click)="setMax()">
@@ -61,7 +61,7 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
-</form>
+      </ng-container>
+    </form>
+  </ng-template>
+</app-content>

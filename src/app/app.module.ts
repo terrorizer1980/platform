@@ -5,7 +5,7 @@ import { ErrorHandler, NgModule } from "@angular/core";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { RouterModule } from "@angular/router";
-import { CoreModule } from "./core/core.module";
+import { CoreModule } from "./main/core.module";
 import { SharedModule } from "./shared/shared.module";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import * as Sentry from "@sentry/browser";
