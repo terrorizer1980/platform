@@ -55,7 +55,8 @@
           Stake
         </button>
         <button
-          *ngIf="details.hasProvider && details.unstakeEnabled"
+          *ngIf="details.hasProvider"
+          [disabled]="!details.unstakeEnabled"
           class="btn btn-secondary btn-lg col-12"
           (click)="navigateToUnStake()"
         >

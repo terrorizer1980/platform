@@ -7,7 +7,6 @@ import {
   interval,
   Observable,
   of,
-  timer
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
@@ -497,9 +496,7 @@ export class TronService implements CoinService {
     // This function checks if there is any frozen expire time in the future
     return this.authService.getAddressFromAuthorized(CoinType.tron).pipe(
       switchMap(address => this.getAccountOnce(address)),
-      map(
-        account => account.frozen.filter(f => f.expireTime > now).length === 0
-      ),
+      map(account => (account.frozen || []).filter(f => f.expireTime > now).length === 0),
       catchError(_ => of(false))
     );
   }
