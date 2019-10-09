@@ -19,13 +19,13 @@ import { Errors } from "../../../shared/consts";
 import { DialogsService } from "../../../shared/services/dialogs.service";
 import { AuthService } from "../../../auth/services/auth.service";
 import { fromPromise } from "rxjs/internal-compatibility";
+import {CoinProviderConfig} from "../../coin-provider-config";
 
 export interface DetailsValidatorInterface {
-  validator: BlockatlasValidator;
-  stakedSum: string;
   additionals: AdditionalInfo[];
   hasProvider: boolean;
   unstakeEnabled: boolean;
+  config: CoinProviderConfig
 }
 
 export interface AdditionalInfo {
@@ -39,10 +39,9 @@ export interface AdditionalInfo {
   styleUrls: ["./details.component.scss"]
 })
 export class DetailsComponent implements AfterViewInit {
-  @Input() validator: Observable<BlockatlasValidator>;
   @Input() isUnstakeEnabled: Observable<boolean>;
   @Input() hasProvider: Observable<boolean>;
-  @Input() staked: Observable<string>;
+  @Input() config: Observable<CoinProviderConfig>;
   @Input() additionals: Observable<AdditionalInfo[]>;
 
   details$: Observable<DetailsValidatorInterface>;
@@ -98,11 +97,10 @@ export class DetailsComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.details$ = forkJoin({
-      validator: this.validator.pipe(first()),
-      stakedSum: this.staked.pipe(first()),
       additionals: this.additionals.pipe(first()),
       unstakeEnabled: this.isUnstakeEnabled.pipe(first()),
-      hasProvider: this.hasProvider
+      hasProvider: this.hasProvider,
+      config: this.config.pipe(first())
     });
   }
 }

@@ -1,9 +1,10 @@
-import { Component } from "@angular/core";
+import {Component, Inject} from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { CosmosService } from "../../services/cosmos.service";
 import { catchError, map } from "rxjs/operators";
-import { of } from "rxjs";
-import BigNumber from "bignumber.js";
+import {CosmosConfigService} from "../../services/cosmos-config.service";
+import {Observable} from "rxjs";
+import {CosmosProviderConfig} from "../../cosmos.descriptor";
 
 @Component({
   selector: "app-details",
@@ -11,25 +12,24 @@ import BigNumber from "bignumber.js";
   styleUrls: ["./details.component.scss"]
 })
 export class DetailsComponent {
-  validatorId = this.activatedRoute.snapshot.params.validatorId;
-  validator = this.cosmos.getValidatorsById(this.validatorId);
   isUnstakeEnabled = this.cosmos.isUnstakeEnabled();
   hasProvider = this.cosmos.hasProvider();
-  staked = this.cosmos.getStakedToValidator(this.validatorId).pipe(
-    catchError(_ => of(new BigNumber(0))),
-    map(staked => staked.toFormat(2, BigNumber.ROUND_DOWN))
-  );
   additionalInfo = this.cosmos.getStakingInfo().pipe(
     map(info => [
       {
-        name: "Lock Time",
+        name: "Minimum Amount",
+        value: 0.01
+      },
+      {
+        name: "Withdraw Time",
         value: `${info.timeFrame.day} days`
       }
     ])
   );
 
   constructor(
+    @Inject(CosmosConfigService)
+    public config: Observable<CosmosProviderConfig>,
     public cosmos: CosmosService,
-    private activatedRoute: ActivatedRoute
   ) {}
 }
