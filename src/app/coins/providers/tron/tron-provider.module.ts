@@ -8,7 +8,6 @@ import { TronProviderRoutingModule } from "./tron-provider-routing.module";
 import { TronService } from "./services/tron.service";
 import { TronConfigService } from "./services/tron-config.service";
 import { TronProviderConfig } from "./tron.descriptor";
-import { DelegatorsComponent } from "./components/delegators/delegators.component";
 import { DetailsComponent } from "./components/details/details.component";
 import { StakingComponent } from "./components/staking/staking.component";
 import { UnstakingComponent } from "./components/unstaking/unstaking.component";
@@ -16,12 +15,7 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { CoinsComponentsModule } from "../../components/coins-components.module";
 
 @NgModule({
-  declarations: [
-    DelegatorsComponent,
-    DetailsComponent,
-    StakingComponent,
-    UnstakingComponent
-  ],
+  declarations: [DetailsComponent, StakingComponent, UnstakingComponent],
   imports: [
     SharedModule,
     RouterDataModule,

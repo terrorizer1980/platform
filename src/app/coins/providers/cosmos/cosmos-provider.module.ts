@@ -5,7 +5,6 @@ import { RouterModule } from "@angular/router";
 import { CosmosProviderRoutingModule } from "./cosmos-provider-routing.module";
 import { CosmosService } from "./services/cosmos.service";
 import { RouterDataModule } from "../../../router-data/router-data.module";
-import { DelegatorsComponent } from "./components/delegators/delegators.component";
 import { SharedModule } from "../../../shared/shared.module";
 import { CosmosConfigService } from "./services/cosmos-config.service";
 import { RouteDataProvider } from "../../../router-data/services/route-data-provider";
@@ -15,12 +14,7 @@ import { UnstakingComponent } from "./components/unstaking/unstaking.component";
 import { CoinsComponentsModule } from "../../components/coins-components.module";
 
 @NgModule({
-  declarations: [
-    DelegatorsComponent,
-    DetailsComponent,
-    StakingComponent,
-    UnstakingComponent
-  ],
+  declarations: [DetailsComponent, StakingComponent, UnstakingComponent],
   imports: [
     SharedModule,
     RouterDataModule,

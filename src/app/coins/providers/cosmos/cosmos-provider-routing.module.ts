@@ -10,11 +10,11 @@ const routes: Routes = [
     component: DetailsComponent
   },
   {
-    path: "details/:validatorId/stake",
+    path: "stake",
     component: StakingComponent
   },
   {
-    path: "details/:validatorId/unstake",
+    path: "unstake",
     component: UnstakingComponent
   }
 ];

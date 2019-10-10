@@ -23,6 +23,9 @@ import { BlockLeftDirective } from "../directives/block-left.directive";
 import { BlockRightDirective } from "../directives/block-right.directive";
 import { SectionDirective } from "../directives/section.directive";
 import { FooterDirective } from "../directives/footer.directive";
+import { InputComponent } from "./input/input.component";
+import { DropdownComponent } from "./dropdown/dropdown.component";
+import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 
 const components = [
   LoadingButtonComponent,
@@ -43,7 +46,9 @@ const components = [
   StakePlaceholderComponent,
   ListviewComponent,
   LabelComponent,
-  BlockBetweenComponent
+  BlockBetweenComponent,
+  InputComponent,
+  DropdownComponent
 ];
 
 @NgModule({
@@ -59,8 +64,9 @@ const components = [
     HttpClientModule,
     NgxLoadersCssModule,
     ContentLoaderModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    NgbModule
   ],
-  exports: [...components, ContentLoaderModule]
+  exports: [...components, ContentLoaderModule, NgbModule]
 })
 export class ComponentsModule {}

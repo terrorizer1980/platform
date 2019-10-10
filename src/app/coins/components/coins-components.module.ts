@@ -1,5 +1,4 @@
 import { NgModule } from "@angular/core";
-import { DelegatorsComponent } from "./delegators/delegators.component";
 import { StakingComponent } from "./staking/staking.component";
 import { UnstakingComponent } from "./unstaking/unstaking.component";
 import { DetailsComponent } from "./details/details.component";
@@ -10,12 +9,7 @@ import { NgxLoadersCssModule } from "ngx-loaders-css";
 import { ContentLoaderModule } from "@ngneat/content-loader";
 import { ReactiveFormsModule } from "@angular/forms";
 
-const components = [
-  DelegatorsComponent,
-  StakingComponent,
-  UnstakingComponent,
-  DetailsComponent
-];
+const components = [StakingComponent, UnstakingComponent, DetailsComponent];
 
 @NgModule({
   declarations: [...components],

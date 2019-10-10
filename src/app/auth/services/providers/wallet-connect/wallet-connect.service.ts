@@ -76,15 +76,11 @@ export class WalletConnectService {
   }
 
   signTransaction(network: CoinType, transaction: any): Observable<string> {
-    if (!this.connector || !this.connector.connected) {
-      return this.connect().pipe(
-        switchMap(() =>
-          from(this.connector.trustSignTransaction(network, transaction))
-        )
-      );
-    } else {
-      return from(this.connector.trustSignTransaction(network, transaction));
-    }
+    return this.connect().pipe(
+      switchMap(() =>
+        from(this.connector.trustSignTransaction(network, transaction))
+      )
+    );
   }
 
   public disconnected(): Observable<boolean> {

@@ -1,10 +1,9 @@
-import {Component, Inject} from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { Component, Inject } from "@angular/core";
 import { CosmosService } from "../../services/cosmos.service";
 import { catchError, map } from "rxjs/operators";
-import {CosmosConfigService} from "../../services/cosmos-config.service";
-import {Observable} from "rxjs";
-import {CosmosProviderConfig} from "../../cosmos.descriptor";
+import { CosmosConfigService } from "../../services/cosmos-config.service";
+import { Observable } from "rxjs";
+import { CosmosProviderConfig } from "../../cosmos.descriptor";
 
 @Component({
   selector: "app-details",
@@ -30,6 +29,6 @@ export class DetailsComponent {
   constructor(
     @Inject(CosmosConfigService)
     public config: Observable<CosmosProviderConfig>,
-    public cosmos: CosmosService,
+    public cosmos: CosmosService
   ) {}
 }

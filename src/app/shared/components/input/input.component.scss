@@ -1,0 +1,10 @@
+.input-group {
+  ::ng-deep {
+    input {
+      border-right: none;
+    }
+  }
+  .input-group-text {
+    background: transparent;
+  }
+}

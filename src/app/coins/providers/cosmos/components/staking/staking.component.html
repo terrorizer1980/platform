@@ -1,11 +1,18 @@
-<app-shared-staking
-  [config]="config"
-  [formatMax]="formatMax"
-  [validator]="validator"
-  [staked]="staked"
-  [hasProvider]="hasProvider"
-  [balance]="balance"
-  [info]="info"
-  [prepareTx]="prepareTx"
-  [max]="0.01"
-></app-shared-staking>
+<ng-container *ngIf="config | async as config">
+  <app-content header="Stake {{ config.currencySymbol }}">
+    <ng-template content>
+      <app-shared-staking
+        [config]="config"
+        [formatMax]="formatMax"
+        [staked]="staked"
+        [hasProvider]="hasProvider"
+        [balance]="balance"
+        [info]="info"
+        [prepareTx]="prepareTx"
+        [max]="0.01"
+        [price]="price"
+        [validators]="validators"
+      ></app-shared-staking>
+    </ng-template>
+  </app-content>
+</ng-container>
