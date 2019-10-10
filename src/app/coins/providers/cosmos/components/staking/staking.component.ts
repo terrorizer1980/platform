@@ -15,7 +15,6 @@ import { BlockatlasValidator } from "@trustwallet/rpc/lib";
 })
 export class StakingComponent {
   hasProvider = this.cosmos.hasProvider();
-  staked = this.cosmos.getStakedToValidator.bind(this.cosmos);
   balance = this.cosmos
     .getBalanceCoins()
     .pipe(catchError(_ => of(new BigNumber(0))));

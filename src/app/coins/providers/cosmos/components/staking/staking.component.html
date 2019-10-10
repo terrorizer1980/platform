@@ -1,10 +1,9 @@
 <ng-container *ngIf="config | async as config">
-  <app-content header="Stake {{ config.currencySymbol }}">
+  <app-content header="Stake {{ config.currencyName }}">
     <ng-template content>
       <app-shared-staking
         [config]="config"
         [formatMax]="formatMax"
-        [staked]="staked"
         [hasProvider]="hasProvider"
         [balance]="balance"
         [info]="info"

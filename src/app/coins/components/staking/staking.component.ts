@@ -4,6 +4,7 @@ import {
   Input,
   OnDestroy,
   OnInit,
+  Output,
   TemplateRef
 } from "@angular/core";
 import {
@@ -40,8 +41,9 @@ import { AuthProvider } from "../../../auth/services/auth-provider";
 import { ErrorsService } from "../../../shared/services/errors/errors.service";
 import { Errors } from "../../../shared/consts";
 import { ContentDirective } from "../../../shared/directives/content.directive";
+import { ComponentAuthService } from "../../services/component-auth.service";
 
-interface StakeDetails {
+export interface StakeDetails {
   hasProvider: boolean;
   price: number;
 }
@@ -55,7 +57,6 @@ export class StakingComponent implements OnInit, OnDestroy {
   @Input() config: CoinProviderConfig;
   @Input() balance: Observable<BigNumber>;
   @Input() hasProvider: Observable<boolean>;
-  @Input() staked: (validator: string) => Observable<BigNumber>;
   @Input() info: Observable<any>;
   @Input() max: number;
   @Input() prepareTx: (
@@ -63,7 +64,7 @@ export class StakingComponent implements OnInit, OnDestroy {
     validatorId: string,
     amount: BigNumber
   ) => Observable<any>;
-  @Input() formatMax: (max: BigNumber) => BigNumber;
+  @Input() formatMax: (max: BigNumber) => string;
   @Input() price: Observable<BigNumber>;
   @Input() validators: Observable<Array<BlockatlasValidator>>;
 
@@ -89,7 +90,8 @@ export class StakingComponent implements OnInit, OnDestroy {
     private dialogService: DialogsService,
     private router: Router,
     private errorsService: ErrorsService,
-    private auth: AuthService
+    private auth: AuthService,
+    private componentAuthService: ComponentAuthService
   ) {
     this.stakeForm = this.fb.group({
       amount: ["", [], []]
@@ -120,40 +122,14 @@ export class StakingComponent implements OnInit, OnDestroy {
           if (hasProvider) {
             return stake$;
           } else {
-            const modal = this.dialogService.showModal(
-              SelectAuthProviderComponent
-            );
-            return modal.componentInstance.select.pipe(
-              switchMap((provider: AuthProvider) =>
-                combineLatest([
-                  this.auth.authorize(provider),
-                  of(provider),
-                  this.config
-                ])
-              ),
-              switchMap(([authorized, provider, config]) =>
-                authorized
-                  ? provider.getAddress(config.coin)
-                  : throwError("closed")
-              ),
-              catchError(error => {
-                if (error === "closed") {
-                  return throwError(Errors.REJECTED_BY_USER);
-                }
-                return throwError(error);
-              })
-            );
+            return this.componentAuthService.showAuth(this.config.coin);
           }
         }),
         tap(() => (this.isLoading = false), e => (this.isLoading = false))
       )
       .subscribe(
         (result: any) => {
-          if (typeof result === "string") {
-            location.reload();
-          } else {
-            this.congratulate(result, this.stakeForm.get("amount").value);
-          }
+          this.congratulate(result, this.stakeForm.get("amount").value);
         },
         error => {
           this.errorsService.showError(error);
@@ -236,15 +212,7 @@ export class StakingComponent implements OnInit, OnDestroy {
       this.stakeForm
         .get("amount")
         .setAsyncValidators([
-          StakeValidator(
-            true,
-            this.config,
-            this.balance,
-            this.staked(validator.id).pipe(
-              catchError(_ => of(new BigNumber(0)))
-            ),
-            this.max
-          )
+          StakeValidator(true, this.config, this.balance, of(null), this.max)
         ]);
     });
 

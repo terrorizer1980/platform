@@ -1,0 +1,61 @@
+<ng-container *ngIf="details$ | async as details; else loadingDetails">
+  <form [formGroup]="stakeForm">
+    <div class="col-12 text-center mt-4 mb-4 small">
+      <div class="form-group mt-2 pb-0">
+        <div class="input-group input-group-lg">
+          <app-input class="d-block w-100">
+            <ng-template content>
+              <input
+                formControlName="amount"
+                placeholder="Amount in {{ config.currencySymbol }}"
+                class="form-control"
+                aria-label="Large"
+                [mask]="'0*'"
+                [ngClass]="{ 'is-invalid': stakeForm.invalid }"
+              />
+            </ng-template>
+            <ng-template right>
+              <div
+                class="available"
+                (click)="setMax()"
+                *ngIf="details.hasProvider"
+              >
+                <span class="btn-link" *ngIf="max$ | async; let max"
+                  ><span>Available: {{ formatMax(max) }}</span></span
+                >
+              </div>
+            </ng-template>
+          </app-input>
+          <div class="text-muted">≈ {{ usdAmount | async }} USD</div>
+        </div>
+        <div class="feedback text-left">
+          <div *ngIf="stakeForm.invalid" class="mt-2 invalid-feedback d-block">
+            <div *ngIf="stakeForm.controls.amount.errors?.max">
+              You don't have enough funds.
+            </div>
+            <div *ngIf="stakeForm.controls.amount.errors?.min">
+              Minimum deposit value is
+              {{ stakeForm.controls.amount.errors?.min }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 text-center p-0 mt-3">
+        <loading-button
+          (click)="stake()"
+          [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
+          [loading]="isLoading"
+        >
+          Freeze
+        </loading-button>
+      </div>
+    </div>
+  </form>
+</ng-container>
+
+<ng-template #loadingDetails>
+  <div class="pl-5 pr-5 pt-5 pb-0">
+    <app-content-placeholder></app-content-placeholder>
+  </div>
+</ng-template>

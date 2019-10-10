@@ -13,9 +13,15 @@ import { StakingComponent } from "./components/staking/staking.component";
 import { UnstakingComponent } from "./components/unstaking/unstaking.component";
 import { ReactiveFormsModule } from "@angular/forms";
 import { CoinsComponentsModule } from "../../components/coins-components.module";
+import { FreezeComponent } from "./components/freeze/freeze.component";
 
 @NgModule({
-  declarations: [DetailsComponent, StakingComponent, UnstakingComponent],
+  declarations: [
+    DetailsComponent,
+    StakingComponent,
+    UnstakingComponent,
+    FreezeComponent
+  ],
   imports: [
     SharedModule,
     RouterDataModule,

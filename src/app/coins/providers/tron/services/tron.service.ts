@@ -207,6 +207,15 @@ export class TronService implements CoinService {
     );
   }
 
+  prepareFreezeTx(amount: BigNumber): Observable<TronTransaction> {
+    return this.getAddress().pipe(
+      switchMap(address => {
+        return this.freezeBalance(address, amount);
+      }),
+      switchMap(result => this.waitForTx(result.code))
+    );
+  }
+
   getStakedToValidator(validator: string): Observable<BigNumber> {
     return combineLatest([this.config, this.getStakeHolders()]).pipe(
       map(([config, stakeholders]) => {
@@ -365,33 +374,35 @@ export class TronService implements CoinService {
     to: string,
     amount: BigNumber
   ): Observable<TronTransaction> {
-    return this.freezeBalance(account.address, amount).pipe(
-      switchMap(_ =>
-        this.addVote(account, to, amount.plus(this.getFreeFrozen(account)))
-      ),
+    return this.addVote(account, to, amount).pipe(
       switchMap(votes => this.updateVotes(account.address, votes)),
       switchMap(result => this.waitForTx(result.code))
     );
   }
 
-  private getFreeFrozen(account: TronAccount): BigNumber {
-    const freeFrozen = account.frozen
-      ? account.frozen
-          .reduce(
-            (acc, frozen) => acc.plus(frozen.frozenBalance),
-            new BigNumber(0)
-          )
-          .integerValue(BigNumber.ROUND_DOWN)
-      : new BigNumber(0);
+  public getFreeFrozen(): Observable<BigNumber> {
+    return this.getAddress().pipe(
+      switchMap(address => this.getAccountOnce(address)),
+      map(account => {
+        const freeFrozen = account.frozen
+          ? account.frozen
+              .reduce(
+                (acc, frozen) => acc.plus(frozen.frozenBalance),
+                new BigNumber(0)
+              )
+              .integerValue(BigNumber.ROUND_DOWN)
+          : new BigNumber(0);
 
-    const votes = this.getVotes(account);
-    const result = freeFrozen.minus(
-      votes.reduce((acc, vote) => vote.vote_count + acc, 0)
+        const votes = this.getVotes(account);
+        const result = freeFrozen.minus(
+          votes.reduce((acc, vote) => vote.vote_count + acc, 0)
+        );
+
+        return result.isGreaterThan(0)
+          ? TronUtils.fromTron(result)
+          : new BigNumber(0);
+      })
     );
-
-    return result.isGreaterThan(0)
-      ? TronUtils.fromTron(result)
-      : new BigNumber(0);
   }
 
   private unstake(

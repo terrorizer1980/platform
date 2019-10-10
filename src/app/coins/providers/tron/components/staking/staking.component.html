@@ -1,24 +1,43 @@
-<app-shared-staking
-  [config]="config"
-  [formatMax]="formatMax"
-  [validator]="validator"
-  [staked]="staked"
-  [hasProvider]="hasProvider"
-  [balance]="balance"
-  [info]="info"
-  [prepareTx]="prepareTx"
-  [max]="1"
->
-  <ng-template content let-form="form" let-details="details">
-    <ng-container [formGroup]="form">
-      <input
-        formControlName="amount"
-        placeholder="Amount in {{ details.config.currencySymbol }}"
-        class="form-control"
-        aria-label="Large"
-        [mask]="'0*'"
-        [ngClass]="{ 'is-invalid': form.invalid }"
-      />
-    </ng-container>
-  </ng-template>
-</app-shared-staking>
+<ng-container *ngIf="config | async as config">
+  <app-content header="Freeze {{ config.currencyName }}">
+    <ng-template content>
+      <app-freeze
+        [config]="config"
+        [formatMax]="formatMax"
+        [hasProvider]="hasProvider"
+        [balance]="balance"
+        [prepareTx]="prepareFreezeTx"
+        [max]="1"
+        [price]="price"
+      ></app-freeze>
+    </ng-template>
+  </app-content>
+  <app-content header="Stake {{ config.currencyName }}" class="d-block mt-3">
+    <ng-template content>
+      <app-shared-staking
+        [config]="config"
+        [formatMax]="formatMax"
+        [hasProvider]="hasProvider"
+        [balance]="balanceFrozen"
+        [info]="info"
+        [prepareTx]="prepareVoteTx"
+        [max]="1"
+        [price]="price"
+        [validators]="validators"
+      >
+        <ng-template content let-form="form" let-details="details">
+          <ng-container [formGroup]="form">
+            <input
+              formControlName="amount"
+              placeholder="Amount in {{ config.currencySymbol }}"
+              class="form-control"
+              aria-label="Large"
+              [mask]="'0*'"
+              [ngClass]="{ 'is-invalid': form.invalid }"
+            />
+          </ng-container>
+        </ng-template>
+      </app-shared-staking>
+    </ng-template>
+  </app-content>
+</ng-container>

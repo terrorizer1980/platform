@@ -1,25 +1,13 @@
 <ng-container *ngIf="details$ | async as details; else loadingDetails">
   <form [formGroup]="stakeForm">
     <ng-template #defaultInput>
-      <app-input class="d-block w-100">
-        <ng-template content>
-          <input
-            type="number"
-            formControlName="amount"
-            placeholder="Amount in {{ config.currencySymbol }}"
-            class="form-control"
-            aria-label="Large"
-          />
-        </ng-template>
-        <ng-template right>
-          <div class="available" (click)="setMax()" *ngIf="details.hasProvider">
-            <span class="btn-link" *ngIf="max$ | async; let max"
-              ><span>Available: {{ formatMax(max.normal) }}</span></span
-            >
-          </div>
-        </ng-template>
-      </app-input>
-      <div class="text-muted">≈ {{ usdAmount | async }} USD</div>
+      <input
+        type="number"
+        formControlName="amount"
+        placeholder="Amount in {{ config.currencySymbol }}"
+        class="form-control"
+        aria-label="Large"
+      />
     </ng-template>
 
     <div class="col-12 text-center mt-4 mb-4 small">
@@ -73,12 +61,28 @@
 
       <div class="form-group mt-2 pb-0">
         <div class="input-group input-group-lg">
-          <ng-container
-            *ngTemplateOutlet="
-              contentTemplate ? contentTemplate : defaultInput;
-              context: { form: stakeForm, details: details }
-            "
-          ></ng-container>
+          <app-input class="d-block w-100">
+            <ng-template content>
+              <ng-container
+                *ngTemplateOutlet="
+                  contentTemplate ? contentTemplate : defaultInput;
+                  context: { form: stakeForm, details: details }
+                "
+              ></ng-container>
+            </ng-template>
+            <ng-template right>
+              <div
+                class="available"
+                (click)="setMax()"
+                *ngIf="details.hasProvider"
+              >
+                <span class="btn-link" *ngIf="max$ | async; let max"
+                  ><span>Available: {{ formatMax(max.normal) }}</span></span
+                >
+              </div>
+            </ng-template>
+          </app-input>
+          <div class="text-muted">≈ {{ usdAmount | async }} USD</div>
         </div>
         <div class="feedback text-left">
           <div *ngIf="warn$ | async as warn" class="mt-2 warn-feedback d-block">

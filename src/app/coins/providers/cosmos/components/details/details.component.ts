@@ -4,6 +4,8 @@ import { catchError, map } from "rxjs/operators";
 import { CosmosConfigService } from "../../services/cosmos-config.service";
 import { Observable } from "rxjs";
 import { CosmosProviderConfig } from "../../cosmos.descriptor";
+import {StakeHolder} from "../../../../coin-provider-config";
+import BigNumber from "bignumber.js";
 
 @Component({
   selector: "app-details",
@@ -13,6 +15,14 @@ import { CosmosProviderConfig } from "../../cosmos.descriptor";
 export class DetailsComponent {
   isUnstakeEnabled = this.cosmos.isUnstakeEnabled();
   hasProvider = this.cosmos.hasProvider();
+  validators: Observable<StakeHolder[]> = this.cosmos.getStakeHolders().pipe(
+    map(stakeHolders => {
+      return stakeHolders.map(sh => {
+        sh.amount = new BigNumber(sh.amount);
+        return sh;
+      });
+    })
+  );
   additionalInfo = this.cosmos.getStakingInfo().pipe(
     map(info => [
       {
