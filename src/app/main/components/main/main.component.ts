@@ -15,8 +15,6 @@ interface CoinDescriptor {
   item: CoinProviderConfig;
   annual: number;
   available: string;
-  pending: BigNumber;
-  unstakingDate: Date;
   stakingInfo: any;
 }
 
@@ -42,14 +40,7 @@ export class MainComponent {
           annual: service.getAnnualPercent().pipe(first()),
           available: service.getBalanceCoins().pipe(
             map(balance => balance.toFormat(2, BigNumber.ROUND_DOWN)),
-            first()
-          ),
-          pending: service.getStakePendingBalance().pipe(
-            catchError(_ => of(new BigNumber(0))),
-            first()
-          ),
-          unstakingDate: service.getUnstakingDate().pipe(
-            catchError(_ => of(null)),
+            catchError(() => of("0")),
             first()
           ),
           stakingInfo: service.getStakingInfo().pipe(first())
@@ -64,13 +55,7 @@ export class MainComponent {
     this.upcomings = of(Upcoming);
   }
 
-  navigateToPosDelegatorsList(item: CoinProviderConfig) {
+  navigateToDetails(item: CoinProviderConfig) {
     this.router.navigate([`/blockchain/${item.network}`]);
-  }
-
-  navigateToMyStakeHoldersList(holder: StakeHolder) {
-    this.router.navigate([
-      `/blockchain/${holder.coin.network}/details/${holder.id}`
-    ]);
   }
 }

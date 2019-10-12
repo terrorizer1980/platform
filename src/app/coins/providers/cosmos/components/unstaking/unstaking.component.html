@@ -1,8 +1,14 @@
-<app-shared-unstaking
-  [config]="config"
-  [timeFrame]="timeFrame"
-  [prepareTx]="prepareTx"
-  [balance]="balance"
-  [staked]="staked"
-  [validator]="validator"
-></app-shared-unstaking>
+<ng-container *ngIf="config | async as config">
+  <app-content header="Withdraw {{ config.currencyName }}">
+    <ng-template content>
+      <app-shared-unstaking
+        [config]="config"
+        [timeFrame]="timeFrame"
+        [formatMax]="formatMax"
+        [prepareTx]="prepareTx"
+        [balance]="balance"
+        [staked]="staked"
+        [validators]="validators"
+        [price]="price"
+      ></app-shared-unstaking> </ng-template></app-content
+></ng-container>

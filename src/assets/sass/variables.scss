@@ -62,7 +62,7 @@ $grays: map-merge(
   $grays
 );
 
-$blue: #007bff !default;
+$blue: #3375bb !default;
 $indigo: #6610f2 !default;
 $purple: #6f42c1 !default;
 $pink: #e83e8c !default;
@@ -252,7 +252,7 @@ $border-width: 1px !default;
 $border-color: $gray-300 !default;
 
 $border-radius: 0.25rem !default;
-$border-radius-lg: 0.3rem !default;
+$border-radius-lg: 0.8rem !default;
 $border-radius-sm: 0.2rem !default;
 
 $rounded-pill: 50rem !default;
@@ -1186,3 +1186,8 @@ $positions: static, relative, absolute, fixed, sticky !default;
 
 $print-page-size: a3 !default;
 $print-body-min-width: map-get($grid-breakpoints, "lg") !default;
+
+// popup
+.small-popup {
+  padding: 0;
+}

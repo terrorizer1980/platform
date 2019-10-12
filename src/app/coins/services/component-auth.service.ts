@@ -18,7 +18,9 @@ export class ComponentAuthService {
     private auth: AuthService
   ) {}
   showAuth(coin: CoinType) {
-    const modal = this.dialogService.showModal(SelectAuthProviderComponent);
+    const modal = this.dialogService.showModal(SelectAuthProviderComponent, {
+      windowClass: "small-popup"
+    });
     return modal.componentInstance.select.pipe(
       switchMap((provider: AuthProvider) =>
         combineLatest([this.auth.authorize(provider), of(provider)])

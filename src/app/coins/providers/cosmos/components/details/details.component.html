@@ -5,6 +5,8 @@
       [hasProvider]="hasProvider"
       [isUnstakeEnabled]="isUnstakeEnabled"
       [config]="config"
+      (stake)="stake()"
+      (unstake)="unstake()"
     ></app-shared-details> </ng-template
 ></app-content>
 
@@ -27,20 +29,64 @@
           <ng-template content>
             <span>{{ item.info.name }}</span>
             <span class="success"
-            >{{ item.reward.annual | number: "1.2-2" }}%</span
+              >{{ item.reward.annual | number: "1.2-2" }}%</span
             >
           </ng-template>
         </app-label>
       </ng-template>
       <ng-template right>
         <div class="text-nowrap">
-          <span>{{ item.amount.toFixed(2) }} {{ item.coin.currencySymbol }}</span>
+          <span
+            >{{ item.amount.toFixed(2) }} {{ item.coin.currencySymbol }}</span
+          >
         </div>
       </ng-template>
     </app-block-between>
   </ng-container>
   <ng-template noitems>
     <div class="m-3">The stakes list is empty</div>
+  </ng-template>
+  <ng-template placeholder>
+    <div class="pb-3 pt-3 pl-3">
+      <app-stake-placeholder></app-stake-placeholder>
+    </div>
+  </ng-template>
+</app-listview>
+
+<app-listview
+  class="d-block mt-2"
+  header="Pending Withdraws"
+  [dataSource]="pendingWithdrawals"
+  [placeholdersCount]="1"
+>
+  <ng-template section>
+    <app-block-between>
+      <ng-template left>Delegator</ng-template>
+      <ng-template right>Amount</ng-template>
+    </app-block-between>
+  </ng-template>
+  <ng-container *item="let item">
+    <app-block-between>
+      <ng-template left>
+        <app-label [image]="item.validator.info.image">
+          <ng-template content>
+            <div>{{ item.validator.info.name }}</div>
+            <div class="text-muted">Availaible in {{ item.date }}</div>
+          </ng-template>
+        </app-label>
+      </ng-template>
+      <ng-template right>
+        <div class="text-nowrap">
+          <span
+            >{{ item.balance.toFixed(2) }}
+            {{ item.validator.coin.currencySymbol }}</span
+          >
+        </div>
+      </ng-template>
+    </app-block-between>
+  </ng-container>
+  <ng-template noitems>
+    <div class="m-3">The pending list is empty</div>
   </ng-template>
   <ng-template placeholder>
     <div class="pb-3 pt-3 pl-3">

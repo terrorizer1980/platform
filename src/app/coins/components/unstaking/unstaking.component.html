@@ -1,67 +1,106 @@
-<app-content>
-  <ng-template content>
-    <form [formGroup]="stakeForm">
-      <ng-container *ngIf="config | async as config">
-        <div class="col-12 text-center p-1 pl-4 pr-4 mt-4 mb-4 small">
-          <div class="pb-4">
-            <h5>Withdraw {{ config.currencySymbol }}</h5>
-            <div class="col-12 available p-0 pb-2" (click)="setMax()">
-              <span class="btn-link" *ngIf="max$ | async; let max"
-                ><span
-                  >Available: {{ Math.floor(max * 1000) / 1000 }}</span
-                ></span
-              >
-            </div>
-            <div
-              *ngIf="stakeForm.controls.amount.valueChanges | async; let value"
-              class=""
-            ></div>
-          </div>
+<form [formGroup]="stakeForm">
+  <ng-template #defaultInput>
+    <input
+      type="number"
+      formControlName="amount"
+      placeholder="Amount in {{ config.currencySymbol }}"
+      class="form-control"
+      aria-label="Large"
+    />
+  </ng-template>
 
-          <div class="form-group mb-2">
-            <div class="input-group input-group-lg">
-              <input
-                formControlName="amount"
-                placeholder="Amount in {{ config.currencySymbol }}"
-                class="form-control"
-                aria-label="Large"
-                [ngClass]="{ 'is-invalid': stakeForm.invalid }"
-              />
-            </div>
-            <div class="feedback">
-              <div
-                *ngIf="stakeForm.invalid"
-                class="mt-2 invalid-feedback d-block"
+  <div class="col-12 text-center mt-4 mb-4 small">
+    <app-dropdown
+      [items]="validators"
+      [selectedIndex]="0"
+      (select)="selectValidator($event)"
+      class="d-block w-100"
+    >
+      <ng-template section>
+        <app-block-between>
+          <ng-template left>Market</ng-template>
+          <ng-template right>Current APY</ng-template>
+        </app-block-between>
+      </ng-template>
+      <div *content="let item" class="btn btn-outline-primary d-block">
+        <app-block-between>
+          <ng-template left>
+            <app-label [image]="item.info.image" alt="item.info.name">
+              <ng-template content>
+                <div class="text-dark">{{ item.info.name }}</div>
+              </ng-template>
+            </app-label>
+          </ng-template>
+          <ng-template right>
+            <small class="success text-nowrap"
+              >{{ item.reward.annual.toFixed(2) }}%
+              <span class="ml-1"
+                ><i class="mr-0 text-muted fa fa-chevron-down"></i></span
+            ></small>
+          </ng-template>
+        </app-block-between>
+      </div>
+      <div *item="let item" class="d-block w-100">
+        <app-block-between>
+          <ng-template left>
+            <app-label [image]="item.info.image" alt="item.info.name">
+              <ng-template content>
+                <div class="text-dark">{{ item.info.name }}</div>
+              </ng-template>
+            </app-label>
+          </ng-template>
+          <ng-template right>
+            <small class="success text-nowrap"
+              >{{ item.reward.annual.toFixed(2) }}%
+            </small>
+          </ng-template>
+        </app-block-between>
+      </div>
+    </app-dropdown>
+
+    <div class="form-group mt-2 pb-0">
+      <div class="input-group input-group-lg">
+        <app-input class="d-block w-100">
+          <ng-template content>
+            <ng-container
+              *ngTemplateOutlet="
+                contentTemplate ? contentTemplate : defaultInput;
+                context: { form: stakeForm }
+              "
+            ></ng-container>
+          </ng-template>
+          <ng-template right>
+            <div class="available" (click)="setMax()">
+              <span class="btn-link" *ngIf="max$ | async; let max"
+                ><span>Available: {{ formatMax(max) }}</span></span
               >
-                <div *ngIf="stakeForm.controls.amount.errors?.max">
-                  You don't have enough funds.
-                </div>
-                <div *ngIf="stakeForm.controls.amount.errors?.min">
-                  Minimum withdraw value is
-                  {{ stakeForm.controls.amount.errors?.min }}
-                </div>
-              </div>
-              <div *ngIf="stakeForm.controls.amount.errors?.restriction">
-                Your Wallet balance is too low. You need at least:
-                {{ stakeForm.controls.amount.errors?.restriction }}
-                {{ config.currencySymbol }}s
-              </div>
             </div>
+          </ng-template>
+        </app-input>
+        <div class="text-muted">≈ {{ usdAmount | async }} USD</div>
+      </div>
+      <div class="feedback text-left">
+        <div *ngIf="stakeForm.invalid" class="mt-2 invalid-feedback d-block">
+          <div *ngIf="stakeForm.controls.amount.errors?.max">
+            You don't have enough funds.
           </div>
-          <div class="col-12 text-center p-0">
-            <loading-button
-              (click)="unStake()"
-              [loading]="isLoading"
-              [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
-            >
-              Withdraw
-            </loading-button>
-            <div class="text-muted pt-3" *ngIf="timeFrame | async as timeFrame">
-              It takes {{ timeFrame }} days to withdraw your funds
-            </div>
+          <div *ngIf="stakeForm.controls.amount.errors?.min">
+            Minimum deposit value is
+            {{ stakeForm.controls.amount.errors?.min }}
           </div>
         </div>
-      </ng-container>
-    </form>
-  </ng-template>
-</app-content>
+      </div>
+    </div>
+
+    <div class="col-12 text-center p-0 mt-3">
+      <loading-button
+        (click)="unStake(stakeForm.invalid || !stakeForm.controls.amount.value)"
+        [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
+        [loading]="isLoading"
+      >
+        <div>Withdraw</div>
+        <div class="withdraw-time">It takes {{ timeFrame | async }} days</div>
+      </loading-button>
+    </div>
+  </div>
+</form>

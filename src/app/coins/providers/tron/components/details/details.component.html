@@ -5,8 +5,32 @@
       [hasProvider]="hasProvider"
       [isUnstakeEnabled]="isUnstakeEnabled"
       [config]="config"
-    ></app-shared-details> </ng-template
-></app-content>
+      [releaseDate]="releaseDate"
+      (stake)="stake()"
+    >
+      <ng-template withdraw let-details>
+        <loading-button
+          *ngIf="details.hasProvider"
+          [disabled]="!details.unstakeEnabled"
+          [loading]="isLoading"
+          classes="btn btn-outline-primary btn-lg col-12 withdraw"
+          spinnerColor="#3375bb"
+          (click)="unstake(details.unstakeEnabled, details.config)"
+        >
+          <div>Withdraw</div>
+          <div
+            *ngIf="
+              !details.unstakeEnabled && releaseDate | async as releaseDate
+            "
+            class="text-muted withdraw-locked"
+          >
+            Available in {{ releaseDate }}
+          </div>
+        </loading-button>
+      </ng-template>
+    </app-shared-details>
+  </ng-template></app-content
+>
 
 <app-listview
   class="d-block mt-2"

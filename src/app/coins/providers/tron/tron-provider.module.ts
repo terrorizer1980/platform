@@ -10,17 +10,17 @@ import { TronConfigService } from "./services/tron-config.service";
 import { TronProviderConfig } from "./tron.descriptor";
 import { DetailsComponent } from "./components/details/details.component";
 import { StakingComponent } from "./components/staking/staking.component";
-import { UnstakingComponent } from "./components/unstaking/unstaking.component";
 import { ReactiveFormsModule } from "@angular/forms";
 import { CoinsComponentsModule } from "../../components/coins-components.module";
 import { FreezeComponent } from "./components/freeze/freeze.component";
+import { WithdrawPopupComponent } from "./components/withdraw-popup/withdraw-popup.component";
 
 @NgModule({
   declarations: [
     DetailsComponent,
     StakingComponent,
-    UnstakingComponent,
-    FreezeComponent
+    FreezeComponent,
+    WithdrawPopupComponent
   ],
   imports: [
     SharedModule,

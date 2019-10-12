@@ -13,43 +13,23 @@ describe("workspace-project App", () => {
     expect(title).toEqual("Trust Platform");
   });
 
-  it("should load cosmos validators", async () => {
+  it("should load cosmos details", async done => {
     await page.navigateTo("blockchain/cosmos");
-    const count = await page.getValidators();
-    expect(count).toBeGreaterThanOrEqual(8);
-  });
-
-  it("should load tron validators", async () => {
-    await page.navigateTo("blockchain/tron");
-    const count = await page.getValidators();
-    expect(count).toBeGreaterThanOrEqual(4);
-  });
-
-  it("should load cosmos details screen", async done => {
-    await page.navigateTo(
-      "blockchain/cosmos/details/cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys"
-    );
     done();
   });
 
-  it("should load tron details screen", async done => {
-    await page.navigateTo(
-      "blockchain/tron/details/TLyqzVGLV1srkB7dToTAEqgDSfPtXRJZYH"
-    );
+  it("should load tron details", async done => {
+    await page.navigateTo("blockchain/tron");
     done();
   });
 
   it("should load cosmos stake screen", async done => {
-    await page.navigateTo(
-      "blockchain/cosmos/details/cosmosvaloper1qwl879nx9t6kef4supyazayf7vjhennyh568ys/stake"
-    );
+    await page.navigateTo("blockchain/cosmos/stake");
     done();
   });
 
   it("should load tron stake screen", async done => {
-    await page.navigateTo(
-      "blockchain/tron/details/TLyqzVGLV1srkB7dToTAEqgDSfPtXRJZYH/stake"
-    );
+    await page.navigateTo("blockchain/tron/stake");
     done();
   });
 });

@@ -7,6 +7,7 @@ import {
   interval,
   Observable,
   of,
+  timer
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
@@ -201,9 +202,10 @@ export class TronService implements CoinService {
           case StakeAction.STAKE:
             return this.stake(account, addressTo, amount);
           case StakeAction.UNSTAKE:
-            return this.unstake(account, addressTo, amount);
+            return this.unstake(account);
         }
-      })
+      }),
+      switchMap(tx => this.waitForTx(tx.code))
     );
   }
 
@@ -339,10 +341,7 @@ export class TronService implements CoinService {
     );
   }
 
-  private buildUnfreezeTransaction(
-    address: string,
-    to: string
-  ): Observable<any> {
+  private buildUnfreezeTransaction(address: string): Observable<any> {
     const timestamp = new Date().getTime();
     return this.buildBlockHeader().pipe(
       map(blockHeader => ({
@@ -373,10 +372,9 @@ export class TronService implements CoinService {
     account: TronAccount,
     to: string,
     amount: BigNumber
-  ): Observable<TronTransaction> {
+  ): Observable<TronBroadcastResult> {
     return this.addVote(account, to, amount).pipe(
-      switchMap(votes => this.updateVotes(account.address, votes)),
-      switchMap(result => this.waitForTx(result.code))
+      switchMap(votes => this.updateVotes(account.address, votes))
     );
   }
 
@@ -405,35 +403,10 @@ export class TronService implements CoinService {
     );
   }
 
-  private unstake(
-    account: TronAccount,
-    to: string,
-    amount: BigNumber
-  ): Observable<TronTransaction> {
-    const votes$ = this.removeVote(account, to, amount);
-    const frozenBalance$ = combineLatest([this.config, votes$]).pipe(
-      map(([cfg, votes]) =>
-        cfg.toUnits(
-          new BigNumber(votes.reduce((acc, v) => acc + v.vote_count, 0))
-        )
-      )
-    );
-    const unfreezeBalance$ = this.buildUnfreezeTransaction(
-      account.address,
-      to
-    ).pipe(
+  private unstake(account: TronAccount): Observable<TronBroadcastResult> {
+    return this.buildUnfreezeTransaction(account.address).pipe(
       switchMap(tx => this.authService.signTransaction(CoinType.tron, tx)),
       switchMap(tx => this.broadcastTx(tx))
-    );
-
-    return unfreezeBalance$.pipe(
-      switchMap(_ => frozenBalance$),
-      switchMap(frozenBalance =>
-        this.freezeBalance(account.address, frozenBalance)
-      ),
-      switchMap(_ => votes$),
-      switchMap(votes => this.updateVotes(account.address, votes)),
-      switchMap(result => this.waitForTx(result.code))
     );
   }
 
@@ -511,7 +484,10 @@ export class TronService implements CoinService {
     // This function checks if there is any frozen expire time in the future
     return this.authService.getAddressFromAuthorized(CoinType.tron).pipe(
       switchMap(address => this.getAccountOnce(address)),
-      map(account => (account.frozen || []).filter(f => f.expireTime > now).length === 0),
+      map(
+        account =>
+          (account.frozen || []).filter(f => f.expireTime > now).length === 0
+      ),
       catchError(_ => of(false))
     );
   }

@@ -1,5 +1,5 @@
 .row-container {
-  border-bottom: 1px solid #DBE3EA;
+  border-bottom: 1px solid #dbe3ea;
   border-top: 0;
   vertical-align: middle;
   align-items: center;
@@ -7,6 +7,10 @@
 }
 
 .withdraw {
-  border-color: #CCD7E1;
+  border-color: #ccd7e1;
   border-width: 0.5px;
+}
+
+.withdraw-locked {
+  font-size: 10px;
 }

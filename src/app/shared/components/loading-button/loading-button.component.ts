@@ -1,4 +1,10 @@
-import { Component, EventEmitter, Input, Output } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  Output
+} from "@angular/core";
 import { LoadersCSS } from "ngx-loaders-css";
 
 @Component({
@@ -6,15 +12,21 @@ import { LoadersCSS } from "ngx-loaders-css";
   templateUrl: "./loading-button.component.html",
   styleUrls: ["./loading-button.component.scss"]
 })
-export class LoadingButtonComponent {
+export class LoadingButtonComponent implements AfterViewInit {
   @Input() loading = false;
   @Input() disabled = false;
-  @Output() click: EventEmitter<any> = new EventEmitter();
+  @Input() classes: string;
+  @Input() spinnerColor: string;
+
+  classCondition = {};
 
   loader: LoadersCSS = "ball-beat";
   constructor() {}
 
-  clicked(event: any) {
-    this.click.emit(event);
+  ngAfterViewInit(): void {
+    this.classCondition = {
+      "btn btn-lg btn-primary w-100": !this.classes,
+      [this.classes]: this.classes
+    };
   }
 }

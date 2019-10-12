@@ -1,4 +1,30 @@
 <ng-container *ngIf="details$ | async as details; else loadingValidator">
+  <ng-template #defaultWihdrawButton>
+    <button
+      *ngIf="details.hasProvider"
+      [disabled]="!details.unstakeEnabled"
+      class="btn btn-outline-primary btn-lg col-12 withdraw"
+      (click)="navigateToUnStake()"
+    >
+      <div>Withdraw</div>
+      <div
+        *ngIf="!details.unstakeEnabled && releaseDate | async as releaseDate"
+        class="text-muted withdraw-locked"
+      >
+        Available in {{ releaseDate }}
+      </div>
+    </button>
+  </ng-template>
+
+  <ng-template #defaultStakeButton>
+    <button
+      class="btn btn-primary btn-lg col-12 mb-2"
+      (click)="navigateToStake(details.hasProvider)"
+    >
+      Stake
+    </button>
+  </ng-template>
+
   <app-label
     [image]="details.config.iconUri"
     [alt]="details.config.currencyName"
@@ -12,19 +38,18 @@
     </ng-template>
   </app-label>
   <div class="col-12 text-center pt-3">
-    <button
-      class="btn btn-primary btn-lg col-12 mb-2"
-      (click)="navigateToStake(details.hasProvider)"
-    >
-      Stake
-    </button>
-    <button
-      *ngIf="details.hasProvider && details.unstakeEnabled"
-      class="btn btn-outline-primary btn-lg col-12 withdraw"
-      (click)="navigateToUnStake()"
-    >
-      Withdraw
-    </button>
+    <ng-container
+      *ngTemplateOutlet="
+        stakeTemplate ? stakeTemplate : defaultStakeButton;
+        context: { $implicit: details }
+      "
+    ></ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        withdrawTemplate ? withdrawTemplate : defaultWihdrawButton;
+        context: { $implicit: details }
+      "
+    ></ng-container>
   </div>
   <div
     class="row row-container ml-3 mr-3 mt-2"

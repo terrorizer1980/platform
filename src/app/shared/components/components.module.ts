@@ -26,6 +26,7 @@ import { FooterDirective } from "../directives/footer.directive";
 import { InputComponent } from "./input/input.component";
 import { DropdownComponent } from "./dropdown/dropdown.component";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
+import { PopupComponent } from "./popup/popup.component";
 
 const components = [
   LoadingButtonComponent,
@@ -48,7 +49,8 @@ const components = [
   LabelComponent,
   BlockBetweenComponent,
   InputComponent,
-  DropdownComponent
+  DropdownComponent,
+  PopupComponent
 ];
 
 @NgModule({

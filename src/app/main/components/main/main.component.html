@@ -2,7 +2,7 @@
   header="Available"
   [dataSource]="blockchains$"
   [placeholdersCount]="coinsCount"
-  (select)="navigateToPosDelegatorsList($event.item)"
+  (select)="navigateToDetails($event.item)"
   class="d-block mt-2"
 >
   <ng-template section>

@@ -8,8 +8,16 @@ import { HttpClientModule } from "@angular/common/http";
 import { NgxLoadersCssModule } from "ngx-loaders-css";
 import { ContentLoaderModule } from "@ngneat/content-loader";
 import { ReactiveFormsModule } from "@angular/forms";
+import { WithdrawDirective } from "./details/directives/withdraw.directive";
+import { StakeDirective } from "./details/directives/stake.directive";
 
-const components = [StakingComponent, UnstakingComponent, DetailsComponent];
+const components = [
+  StakingComponent,
+  UnstakingComponent,
+  DetailsComponent,
+  WithdrawDirective,
+  StakeDirective
+];
 
 @NgModule({
   declarations: [...components],
