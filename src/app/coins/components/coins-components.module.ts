@@ -1,5 +1,4 @@
 import { NgModule } from "@angular/core";
-import { DelegatorsComponent } from "./delegators/delegators.component";
 import { StakingComponent } from "./staking/staking.component";
 import { UnstakingComponent } from "./unstaking/unstaking.component";
 import { DetailsComponent } from "./details/details.component";
@@ -9,12 +8,15 @@ import { HttpClientModule } from "@angular/common/http";
 import { NgxLoadersCssModule } from "ngx-loaders-css";
 import { ContentLoaderModule } from "@ngneat/content-loader";
 import { ReactiveFormsModule } from "@angular/forms";
+import { WithdrawDirective } from "./details/directives/withdraw.directive";
+import { StakeDirective } from "./details/directives/stake.directive";
 
 const components = [
-  DelegatorsComponent,
   StakingComponent,
   UnstakingComponent,
-  DetailsComponent
+  DetailsComponent,
+  WithdrawDirective,
+  StakeDirective
 ];
 
 @NgModule({

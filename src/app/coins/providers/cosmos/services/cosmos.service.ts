@@ -32,6 +32,8 @@ import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { AuthService } from "../../../../auth/services/auth.service";
 import { CosmosTx } from "@trustwallet/rpc/lib/cosmos/models/CosmosTx";
 import { ProviderUtils } from "../../provider-utils";
+import { CosmosUtils } from "@trustwallet/rpc/lib";
+import { CosmosUnbond } from "@trustwallet/rpc/lib/cosmos/models/CosmosUnbond";
 
 // Used for creating Cosmos service manually bypassing regular routing flow
 export const CosmosServiceInjectable = [
@@ -167,8 +169,11 @@ export class CosmosService implements CoinService {
       map(([balance, price]) => balance.multipliedBy(price))
     );
   }
-  getBalance(): Observable<BigNumber> {
+  getBalanceCoins(): Observable<BigNumber> {
     return this.balance$;
+  }
+  getBalanceUnits(): Observable<BigNumber> {
+    return this.balance$.pipe(map(balance => CosmosUtils.fromAtom(balance)));
   }
   getStakedUSD(): Observable<BigNumber> {
     return this.stakedAmount$.pipe(
@@ -245,6 +250,10 @@ export class CosmosService implements CoinService {
 
   getStakePendingBalance(): Observable<BigNumber> {
     return this.cosmosUnboundInfoService.getPendingBalance();
+  }
+
+  getStakePendingUnbonds(): Observable<CosmosUnbond[]> {
+    return this.cosmosUnboundInfoService.getUnbonds();
   }
 
   getStakingRewards(): Observable<BigNumber> {

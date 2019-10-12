@@ -14,8 +14,7 @@ import BigNumber from "bignumber.js";
 interface CoinDescriptor {
   item: CoinProviderConfig;
   annual: number;
-  pending: BigNumber;
-  unstakingDate: Date;
+  available: string;
   stakingInfo: any;
 }
 
@@ -24,10 +23,10 @@ interface CoinDescriptor {
   templateUrl: "./main.component.html",
   styleUrls: ["./main.component.scss"]
 })
-export class MainComponent implements OnInit {
-  myStakeHolders$: Observable<StakeHolderList> = new ReplaySubject(1);
+export class MainComponent {
   blockchains$: Observable<CoinDescriptor[]>;
   upcomings: Observable<UpcomingCoin[]>;
+  coinsCount = Coins.length;
 
   constructor(
     private router: Router,
@@ -39,12 +38,9 @@ export class MainComponent implements OnInit {
         return forkJoin({
           item: of(coin).pipe(first()),
           annual: service.getAnnualPercent().pipe(first()),
-          pending: service.getStakePendingBalance().pipe(
-            catchError(_ => of(new BigNumber(0))),
-            first()
-          ),
-          unstakingDate: service.getUnstakingDate().pipe(
-            catchError(_ => of(null)),
+          available: service.getBalanceCoins().pipe(
+            map(balance => balance.toFormat(2, BigNumber.ROUND_DOWN)),
+            catchError(() => of("0")),
             first()
           ),
           stakingInfo: service.getStakingInfo().pipe(first())
@@ -59,35 +55,7 @@ export class MainComponent implements OnInit {
     this.upcomings = of(Upcoming);
   }
 
-  ngOnInit(): void {
-    this.myStakeHolders$ = forkJoin(
-      this.coinsReceiverService.blochchainServices.map(service =>
-        service.getStakeHolders().pipe(catchError(_ => of([])))
-      )
-    ).pipe(
-      map(holder => {
-        return holder.reduce((acc, stakeHolders, index) => {
-          stakeHolders.forEach(sh => {
-            sh.coin = Coins[index];
-            sh.amount = new BigNumber(sh.amount).toFormat(
-              2,
-              BigNumber.ROUND_DOWN
-            );
-          });
-          return [...acc, ...stakeHolders];
-        }, []);
-      }),
-      shareReplay(1)
-    ) as Observable<StakeHolderList>;
-  }
-
-  navigateToPosDelegatorsList(item: CoinProviderConfig) {
+  navigateToDetails(item: CoinProviderConfig) {
     this.router.navigate([`/blockchain/${item.network}`]);
-  }
-
-  navigateToMyStakeHoldersList(holder: StakeHolder) {
-    this.router.navigate([
-      `/blockchain/${holder.coin.network}/details/${holder.id}`
-    ]);
   }
 }

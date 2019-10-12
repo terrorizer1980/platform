@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import PouchDB from "pouchdb";
 import { environment } from "../../../environments/environment";
-import { Observable } from "rxjs";
+import { Observable, ReplaySubject, Subject } from "rxjs";
 import { fromPromise } from "rxjs/internal-compatibility";
 import { catchError, first, switchMap } from "rxjs/operators";
 
@@ -17,7 +17,14 @@ export class DbService {
   }
 
   get<T>(key: string): Observable<T> {
-    return fromPromise(this.db.get(key)).pipe(first()) as Observable<T>;
+    const res = new ReplaySubject<T>(1);
+    this.db
+      .get(key)
+      .catch(error => {})
+      .then(result => {
+        res.next((result as unknown) as T);
+      });
+    return res.pipe(first());
   }
 
   getAll(): Observable<any> {

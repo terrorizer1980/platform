@@ -1,0 +1,21 @@
+<div class="mb-3 p-2">
+  <div class="col-12 text-right mt-3">
+    <img
+      src="assets/images/close.svg"
+      aria-label="Close"
+      (click)="activeModal.dismiss('Cross click')"
+      aria-hidden="true"
+    />
+  </div>
+  <div class="pb-4 text-center">
+    <div>
+      <ng-container *ngTemplateOutlet="sectionTemplate"></ng-container>
+    </div>
+    <div class="mt-3">
+      <ng-container *ngTemplateOutlet="contentTemplate"></ng-container>
+    </div>
+  </div>
+  <div class="col-12 text-center mt-4">
+    <ng-container *ngTemplateOutlet="footerTemplate"></ng-container>
+  </div>
+</div>

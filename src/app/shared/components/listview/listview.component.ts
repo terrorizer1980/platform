@@ -14,6 +14,8 @@ import { Observable } from "rxjs";
 import { PlaceholderDirective } from "../../directives/placeholder.directive";
 import { ItemDirective } from "../../directives/item.directive";
 import { NoItemsDirective } from "../../directives/no-items.directive";
+import { SectionDirective } from "../../directives/section.directive";
+import { FooterDirective } from "../../directives/footer.directive";
 
 @Component({
   selector: "app-listview",
@@ -24,7 +26,8 @@ export class ListviewComponent implements AfterViewInit {
   @Input() header: string;
   @Input() placeholdersCount: number;
   @Input() dataSource: Observable<any[]>;
-  @Input() custmized: boolean;
+  @Input() custmizedCell: boolean;
+  @Input() containerized: boolean;
   @Output() select = new EventEmitter();
 
   placeholders: any[] = [];
@@ -35,6 +38,10 @@ export class ListviewComponent implements AfterViewInit {
   noItemTemplate;
   @ContentChild(PlaceholderDirective, { read: TemplateRef, static: false })
   placeholderTemplate;
+  @ContentChild(SectionDirective, { read: TemplateRef, static: false })
+  sectionTemplate;
+  @ContentChild(FooterDirective, { read: TemplateRef, static: false })
+  footerTemplate;
 
   constructor(private cdref: ChangeDetectorRef) {}
 
@@ -45,7 +52,10 @@ export class ListviewComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.placeholders.length = this.placeholdersCount;
     this.placeholders.fill(0, 0, this.placeholdersCount);
-    this.custmized = this.custmized === undefined ? true : this.custmized;
+    this.custmizedCell =
+      this.custmizedCell === undefined ? true : this.custmizedCell;
+    this.containerized =
+      this.containerized === undefined ? true : this.containerized;
     this.cdref.detectChanges();
   }
 }

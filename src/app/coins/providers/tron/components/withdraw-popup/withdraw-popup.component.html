@@ -1,0 +1,18 @@
+<app-popup>
+  <ng-template section><img src="{{ image }}" class="icon" /> </ng-template>
+  <ng-template content>
+    <h4>Withdraw TRX?</h4>
+    <div class="text-muted">
+      You will withdraw whole staked Balance + Earned interest
+    </div>
+  </ng-template>
+  <ng-template footer>
+    <button
+      type="button"
+      class="btn btn-lg btn-block btn-primary"
+      (click)="confirm()"
+    >
+      Confirm
+    </button>
+  </ng-template>
+</app-popup>

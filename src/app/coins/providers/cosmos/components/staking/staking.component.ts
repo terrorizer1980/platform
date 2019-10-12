@@ -6,6 +6,7 @@ import { CosmosConfigService } from "../../services/cosmos-config.service";
 import { CosmosProviderConfig } from "../../cosmos.descriptor";
 import BigNumber from "bignumber.js";
 import { catchError, map } from "rxjs/operators";
+import { BlockatlasValidator } from "@trustwallet/rpc/lib";
 
 @Component({
   selector: "app-test",
@@ -13,18 +14,16 @@ import { catchError, map } from "rxjs/operators";
   styleUrls: ["./staking.component.scss"]
 })
 export class StakingComponent {
-  validatorId = this.activatedRoute.snapshot.params.validatorId;
-  validator = this.cosmos.getValidatorsById(this.validatorId);
   hasProvider = this.cosmos.hasProvider();
-  staked = this.cosmos.getStakedToValidator(this.validatorId).pipe(
-    catchError(_ => of(new BigNumber(0))),
-    map(staked => staked.toFormat(2, BigNumber.ROUND_DOWN))
-  );
   balance = this.cosmos
-    .getBalance()
+    .getBalanceCoins()
     .pipe(catchError(_ => of(new BigNumber(0))));
   info = this.cosmos.getStakingInfo();
   prepareTx = this.cosmos.prepareStakeTx.bind(this.cosmos);
+  price = this.cosmos.getPriceUSD();
+  validators: Observable<
+    Array<BlockatlasValidator>
+  > = this.cosmos.getValidators();
 
   constructor(
     @Inject(CosmosConfigService)

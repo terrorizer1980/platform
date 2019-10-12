@@ -6,7 +6,7 @@ import { TronConfigService } from "../../services/tron-config.service";
 import { TronService } from "../../services/tron.service";
 import BigNumber from "bignumber.js";
 import { catchError, map } from "rxjs/operators";
-import { TronUtils } from "@trustwallet/rpc/lib";
+import { BlockatlasValidator, TronUtils } from "@trustwallet/rpc/lib";
 
 @Component({
   selector: "app-staking",
@@ -14,25 +14,26 @@ import { TronUtils } from "@trustwallet/rpc/lib";
   styleUrls: ["./staking.component.scss"]
 })
 export class StakingComponent {
-  validatorId = this.activatedRoute.snapshot.params.validatorId;
-  validator = this.tron.getValidatorsById(this.validatorId);
   hasProvider = this.tron.hasProvider();
-  staked = this.tron.getStakedToValidator(this.validatorId).pipe(
-    catchError(_ => of(new BigNumber(0))),
-    map(staked => staked.toFormat(2, BigNumber.ROUND_DOWN))
-  );
-  balance = this.tron.getBalance().pipe(
-    map(balance => TronUtils.fromTron(balance)),
+  balance = this.tron
+    .getBalanceCoins()
+    .pipe(catchError(_ => of(new BigNumber(0))));
+  balanceFrozen = this.tron.getFreeFrozen().pipe(
+    map(frozen => TronUtils.toTron(frozen)),
     catchError(_ => of(new BigNumber(0)))
   );
   info = this.tron.getStakingInfo();
-  prepareTx = this.tron.prepareStakeTx.bind(this.tron);
+  prepareVoteTx = this.tron.prepareStakeTx.bind(this.tron);
+  prepareFreezeTx = this.tron.prepareFreezeTx.bind(this.tron);
+  price = this.tron.getPriceUSD();
+  validators: Observable<
+    Array<BlockatlasValidator>
+  > = this.tron.getValidators();
 
   constructor(
     @Inject(TronConfigService)
     public config: Observable<TronProviderConfig>,
-    public tron: TronService,
-    private activatedRoute: ActivatedRoute
+    public tron: TronService
   ) {}
 
   formatMax(max: BigNumber): string {

@@ -3,8 +3,8 @@
 }
 
 .trust {
-    width: 120px;
-    height: 120px;
+  width: 120px;
+  height: 120px;
 }
 
 .item_description {
@@ -13,4 +13,9 @@
 
 .item_name {
   line-height: 17px;
+}
+
+.list-group-flush li:last-child,
+div.list-group-item:last-child {
+  border-bottom: none;
 }

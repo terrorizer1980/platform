@@ -1,4 +1,4 @@
-<div class="mb-3 p-2">
+<div class="mb-3">
   <div class="col-12 text-right mt-3">
     <img
       src="assets/images/close.svg"
@@ -7,19 +7,19 @@
       aria-hidden="true"
     />
   </div>
-  <div class="pb-4 text-center ml-5 mr-5">
-    <h4 class="modal-title" id="modal-basic-title">
+  <div class="text-center">
+    <h4 class="modal-title font-weight-bolder" id="modal-basic-title">
       Connect wallet
     </h4>
-    <div class="text-muted">to start using TrustWallet</div>
-    <div class="list-group mt-4 list-group-flush ml-4 mr-5">
+    <div class="text-muted">To start using Trust Platform</div>
+    <div class="list-group mt-4 list-group-flush">
       <div
         (click)="provider.active ? onSelect(provider) : null"
         class="provider list-group-item"
         [ngClass]="{ 'list-group-item-action': provider.active }"
         *ngFor="let provider of providers | async"
       >
-        <div class="d-flex justify-content-between">
+        <div class="d-flex">
           <div class="d-flex justify-content-start align-self-center">
             <img
               class="align-self-center"
@@ -34,11 +34,12 @@
               }}</small>
             </div>
           </div>
-          <div class="ow justify-content-center align-self-center">
-            <i class="text-primary fa fa-chevron-right"></i>
-          </div>
         </div>
       </div>
+    </div>
+    <div class="text-muted text-left mt-3 ml-4">
+      *By connecting your wallet you agree on that Trust Wallet is not
+      responsible for any investment risks.
     </div>
   </div>
 </div>

@@ -1,5 +1,9 @@
 import { Injectable } from "@angular/core";
-import { NgbModal, NgbModalRef } from "@ng-bootstrap/ng-bootstrap";
+import {
+  NgbModal,
+  NgbModalOptions,
+  NgbModalRef
+} from "@ng-bootstrap/ng-bootstrap";
 import { SuccessPopupComponent } from "../components/success-popup/success-popup.component";
 import { ErrorPopupComponent } from "../components/error-popup/error-popup.component";
 
@@ -23,8 +27,11 @@ export class DialogsService {
     return modalRef;
   }
 
-  showModal<T>(component: T): NgbModalRef {
-    const modalRef = this.dialogService.open(component, { centered: true });
+  showModal<T>(component: T, options: NgbModalOptions = {}): NgbModalRef {
+    const modalRef = this.dialogService.open(component, {
+      centered: true,
+      ...options
+    });
     return modalRef;
   }
 }

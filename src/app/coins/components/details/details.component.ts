@@ -1,4 +1,13 @@
-import { AfterViewInit, Component, Input, OnDestroy } from "@angular/core";
+import {
+  AfterViewInit,
+  Component,
+  ContentChild,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  Output,
+  TemplateRef
+} from "@angular/core";
 import {
   combineLatest,
   forkJoin,
@@ -19,13 +28,16 @@ import { Errors } from "../../../shared/consts";
 import { DialogsService } from "../../../shared/services/dialogs.service";
 import { AuthService } from "../../../auth/services/auth.service";
 import { fromPromise } from "rxjs/internal-compatibility";
+import { CoinProviderConfig } from "../../coin-provider-config";
+import { ContentDirective } from "../../../shared/directives/content.directive";
+import { WithdrawDirective } from "./directives/withdraw.directive";
+import { StakeDirective } from "./directives/stake.directive";
 
 export interface DetailsValidatorInterface {
-  validator: BlockatlasValidator;
-  stakedSum: string;
   additionals: AdditionalInfo[];
   hasProvider: boolean;
   unstakeEnabled: boolean;
+  config: CoinProviderConfig;
 }
 
 export interface AdditionalInfo {
@@ -39,26 +51,34 @@ export interface AdditionalInfo {
   styleUrls: ["./details.component.scss"]
 })
 export class DetailsComponent implements AfterViewInit {
-  @Input() validator: Observable<BlockatlasValidator>;
   @Input() isUnstakeEnabled: Observable<boolean>;
+  @Input() releaseDate: Observable<string>;
   @Input() hasProvider: Observable<boolean>;
-  @Input() staked: Observable<string>;
+  @Input() config: Observable<CoinProviderConfig>;
   @Input() additionals: Observable<AdditionalInfo[]>;
+  @Output() stake = new EventEmitter();
+  @Output() unstake = new EventEmitter();
+
+  @ContentChild(WithdrawDirective, { read: TemplateRef, static: false })
+  withdrawTemplate;
+
+  @ContentChild(StakeDirective, { read: TemplateRef, static: false })
+  stakeTemplate;
 
   details$: Observable<DetailsValidatorInterface>;
 
   constructor(
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
     private dialogService: DialogsService,
     private auth: AuthService
   ) {}
 
   navigateToStake(hasProvider: boolean) {
     if (hasProvider) {
-      this.router.navigate([`stake`], { relativeTo: this.activatedRoute });
+      this.stake.next();
     } else {
-      const modal = this.dialogService.showModal(SelectAuthProviderComponent);
+      const modal = this.dialogService.showModal(SelectAuthProviderComponent, {
+        windowClass: "small-popup"
+      });
       modal.componentInstance.select
         .pipe(
           switchMap((provider: AuthProvider) =>
@@ -66,13 +86,6 @@ export class DetailsComponent implements AfterViewInit {
           ),
           switchMap(([authorized, provider]) =>
             authorized ? authorized : throwError("closed")
-          ),
-          switchMap(_ =>
-            fromPromise(
-              this.router.navigate([`stake`], {
-                relativeTo: this.activatedRoute
-              })
-            )
           ),
           catchError(error => {
             if (error === "closed") {
@@ -93,16 +106,15 @@ export class DetailsComponent implements AfterViewInit {
   }
 
   navigateToUnStake() {
-    this.router.navigate([`unstake`], { relativeTo: this.activatedRoute });
+    this.unstake.next();
   }
 
   ngAfterViewInit(): void {
     this.details$ = forkJoin({
-      validator: this.validator.pipe(first()),
-      stakedSum: this.staked.pipe(first()),
       additionals: this.additionals.pipe(first()),
       unstakeEnabled: this.isUnstakeEnabled.pipe(first()),
-      hasProvider: this.hasProvider
+      hasProvider: this.hasProvider,
+      config: this.config.pipe(first())
     });
   }
 }

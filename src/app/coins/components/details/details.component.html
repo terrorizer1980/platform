@@ -1,73 +1,70 @@
-<app-content>
-  <ng-template content>
-    <ng-container *ngIf="details$ | async as details; else loadingValidator">
-      <div class="col-12 mt-3">
-        <img
-          class="row-logo"
-          src="{{ details.validator.info.image || '...' }}"
-          alt="{{ details.validator.info.name || '...' }}"
-        />
-        <h6 class="card-title p-2 m-0 js-l">
-          {{ details.validator.info.name || "..." }}
-        </h6>
-        <p class="text-left description text-muted pt-2 mb-2">
-          {{ details.validator.info.description || "..." }}
-        </p>
-      </div>
-
-      <div class="row row-container ml-3 mr-3">
-        <div class="col-auto mr-auto p-0">
-          <span class="text-muted">Current Interest APY</span>
-        </div>
-        <div class="col-auto p-0">
-          <p class="success m-0">
-            {{ details.validator.reward.annual.toFixed(2) + "%" || "..." }}
-          </p>
-        </div>
-      </div>
-
+<ng-container *ngIf="details$ | async as details; else loadingValidator">
+  <ng-template #defaultWihdrawButton>
+    <button
+      *ngIf="details.hasProvider"
+      [disabled]="!details.unstakeEnabled"
+      class="btn btn-outline-primary btn-lg col-12 withdraw"
+      (click)="navigateToUnStake()"
+    >
+      <div>Withdraw</div>
       <div
-        class="row row-container ml-3 mr-3"
-        *ngFor="let additional of details.additionals"
+        *ngIf="!details.unstakeEnabled && releaseDate | async as releaseDate"
+        class="text-muted withdraw-locked"
       >
-        <div class="col-auto mr-auto p-0">
-          <span class="text-muted">{{ additional.name }}</span>
-        </div>
-        <div class="col-auto p-0">
-          <p class="m-0">{{ additional.value }}</p>
-        </div>
+        Available in {{ releaseDate }}
       </div>
-
-      <div class="row row-container ml-3 mr-3">
-        <div class="col-auto mr-auto p-0">
-          <span class="text-muted">Staked Amount</span>
-        </div>
-        <div class="col-auto p-0">
-          <p class="m-0">{{ details.stakedSum }}</p>
-        </div>
-      </div>
-
-      <div class="col-12 text-center pt-4 pb-4">
-        <button
-          class="btn btn-primary btn-lg col-12 mb-3"
-          (click)="navigateToStake(details.hasProvider)"
-        >
-          Stake
-        </button>
-        <button
-          *ngIf="details.hasProvider"
-          [disabled]="!details.unstakeEnabled"
-          class="btn btn-secondary btn-lg col-12"
-          (click)="navigateToUnStake()"
-        >
-          Withdraw
-        </button>
-      </div>
-    </ng-container>
-    <ng-template #loadingValidator>
-      <div class="pl-5 pr-5 pt-5 pb-0">
-        <app-content-placeholder></app-content-placeholder>
-      </div>
-    </ng-template>
+    </button>
   </ng-template>
-</app-content>
+
+  <ng-template #defaultStakeButton>
+    <button
+      class="btn btn-primary btn-lg col-12 mb-2"
+      (click)="navigateToStake(details.hasProvider)"
+    >
+      Stake
+    </button>
+  </ng-template>
+
+  <app-label
+    [image]="details.config.iconUri"
+    [alt]="details.config.currencyName"
+    class="d-block ml-3 mt-3"
+  >
+    <ng-template content>
+      <span class="font-weight-bolder">{{ details.config.currencyName }}</span>
+      <span class="text-muted">
+        {{ details.config.currencySymbol }}
+      </span>
+    </ng-template>
+  </app-label>
+  <div class="col-12 text-center pt-3">
+    <ng-container
+      *ngTemplateOutlet="
+        stakeTemplate ? stakeTemplate : defaultStakeButton;
+        context: { $implicit: details }
+      "
+    ></ng-container>
+    <ng-container
+      *ngTemplateOutlet="
+        withdrawTemplate ? withdrawTemplate : defaultWihdrawButton;
+        context: { $implicit: details }
+      "
+    ></ng-container>
+  </div>
+  <div
+    class="row row-container ml-3 mr-3 mt-2"
+    *ngFor="let additional of details.additionals"
+  >
+    <div class="col-auto mr-auto p-0">
+      <span class="text-muted">{{ additional.name }}</span>
+    </div>
+    <div class="col-auto p-0">
+      <p class="m-0">{{ additional.value }}</p>
+    </div>
+  </div>
+</ng-container>
+<ng-template #loadingValidator>
+  <div class="pl-5 pr-5 pt-5 pb-0">
+    <app-content-placeholder></app-content-placeholder>
+  </div>
+</ng-template>

@@ -1,7 +1,16 @@
 .row-container {
-  border-bottom: 1px solid #DBE3EA;
+  border-bottom: 1px solid #dbe3ea;
   border-top: 0;
   vertical-align: middle;
   align-items: center;
   padding: 15px 0 15px 0;
+}
+
+.withdraw {
+  border-color: #ccd7e1;
+  border-width: 0.5px;
+}
+
+.withdraw-locked {
+  font-size: 10px;
 }

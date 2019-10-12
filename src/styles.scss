@@ -1,13 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
 
-//@import url("https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css");
-@import '~bootstrap/scss/functions';
-@import 'assets/sass/variables';
+@import "~bootstrap/scss/functions";
+@import "assets/sass/variables";
 @import "~bootstrap/scss/bootstrap";
+@import "~roboto-fontface/css/roboto/sass/roboto-fontface";
 @import "~font-awesome/scss/font-awesome";
 
 body {
-    background-color: $light !important;
+  background-color: $light !important;
+  font-family: Roboto-Light;
 }
 
 .override {
@@ -15,8 +16,8 @@ body {
   position: relative;
 }
 
-.header-bg{
-    background: $primary;
+.header-bg {
+  background: $primary;
 }
 
 .success {
@@ -24,20 +25,20 @@ body {
   display: block;
 }
 
-.icon-color{
+.icon-color {
   color: $icon;
 }
 
-.header-cards{
+.header-cards {
   background: none;
   color: $white;
 }
 
-.cards{
+.cards {
   background: $alpha-white;
 }
 
-.text-alpha{
+.text-alpha {
   color: $alpha-white;
 }
 
@@ -52,25 +53,25 @@ body {
   border: 1px solid $primary !important;
 }
 
-.btn-secondary{
+.btn-secondary {
   color: $primary !important;
   background-color: $gray-200 !important;
   border: 1px !important;
 }
-.btn-secondary:hover{
+.btn-secondary:hover {
   color: $primary !important;
   background-color: $gray-300 !important;
   border: 1px !important;
 }
 
-.btn-link{
+.btn-link {
   color: $primary !important;
   cursor: pointer;
   text-decoration: none !important;
   font-size: 15px;
 }
 
-.feedback{
+.feedback {
   min-height: 28px;
   position: relative;
   overflow: hidden;
@@ -83,4 +84,15 @@ body {
 
 .row-container {
   border-top: 0.5px solid $border;
+}
+
+.fa {
+  -webkit-text-stroke: 1px white;
+}
+
+.input-group-lg .form-control,
+.input-group-lg .input-group-append,
+.input-group-lg .input-group-append .input-group-text,
+.btn-lg {
+  border-radius: 5px;
 }

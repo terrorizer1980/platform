@@ -4,6 +4,7 @@ import {
   Input,
   OnDestroy,
   OnInit,
+  Output,
   TemplateRef
 } from "@angular/core";
 import {
@@ -11,6 +12,8 @@ import {
   forkJoin,
   Observable,
   of,
+  ReplaySubject,
+  Subject,
   Subscription,
   throwError
 } from "rxjs";
@@ -38,10 +41,11 @@ import { AuthProvider } from "../../../auth/services/auth-provider";
 import { ErrorsService } from "../../../shared/services/errors/errors.service";
 import { Errors } from "../../../shared/consts";
 import { ContentDirective } from "../../../shared/directives/content.directive";
+import { ComponentAuthService } from "../../services/component-auth.service";
 
-interface StakeDetails {
-  config: CoinProviderConfig;
+export interface StakeDetails {
   hasProvider: boolean;
+  price: number;
 }
 
 @Component({
@@ -50,11 +54,9 @@ interface StakeDetails {
   styleUrls: ["./staking.component.scss"]
 })
 export class StakingComponent implements OnInit, OnDestroy {
-  @Input() config: Observable<CoinProviderConfig>;
-  @Input() validator: Observable<BlockatlasValidator>;
+  @Input() config: CoinProviderConfig;
   @Input() balance: Observable<BigNumber>;
   @Input() hasProvider: Observable<boolean>;
-  @Input() staked: Observable<BigNumber>;
   @Input() info: Observable<any>;
   @Input() max: number;
   @Input() prepareTx: (
@@ -62,11 +64,14 @@ export class StakingComponent implements OnInit, OnDestroy {
     validatorId: string,
     amount: BigNumber
   ) => Observable<any>;
-  @Input() formatMax: (max: BigNumber) => BigNumber;
+  @Input() formatMax: (max: BigNumber) => string;
+  @Input() price: Observable<BigNumber>;
+  @Input() validators: Observable<Array<BlockatlasValidator>>;
 
   @ContentChild(ContentDirective, { read: TemplateRef, static: false })
   contentTemplate;
 
+  validator = new ReplaySubject<BlockatlasValidator>(1);
   stakeForm: FormGroup;
   max$: Observable<any>;
   warn$: Observable<BigNumber>;
@@ -74,8 +79,10 @@ export class StakingComponent implements OnInit, OnDestroy {
   Math = Math;
   isLoading = false;
   details$: Observable<StakeDetails>;
+  usdAmount = new Subject();
 
   confSubs: Subscription;
+  priceSubs: Subscription;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -83,8 +90,13 @@ export class StakingComponent implements OnInit, OnDestroy {
     private dialogService: DialogsService,
     private router: Router,
     private errorsService: ErrorsService,
-    private auth: AuthService
-  ) {}
+    private auth: AuthService,
+    private componentAuthService: ComponentAuthService
+  ) {
+    this.stakeForm = this.fb.group({
+      amount: ["", [], []]
+    });
+  }
 
   stake() {
     if (this.isLoading) {
@@ -93,15 +105,15 @@ export class StakingComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    const stake$ = combineLatest([this.config, this.validator]).pipe(
-      switchMap(([cfg, validator]) => {
-        const amount = cfg.toUnits(
+    const stake$ = this.validator.pipe(
+      switchMap(validator => {
+        const amount = this.config.toUnits(
           new BigNumber(this.stakeForm.get("amount").value)
         );
         return this.prepareTx(StakeAction.STAKE, validator.id, amount);
       }),
       tap(() => (this.isLoading = false), e => (this.isLoading = false)),
-      switchMap(_ => this.config)
+      map(_ => this.config)
     );
 
     this.details$
@@ -110,45 +122,23 @@ export class StakingComponent implements OnInit, OnDestroy {
           if (hasProvider) {
             return stake$;
           } else {
-            const modal = this.dialogService.showModal(
-              SelectAuthProviderComponent
-            );
-            return modal.componentInstance.select.pipe(
-              switchMap((provider: AuthProvider) =>
-                combineLatest([
-                  this.auth.authorize(provider),
-                  of(provider),
-                  this.config
-                ])
-              ),
-              switchMap(([authorized, provider, config]) =>
-                authorized
-                  ? provider.getAddress(config.coin)
-                  : throwError("closed")
-              ),
-              catchError(error => {
-                if (error === "closed") {
-                  return throwError(Errors.REJECTED_BY_USER);
-                }
-                return throwError(error);
-              })
-            );
+            return this.componentAuthService.showAuth(this.config.coin);
           }
         }),
         tap(() => (this.isLoading = false), e => (this.isLoading = false))
       )
       .subscribe(
         (result: any) => {
-          if (typeof result === "string") {
-            location.reload();
-          } else {
-            this.congratulate(result, this.stakeForm.get("amount").value);
-          }
+          this.congratulate(result, this.stakeForm.get("amount").value);
         },
         error => {
           this.errorsService.showError(error);
         }
       );
+  }
+
+  selectValidator(validator: BlockatlasValidator) {
+    this.validator.next(validator);
   }
 
   setMax() {
@@ -189,9 +179,9 @@ export class StakingComponent implements OnInit, OnDestroy {
     );
   }
   getMax(): Observable<{ min: BigNumber; normal: BigNumber }> {
-    return combineLatest([this.balance, this.config]).pipe(
-      map(([balance, config]) => {
-        const additional = config.toCoin(new BigNumber(config.fee));
+    return this.balance.pipe(
+      map(balance => {
+        const additional = this.config.toCoin(new BigNumber(this.config.fee));
         const normal = balance.minus(additional.multipliedBy(2));
         const min = balance.minus(additional);
         return {
@@ -218,26 +208,46 @@ export class StakingComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.confSubs = this.config.subscribe(config => {
-      this.stakeForm = this.fb.group({
-        amount: [
-          "",
-          [],
-          [StakeValidator(true, config, this.balance, this.staked, this.max)]
-        ]
-      });
+    this.confSubs = this.validator.subscribe(validator => {
+      this.stakeForm
+        .get("amount")
+        .setAsyncValidators([
+          StakeValidator(true, this.config, this.balance, of(null), this.max)
+        ]);
     });
 
     this.max$ = this.getMax();
     this.warn$ = this.warn();
     this.monthlyEarnings$ = this.getMonthlyEarnings();
     this.details$ = forkJoin({
-      config: this.config.pipe(first()),
-      hasProvider: this.hasProvider
+      hasProvider: this.hasProvider,
+      price: this.price.pipe(
+        map(price => price.toNumber()),
+        first()
+      )
     });
+
+    this.priceSubs = combineLatest([
+      this.stakeForm.get("amount").valueChanges,
+      this.price
+    ])
+      .pipe(
+        map(([amount, price]) => {
+          const val = new BigNumber(amount);
+          if (val.isNaN()) {
+            return "0";
+          } else {
+            return val.multipliedBy(price).toFormat(2, BigNumber.ROUND_DOWN);
+          }
+        })
+      )
+      .subscribe(result => {
+        this.usdAmount.next(result);
+      });
   }
 
   ngOnDestroy(): void {
     this.confSubs.unsubscribe();
+    this.priceSubs.unsubscribe();
   }
 }
