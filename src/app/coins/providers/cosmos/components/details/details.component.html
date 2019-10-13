@@ -79,7 +79,7 @@
         <div class="text-nowrap">
           <span
             >{{ item.balance.toFixed(2) }}
-            {{ item.validator.coin.currencySymbol }}</span
+            {{ (config | async)?.currencySymbol }}</span
           >
         </div>
       </ng-template>
