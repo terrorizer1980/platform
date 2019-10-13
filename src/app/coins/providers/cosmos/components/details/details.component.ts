@@ -36,7 +36,7 @@ export class DetailsComponent {
   );
   pendingWithdrawals: Observable<PendingWithdrawals[]> = combineLatest([
     this.cosmos.getStakePendingUnbonds(),
-    this.cosmos.getStakeHolders()
+    this.cosmos.getValidators()
   ]).pipe(
     map(([unbounds, holders]) =>
       unbounds.reduce(
