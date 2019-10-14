@@ -142,8 +142,8 @@ export class ProviderUtils {
   selectValidatorWithBestInterestRate(validators: BlockatlasValidator[]) {
     return validators.reduce(
       (maxRate: number, validator: BlockatlasValidator) => {
-        return maxRate < validator.reward.annual
-          ? validator.reward.annual
+        return maxRate < validator.details.reward.annual
+          ? validator.details.reward.annual
           : maxRate;
       },
       0

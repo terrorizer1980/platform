@@ -28,12 +28,12 @@ import { CoinType } from "@trustwallet/types";
 import { CosmosRpcService } from "./cosmos-rpc.service";
 import { CosmosUnboundInfoService } from "./cosmos-unbound-info.service";
 import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
-import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { AuthService } from "../../../../auth/services/auth.service";
 import { CosmosTx } from "@trustwallet/rpc/lib/cosmos/models/CosmosTx";
 import { ProviderUtils } from "../../provider-utils";
 import { CosmosUtils } from "@trustwallet/rpc/lib";
 import { CosmosUnbond } from "@trustwallet/rpc/lib/cosmos/models/CosmosUnbond";
+import { CoinAtlasService } from "../../../services/atlas/coin-atlas.service";
 
 // Used for creating Cosmos service manually bypassing regular routing flow
 export const CosmosServiceInjectable = [

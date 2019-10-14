@@ -38,7 +38,6 @@ import {
   TX_WAIT_CHECK_INTERVAL
 } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
-import { CoinAtlasService } from "../../../services/coin-atlas.service";
 import { TronConfigService } from "./tron-config.service";
 import { TronProviderConfig } from "../tron.descriptor";
 import { TronRpcService } from "./tron-rpc.service";
@@ -49,6 +48,7 @@ import { TronTransaction, TronUtils } from "@trustwallet/rpc/lib";
 import { CosmosTx } from "@trustwallet/rpc/lib/cosmos/models/CosmosTx";
 import { ProviderUtils } from "../../provider-utils";
 import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
+import { CoinAtlasService } from "../../../services/atlas/coin-atlas.service";
 
 export const TronServiceInjectable = [
   TronConfigService,

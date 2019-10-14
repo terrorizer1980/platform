@@ -173,7 +173,9 @@ export class StakingComponent implements OnInit, OnDestroy {
         if (val.isNaN()) {
           return null;
         }
-        return val.multipliedBy(validator.reward.annual / 100).dividedBy(12);
+        return val
+          .multipliedBy(validator.details.reward.annual / 100)
+          .dividedBy(12);
       }),
       shareReplay(1)
     );

@@ -23,7 +23,10 @@
             <ng-template right>Current APY</ng-template>
           </app-block-between>
         </ng-template>
-        <div *content="let item" class="btn btn-outline-primary d-block selector">
+        <div
+          *content="let item"
+          class="btn btn-outline-primary d-block selector"
+        >
           <app-block-between>
             <ng-template left>
               <app-label [image]="item.info.image" alt="item.info.name">
@@ -34,7 +37,7 @@
             </ng-template>
             <ng-template right>
               <small class="success text-nowrap"
-                >{{ item.reward.annual.toFixed(2) }}%
+                >{{ item.details.reward.annual.toFixed(2) }}%
                 <span class="ml-1"
                   ><i class="mr-0 text-muted fa fa-chevron-down"></i></span
               ></small>
@@ -52,7 +55,7 @@
             </ng-template>
             <ng-template right>
               <small class="success text-nowrap"
-                >{{ item.reward.annual.toFixed(2) }}%
+                >{{ item.details.reward.annual.toFixed(2) }}%
               </small>
             </ng-template>
           </app-block-between>
