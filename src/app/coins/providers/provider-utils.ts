@@ -1,17 +1,9 @@
-import { CosmosProviderConfig } from "./cosmos/cosmos.descriptor";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
-import {
-  BALANCE_REFRESH_INTERVAL,
-  CoinProviderConfig,
-  STAKE_REFRESH_INTERVAL,
-  StakeHolderList
-} from "../coin-provider-config";
+import { BALANCE_REFRESH_INTERVAL, CoinProviderConfig, STAKE_REFRESH_INTERVAL, StakeHolderList } from "../coin-provider-config";
 import { CoinType } from "@trustwallet/types";
 import { first, map, switchMap } from "rxjs/operators";
 import { combineLatest, Observable, of, timer } from "rxjs";
-import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
 import BigNumber from "bignumber.js";
-import { ClassType } from "class-transformer/ClassTransformer";
 import { Injectable } from "@angular/core";
 import { AuthService } from "../../auth/services/auth.service";
 
@@ -40,11 +32,11 @@ export class ProviderUtils {
 
   private validatorsAndDelegations(
     coin: CoinType,
-    validators: Observable<BlockatlasValidator[]>,
+    validators$: Observable<BlockatlasValidator[]>,
     delegations: (address: string) => Observable<any[]>
   ): any[] {
     return [
-      validators,
+      validators$,
       this.authService
         .getAddressFromAuthorized(coin)
         .pipe(switchMap(address => delegations(address)))
@@ -52,13 +44,13 @@ export class ProviderUtils {
   }
 
   address2StakeMap<T>(
-    config: Observable<CoinProviderConfig>,
+    config$: Observable<CoinProviderConfig>,
     validators: () => Observable<BlockatlasValidator[]>,
     delegations: (address: string) => Observable<any[]>,
     delegationValidatorAddress: (delegation: T) => string,
     delegationShare: (delegation: T) => BigNumber
   ): Observable<StakeHolderList> {
-    return config.pipe(
+    return config$.pipe(
       switchMap(config =>
         combineLatest([
           ...this.validatorsAndDelegations(
@@ -107,8 +99,8 @@ export class ProviderUtils {
 
   buildPipeline(milliSeconds, address: Observable<string>): Observable<string> {
     return address.pipe(
-      switchMap(address => {
-        return timer(0, milliSeconds).pipe(map(() => address));
+      switchMap(addr => {
+        return timer(0, milliSeconds).pipe(map(() => addr));
       })
     );
   }
@@ -116,11 +108,11 @@ export class ProviderUtils {
   updatableBalance(
     address: () => Observable<string>,
     balance: (address: string) => Observable<BigNumber>,
-    config: Observable<CoinProviderConfig>
+    config$: Observable<CoinProviderConfig>
   ): Observable<BigNumber> {
     return this.buildPipeline(BALANCE_REFRESH_INTERVAL, address()).pipe(
-      switchMap(address => {
-        return combineLatest([balance(address), config]);
+      switchMap(addr => {
+        return combineLatest([balance(addr), config$]);
       }),
       map(([units, config]) => config.toCoin(units))
     );
@@ -129,11 +121,11 @@ export class ProviderUtils {
   updatableStakedAmount(
     address: () => Observable<string>,
     staked: (address: string) => Observable<BigNumber>,
-    config: Observable<CoinProviderConfig>
+    config$: Observable<CoinProviderConfig>
   ): Observable<BigNumber> {
     return this.buildPipeline(STAKE_REFRESH_INTERVAL, address()).pipe(
-      switchMap(address => {
-        return combineLatest([staked(address), config]);
+      switchMap(add => {
+        return combineLatest([staked(add), config$]);
       }),
       map(([units, config]) => config.toCoin(units) || new BigNumber(0))
     );

@@ -163,18 +163,22 @@ export class CosmosService implements CoinService {
       )
     );
   }
+
   getBalanceUSD(): Observable<BigNumber> {
     return this.balance$.pipe(
       switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
       map(([balance, price]) => balance.multipliedBy(price))
     );
   }
+
   getBalanceCoins(): Observable<BigNumber> {
     return this.balance$;
   }
+
   getBalanceUnits(): Observable<BigNumber> {
     return this.balance$.pipe(map(balance => CosmosUtils.fromAtom(balance)));
   }
+
   getStakedUSD(): Observable<BigNumber> {
     return this.stakedAmount$.pipe(
       switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
@@ -318,6 +322,7 @@ export class CosmosService implements CoinService {
   getValidators(): Observable<BlockatlasValidator[]> {
     return this.atlasService.getValidatorsFromBlockatlas(CoinType.cosmos);
   }
+
   getValidatorsById(validatorId: string): Observable<BlockatlasValidator> {
     return this.atlasService.getValidatorFromBlockatlasById(
       CoinType.cosmos,

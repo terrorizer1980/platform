@@ -1,0 +1,54 @@
+<app-content>
+  <ng-template content>
+    <app-shared-details
+      [additionals]="additionalInfo"
+      [hasProvider]="hasProvider"
+      [isUnstakeEnabled]="isUnstakeEnabled"
+      [config]="config"
+      (stake)="stake()"
+      (unstake)="unstake()"
+    >
+    </app-shared-details>
+  </ng-template>
+</app-content>
+
+<app-listview
+  class="d-block mt-2"
+  header="Stakes"
+  [dataSource]="validators"
+  [placeholdersCount]="1"
+>
+  <ng-template section>
+    <app-block-between>
+      <ng-template left>Delegator / APY</ng-template>
+      <ng-template right>Amount</ng-template>
+    </app-block-between>
+  </ng-template>
+  <ng-container *item="let item">
+    <app-block-between>
+      <ng-template left>
+        <app-label [image]="item.info.image">
+          <ng-template>
+            <span>{{ item.info.name }}</span>
+            <span class="success"
+              >{{ item.details.reward.annual | number: "1.2-2" }}%</span
+            >
+          </ng-template>
+        </app-label>
+      </ng-template>
+      <ng-template right>
+        <div class="text-nowrap">
+          <span>{{ item.amount }} {{ item.coin.currencySymbol }}</span>
+        </div>
+      </ng-template>
+    </app-block-between>
+  </ng-container>
+  <ng-template noitems>
+    <div class="m-3">The stakes list is empty</div>
+  </ng-template>
+  <ng-template placeholder>
+    <div class="pb-3 pt-3 pl-3">
+      <app-stake-placeholder></app-stake-placeholder>
+    </div>
+  </ng-template>
+</app-listview>

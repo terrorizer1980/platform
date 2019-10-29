@@ -1,87 +1,41 @@
 <ng-container *ngIf="details$ | async as details; else loadingDetails">
   <form [formGroup]="stakeForm">
-    <ng-template #defaultInput>
+    <ng-template #defaultAction>
+      <loading-button
+        (click)="stake()"
+        [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
+        [loading]="isLoading"
+      >
+        Stake
+      </loading-button>
+    </ng-template>
+    <ng-template #defaultContent>
       <input
         type="number"
         formControlName="amount"
         placeholder="Amount in {{ config.currencySymbol }}"
         class="form-control"
-        aria-label="Large"
+        aria-label="AmountLarge"
       />
     </ng-template>
 
-    <div class="col-12 text-center mt-4 mb-4 small">
-      <app-dropdown
-        [items]="validators"
-        [selectedIndex]="0"
-        (select)="selectValidator($event)"
-        class="d-block w-100"
-      >
-        <ng-template section>
-          <app-block-between>
-            <ng-template left>Market</ng-template>
-            <ng-template right>Current APY</ng-template>
-          </app-block-between>
-        </ng-template>
-        <div
-          *content="let item"
-          class="btn btn-outline-primary d-block selector"
-        >
-          <app-block-between>
-            <ng-template left>
-              <app-label [image]="item.info.image" alt="item.info.name">
-                <ng-template content>
-                  <div class="text-dark">{{ item.info.name }}</div>
-                </ng-template>
-              </app-label>
-            </ng-template>
-            <ng-template right>
-              <small class="success text-nowrap"
-                >{{ item.details.reward.annual.toFixed(2) }}%
-                <span class="ml-1"
-                  ><i class="mr-0 text-muted fa fa-chevron-down"></i></span
-              ></small>
-            </ng-template>
-          </app-block-between>
-        </div>
-        <div *item="let item" class="d-block w-100">
-          <app-block-between>
-            <ng-template left>
-              <app-label [image]="item.info.image" alt="item.info.name">
-                <ng-template content>
-                  <div class="text-dark">{{ item.info.name }}</div>
-                </ng-template>
-              </app-label>
-            </ng-template>
-            <ng-template right>
-              <small class="success text-nowrap"
-                >{{ item.details.reward.annual.toFixed(2) }}%
-              </small>
-            </ng-template>
-          </app-block-between>
-        </div>
-      </app-dropdown>
-
+    <ng-template #defaultInput>
       <div class="form-group mt-2 pb-0">
         <div class="input-group input-group-lg">
           <app-input class="d-block w-100">
             <ng-template content>
-              <ng-container
-                *ngTemplateOutlet="
-                  contentTemplate ? contentTemplate : defaultInput;
-                  context: { form: stakeForm, details: details }
-                "
-              ></ng-container>
+              <ng-container *ngTemplateOutlet="
+                contentTemplate ? contentTemplate : defaultContent;
+                context: { form: stakeForm, details: details }
+              "></ng-container>
             </ng-template>
             <ng-template right>
-              <div
-                class="available"
+              <div class="available"
                 (click)="setMax()"
-                *ngIf="details.hasProvider"
-              >
-                <span class="btn-link" *ngIf="max$ | async; let max"
-                  ><span>Available: {{ formatMax(max.normal) }}</span></span
-                >
+                *ngIf="details.hasProvider">
+                <span class="btn-link" *ngIf="max$ | async; let max">
+                  <span>Available: {{ formatMax(max.normal) }}</span>
+                </span>
               </div>
             </ng-template>
           </app-input>
@@ -105,32 +59,76 @@
           </div>
         </div>
       </div>
+    </ng-template>
+
+    <div class="col-12 text-center mt-4 mb-4 small">
+      <app-dropdown
+        [items]="validators"
+        [selectedIndex]="0"
+        (select)="selectValidator($event)"
+        class="d-block w-100"
+      >
+        <ng-template section>
+          <app-block-between>
+            <ng-template left>Market</ng-template>
+            <ng-template right>Current APY</ng-template>
+          </app-block-between>
+        </ng-template>
+        <div *content="let item" class="btn btn-outline-primary d-block selector">
+          <app-block-between>
+            <ng-template left>
+              <app-label [image]="item.info.image" alt="item.info.name">
+                <ng-template content>
+                  <div class="text-dark">{{ item.info.name }}</div>
+                </ng-template>
+              </app-label>
+            </ng-template>
+            <ng-template right>
+              <small class="success text-nowrap">
+                {{ item.details.reward.annual.toFixed(2) }}%
+                <span class="ml-1"><i class="mr-0 text-muted fa fa-chevron-down"></i></span></small>
+            </ng-template>
+          </app-block-between>
+        </div>
+        <div *item="let item" class="d-block w-100">
+          <app-block-between>
+            <ng-template left>
+              <app-label [image]="item.info.image" alt="item.info.name">
+                <ng-template content>
+                  <div class="text-dark">{{ item.info.name }}</div>
+                </ng-template>
+              </app-label>
+            </ng-template>
+            <ng-template right>
+              <small class="success text-nowrap"
+                >{{ item.details.reward.annual.toFixed(2) }}%
+              </small>
+            </ng-template>
+          </app-block-between>
+        </div>
+      </app-dropdown>
+
+      <ng-container *ngTemplateOutlet="
+        inputTemplate ? inputTemplate : defaultInput;
+        context: { form: stakeForm, details: details }
+      "></ng-container>
 
       <hr class="mt-0" />
       <div class="col-12">
         <div class="row">
           <div class="col-7 p-0 text-left">
             <h6 class="mb-0">Monthly earnings</h6>
-            <span class="text-left d-block text-muted"
-              >Estimated from current APY</span
-            >
+            <span class="text-left d-block text-muted">Estimated from current APY</span>
           </div>
 
           <div class="col-5 text-right p-0 earnings">
-            <div
-              class="success"
-              *ngIf="monthlyEarnings$ | async as monthlyEarnings"
-            >
+            <div class="success" *ngIf="monthlyEarnings$ | async as monthlyEarnings">
               <h6 *ngIf="monthlyEarnings">
                 <div>
                   {{ Math.floor(monthlyEarnings * 1000) / 1000 }}
                   {{ config.currencySymbol }}
                 </div>
-                <small
-                  >≈
-                  {{ (monthlyEarnings * details.price).toFixed(2) }}
-                  USD</small
-                >
+                <small>≈{{ (monthlyEarnings * details.price).toFixed(2) }}USD</small>
               </h6>
             </div>
           </div>
@@ -138,13 +136,10 @@
       </div>
 
       <div class="col-12 text-center p-0 mt-3">
-        <loading-button
-          (click)="stake()"
-          [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
-          [loading]="isLoading"
-        >
-          Stake
-        </loading-button>
+        <ng-container *ngTemplateOutlet="
+          actionTemplate ? actionTemplate : defaultAction;
+          context: { form: stakeForm, isLoading: isLoading, stake: stake.bind(this) }
+        "></ng-container>
       </div>
     </div>
   </form>

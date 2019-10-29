@@ -27,6 +27,8 @@ import { InputComponent } from "./input/input.component";
 import { DropdownComponent } from "./dropdown/dropdown.component";
 import { NgbModule } from "@ng-bootstrap/ng-bootstrap";
 import { PopupComponent } from "./popup/popup.component";
+import { InputDirective } from "../directives/input.directive";
+import { ActionDirective } from "../directives/action.directive";
 
 const components = [
   LoadingButtonComponent,
@@ -42,6 +44,8 @@ const components = [
   BlockRightDirective,
   SectionDirective,
   FooterDirective,
+  InputDirective,
+  ActionDirective,
   SuccessPopupComponent,
   ErrorPopupComponent,
   StakePlaceholderComponent,

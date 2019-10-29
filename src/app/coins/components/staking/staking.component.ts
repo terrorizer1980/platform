@@ -1,47 +1,19 @@
-import {
-  Component,
-  ContentChild,
-  Input,
-  OnDestroy,
-  OnInit,
-  Output,
-  TemplateRef
-} from "@angular/core";
-import {
-  combineLatest,
-  forkJoin,
-  Observable,
-  of,
-  ReplaySubject,
-  Subject,
-  Subscription,
-  throwError
-} from "rxjs";
-import { CosmosStakingInfo } from "@trustwallet/rpc/lib/cosmos/models/CosmosStakingInfo";
+import { Component, ContentChild, Input, OnDestroy, OnInit, TemplateRef } from "@angular/core";
+import { combineLatest, forkJoin, Observable, of, ReplaySubject, Subject, Subscription, merge } from "rxjs";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import BigNumber from "bignumber.js";
 import { ActivatedRoute, Router } from "@angular/router";
 import { DialogsService } from "../../../shared/services/dialogs.service";
 import { StakeValidator } from "../../validators/stake.validator";
 import { CoinProviderConfig, StakeAction } from "../../coin-provider-config";
-import {
-  catchError,
-  first,
-  map,
-  shareReplay,
-  switchMap,
-  tap
-} from "rxjs/operators";
-import { BlockatlasValidator, CosmosUtils } from "@trustwallet/rpc/lib";
-import { CoinService } from "../../services/coin.service";
-import { DetailsValidatorInterface } from "../details/details.component";
+import { first, map, shareReplay, switchMap, tap } from "rxjs/operators";
+import { BlockatlasValidator } from "@trustwallet/rpc/lib";
 import { AuthService } from "../../../auth/services/auth.service";
-import { SelectAuthProviderComponent } from "../../../shared/components/select-auth-provider/select-auth-provider.component";
-import { AuthProvider } from "../../../auth/services/auth-provider";
 import { ErrorsService } from "../../../shared/services/errors/errors.service";
-import { Errors } from "../../../shared/consts";
-import { ContentDirective } from "../../../shared/directives/content.directive";
 import { ComponentAuthService } from "../../services/component-auth.service";
+import { InputDirective } from "../../../shared/directives/input.directive";
+import { ContentDirective } from "../../../shared/directives/content.directive";
+import { ActionDirective } from "../../../shared/directives/action.directive";
 
 export interface StakeDetails {
   hasProvider: boolean;
@@ -67,6 +39,13 @@ export class StakingComponent implements OnInit, OnDestroy {
   @Input() formatMax: (max: BigNumber) => string;
   @Input() price: Observable<BigNumber>;
   @Input() validators: Observable<Array<BlockatlasValidator>>;
+  @Input() amount: Observable<BigNumber>;
+
+  @ContentChild(InputDirective, { read: TemplateRef, static: false })
+  inputTemplate;
+
+  @ContentChild(ActionDirective, { read: TemplateRef, static: false })
+  actionTemplate;
 
   @ContentChild(ContentDirective, { read: TemplateRef, static: false })
   contentTemplate;
@@ -165,7 +144,7 @@ export class StakingComponent implements OnInit, OnDestroy {
 
   getMonthlyEarnings(): Observable<BigNumber> {
     return combineLatest([
-      this.stakeForm.get("amount").valueChanges,
+      merge(this.stakeForm.get("amount").valueChanges, this.amount),
       this.validator
     ]).pipe(
       map(([value, validator]) => {

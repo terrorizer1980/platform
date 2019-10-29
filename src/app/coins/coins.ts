@@ -16,6 +16,7 @@ import {
   TronProviderConfig
 } from "./providers/tron/tron.descriptor";
 import BigNumber from "bignumber.js";
+import { TezosCoinConfig, TezosProviderConfig } from "./providers/tezos/tezos.descriptor";
 
 function icon(type: CoinType): string {
   return `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(
@@ -61,6 +62,25 @@ export const Coins: CoinProviderConfig[] = [
     toCoin(amount: BigNumber): BigNumber {
       return new UnitConverter(this).toCoin(amount);
     }
+  }),
+  CoinDescriptor<TezosProviderConfig>({
+    network: CoinTypeUtils.id(CoinType.tezos),
+    coin: CoinType.tezos,
+    chainId: TronChainId,
+    endpoint: environment.rpcEndpoint(CoinType.tezos),
+    currencyName: CoinTypeUtils.networkName(CoinType.tezos),
+    currencySymbol: CoinTypeUtils.symbol(CoinType.tezos),
+    iconUri: icon(CoinType.tezos),
+    config: TezosCoinConfig,
+    gas: new BigNumber(11000),
+    fee: new BigNumber(1300),
+    digits: 6,
+    toUnits(amount: BigNumber): BigNumber {
+      return new UnitConverter(this).toUnits(amount);
+    },
+    toCoin(amount: BigNumber): BigNumber {
+      return new UnitConverter(this).toCoin(amount);
+    }
   })
 ];
 
@@ -72,12 +92,6 @@ export interface UpcomingCoin {
 }
 
 export const Upcoming: UpcomingCoin[] = [
-  {
-    symbol: "XTZ",
-    name: "Tezos",
-    iconUri: icon(CoinType.tezos),
-    message: "Coming after Oct 24 2019."
-  },
   {
     symbol: "WAV",
     name: "Waves",
