@@ -1,5 +1,21 @@
-import { Component, ContentChild, Input, OnDestroy, OnInit, TemplateRef } from "@angular/core";
-import { combineLatest, forkJoin, Observable, of, ReplaySubject, Subject, Subscription, merge } from "rxjs";
+import {
+  Component,
+  ContentChild,
+  Input,
+  OnDestroy,
+  OnInit,
+  TemplateRef
+} from "@angular/core";
+import {
+  combineLatest,
+  forkJoin,
+  Observable,
+  of,
+  ReplaySubject,
+  Subject,
+  Subscription,
+  merge
+} from "rxjs";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import BigNumber from "bignumber.js";
 import { ActivatedRoute, Router } from "@angular/router";

@@ -29,10 +29,12 @@ export class DetailsComponent {
   );
   additionalInfo = combineLatest([
     this.config.pipe(
-      switchMap(config => this.tezos.getStaked().pipe(
-        map(staked => config.toCoin(staked)),
-        catchError(() => of(new BigNumber(0)))
-      ))
+      switchMap(config =>
+        this.tezos.getStaked().pipe(
+          map(staked => config.toCoin(staked)),
+          catchError(() => of(new BigNumber(0)))
+        )
+      )
     ),
     this.config
   ]).pipe(
@@ -54,7 +56,7 @@ export class DetailsComponent {
           value: `No lock time`
         }
       ];
-    }),
+    })
   );
 
   constructor(
@@ -62,13 +64,12 @@ export class DetailsComponent {
     public config: Observable<TezosProviderConfig>,
     public tezos: TezosService,
     private router: Router,
-    private activatedRoute: ActivatedRoute,
+    private activatedRoute: ActivatedRoute
   ) {}
 
   stake() {
     this.router.navigate([`stake`], { relativeTo: this.activatedRoute });
   }
 
-  unstake() {
-  }
+  unstake() {}
 }

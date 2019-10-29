@@ -15,7 +15,12 @@ import { TezosProviderConfig } from "../tezos.descriptor";
 import { BlockatlasValidator } from "@trustwallet/rpc";
 import { from, Observable, of, combineLatest, forkJoin } from "rxjs";
 import { CoinType } from "@trustwallet/types";
-import { BlockatlasDelegation, TezosContract, TezosHead, TezosOperationResult } from "@trustwallet/rpc";
+import {
+  BlockatlasDelegation,
+  TezosContract,
+  TezosHead,
+  TezosOperationResult
+} from "@trustwallet/rpc";
 
 export const TezosServiceInjectable = [
   TezosConfigService,
@@ -69,7 +74,9 @@ export class TezosService implements CoinService {
 
   getAddressDelegations(address: string): Observable<BlockatlasDelegation[]> {
     return this.config.pipe(
-      switchMap(config => this.atlasService.getDelegations(config.coin, address)),
+      switchMap(config =>
+        this.atlasService.getDelegations(config.coin, address)
+      ),
       map(batch => batch.delegations)
     );
   }
@@ -137,8 +144,12 @@ export class TezosService implements CoinService {
 
   getStakedUSD(): Observable<BigNumber> {
     return this.stakedAmount$.pipe(
-      switchMap(balance => forkJoin([this.config, of(balance), this.getPriceUSD()])),
-      map(([config, balance, price]) => config.toCoin(balance).multipliedBy(price))
+      switchMap(balance =>
+        forkJoin([this.config, of(balance), this.getPriceUSD()])
+      ),
+      map(([config, balance, price]) =>
+        config.toCoin(balance).multipliedBy(price)
+      )
     );
   }
 
@@ -173,7 +184,11 @@ export class TezosService implements CoinService {
     return of(false);
   }
 
-  prepareStakeTx(action: StakeAction, addressTo: string, amount: BigNumber): Observable<any> {
+  prepareStakeTx(
+    action: StakeAction,
+    addressTo: string,
+    amount: BigNumber
+  ): Observable<any> {
     return this.getAddress().pipe(
       switchMap(address => this.stake(address, addressTo))
     );
@@ -181,7 +196,7 @@ export class TezosService implements CoinService {
 
   broadcastTx(tx: string): Observable<TezosOperationResult> {
     return this.tezosRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.broadcastTransaction(tx))),
+      switchMap(rpc => from(rpc.broadcastTransaction(tx)))
     );
   }
 
@@ -192,15 +207,11 @@ export class TezosService implements CoinService {
   }
 
   private requestBalance(address: string): Observable<BigNumber> {
-    return this.getAccountOnce(address).pipe(
-      map(account => account.balance)
-    );
+    return this.getAccountOnce(address).pipe(map(account => account.balance));
   }
 
   private getHead(): Observable<TezosHead> {
-    return this.tezosRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.getHead()))
-    );
+    return this.tezosRpc.rpc.pipe(switchMap(rpc => from(rpc.getHead())));
   }
 
   private getManagerKey(account: string): Observable<string> {
@@ -215,12 +226,18 @@ export class TezosService implements CoinService {
       this.getAddressDelegations(address)
     ]).pipe(
       map(([config, delegations]) =>
-        delegations.reduce((acc, d) => acc.plus(config.toUnits(d.value)), new BigNumber(0))
+        delegations.reduce(
+          (acc, d) => acc.plus(config.toUnits(d.value)),
+          new BigNumber(0)
+        )
       )
     );
   }
 
-  private stake(fromAccount: string, toAccount: string): Observable<TezosOperationResult> {
+  private stake(
+    fromAccount: string,
+    toAccount: string
+  ): Observable<TezosOperationResult> {
     return combineLatest([
       this.config,
       this.getHead(),
@@ -250,7 +267,7 @@ export class TezosService implements CoinService {
           operationList: {
             branch: head.hash,
             operations: [
-              ... reveal,
+              ...reveal,
               {
                 source: fromAccount,
                 fee: config.fee.toNumber(),
@@ -267,7 +284,7 @@ export class TezosService implements CoinService {
         };
       }),
       switchMap(tx => this.authService.signTransaction(CoinType.tezos, tx)),
-      switchMap(result => this.broadcastTx(result)),
+      switchMap(result => this.broadcastTx(result))
     );
   }
 }

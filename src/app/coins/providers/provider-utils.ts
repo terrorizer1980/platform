@@ -1,5 +1,10 @@
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
-import { BALANCE_REFRESH_INTERVAL, CoinProviderConfig, STAKE_REFRESH_INTERVAL, StakeHolderList } from "../coin-provider-config";
+import {
+  BALANCE_REFRESH_INTERVAL,
+  CoinProviderConfig,
+  STAKE_REFRESH_INTERVAL,
+  StakeHolderList
+} from "../coin-provider-config";
 import { CoinType } from "@trustwallet/types";
 import { first, map, switchMap } from "rxjs/operators";
 import { combineLatest, Observable, of, timer } from "rxjs";

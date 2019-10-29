@@ -14,10 +14,7 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { CoinsComponentsModule } from "../../components/coins-components.module";
 
 @NgModule({
-  declarations: [
-    DetailsComponent,
-    StakingComponent
-  ],
+  declarations: [DetailsComponent, StakingComponent],
   imports: [
     SharedModule,
     RouterDataModule,

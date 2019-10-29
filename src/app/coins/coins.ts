@@ -16,7 +16,10 @@ import {
   TronProviderConfig
 } from "./providers/tron/tron.descriptor";
 import BigNumber from "bignumber.js";
-import { TezosCoinConfig, TezosProviderConfig } from "./providers/tezos/tezos.descriptor";
+import {
+  TezosCoinConfig,
+  TezosProviderConfig
+} from "./providers/tezos/tezos.descriptor";
 
 function icon(type: CoinType): string {
   return `https://assets.trustwalletapp.com/blockchains/${CoinTypeUtils.id(

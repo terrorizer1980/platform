@@ -2,7 +2,12 @@ import { CoinType } from "@trustwallet/types";
 import { from, Observable, throwError } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import { environment } from "../../../../environments/environment";
-import { BlockatlasValidator, BlockatlasDelegationBatch, BlockatlasRPC, BlockatlasValidatorResult } from "@trustwallet/rpc";
+import {
+  BlockatlasValidator,
+  BlockatlasDelegationBatch,
+  BlockatlasRPC,
+  BlockatlasValidatorResult
+} from "@trustwallet/rpc";
 import { Injectable } from "@angular/core";
 import { ValidatorRequest } from "./validator.request";
 
@@ -38,17 +43,22 @@ export class CoinAtlasService {
   }
 
   // preparing for the new validators API
-  getValidatorsBatch(request: ValidatorRequest[]): Observable<BlockatlasDelegationBatch[]> {
+  getValidatorsBatch(
+    request: ValidatorRequest[]
+  ): Observable<BlockatlasDelegationBatch[]> {
     return from(this.rpc.listDelegationsBatch(request)).pipe(
-        map(resp => resp.docs),
-        catchError(error => {
-          console.log(error);
-          return throwError(error);
-        })
-      );
+      map(resp => resp.docs),
+      catchError(error => {
+        console.log(error);
+        return throwError(error);
+      })
+    );
   }
 
-  getDelegations(coin: CoinType, address: string): Observable<BlockatlasDelegationBatch> {
+  getDelegations(
+    coin: CoinType,
+    address: string
+  ): Observable<BlockatlasDelegationBatch> {
     return this.getValidatorsBatch([{ coin, address }]).pipe(
       map(batch => {
         if (batch.length === 0) {

@@ -15,28 +15,26 @@ import { StakeAction } from "../../../../coin-provider-config";
 })
 export class StakingComponent {
   hasProvider = this.tezos.hasProvider();
-  balance = this.tezos
-    .getBalanceCoins()
-    .pipe(
-      map(balance => balance.toFormat(2)),
-      catchError(_ => of(new BigNumber(0)))
-    );
+  balance = this.tezos.getBalanceCoins().pipe(
+    map(balance => balance.toFormat(2)),
+    catchError(_ => of(new BigNumber(0)))
+  );
   info = this.tezos.getStakingInfo();
   prepareTx = this.tezos.prepareStakeTx.bind(this.tezos);
   price = this.tezos.getPriceUSD();
-  validators: Observable<Array<BlockatlasValidator>> = this.tezos.getValidators();
-  balanceUsd = this.tezos
-    .getBalanceUSD()
-    .pipe(
-      map(balance => balance.toFormat(2)),
-      catchError(_ => of(new BigNumber(0)))
-    );
+  validators: Observable<
+    Array<BlockatlasValidator>
+  > = this.tezos.getValidators();
+  balanceUsd = this.tezos.getBalanceUSD().pipe(
+    map(balance => balance.toFormat(2)),
+    catchError(_ => of(new BigNumber(0)))
+  );
   isLoading = false;
 
   constructor(
     @Inject(TezosConfigService)
     public config: Observable<TezosProviderConfig>,
-    public tezos: TezosService,
+    public tezos: TezosService
   ) {}
 
   formatMax(max: BigNumber): string {
