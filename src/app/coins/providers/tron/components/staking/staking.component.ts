@@ -1,5 +1,5 @@
 import { Component, Inject } from "@angular/core";
-import { Observable, of } from "rxjs";
+import { Observable, of, Subject } from "rxjs";
 import { ActivatedRoute } from "@angular/router";
 import { TronProviderConfig } from "../../tron.descriptor";
 import { TronConfigService } from "../../services/tron-config.service";
@@ -29,6 +29,7 @@ export class StakingComponent {
   validators: Observable<
     Array<BlockatlasValidator>
   > = this.tron.getValidators();
+  amount = new Subject<BigNumber>();
 
   constructor(
     @Inject(TronConfigService)

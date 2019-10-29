@@ -1,5 +1,5 @@
 import { Component, Inject } from "@angular/core";
-import { Observable, of } from "rxjs";
+import { Observable, of, Subject } from "rxjs";
 import { CosmosService } from "../../services/cosmos.service";
 import { ActivatedRoute } from "@angular/router";
 import { CosmosConfigService } from "../../services/cosmos-config.service";
@@ -24,6 +24,7 @@ export class StakingComponent {
   validators: Observable<
     Array<BlockatlasValidator>
   > = this.cosmos.getValidators();
+  amount = new Subject<BigNumber>();
 
   constructor(
     @Inject(CosmosConfigService)
