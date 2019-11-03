@@ -66,25 +66,25 @@ export const Coins: CoinProviderConfig[] = [
       return new UnitConverter(this).toCoin(amount);
     }
   }),
-  // CoinDescriptor<TezosProviderConfig>({
-  //   network: CoinTypeUtils.id(CoinType.tezos),
-  //   coin: CoinType.tezos,
-  //   chainId: TronChainId,
-  //   endpoint: environment.rpcEndpoint(CoinType.tezos),
-  //   currencyName: CoinTypeUtils.networkName(CoinType.tezos),
-  //   currencySymbol: CoinTypeUtils.symbol(CoinType.tezos),
-  //   iconUri: icon(CoinType.tezos),
-  //   config: TezosCoinConfig,
-  //   gas: new BigNumber(11000),
-  //   fee: new BigNumber(1300),
-  //   digits: 6,
-  //   toUnits(amount: BigNumber): BigNumber {
-  //     return new UnitConverter(this).toUnits(amount);
-  //   },
-  //   toCoin(amount: BigNumber): BigNumber {
-  //     return new UnitConverter(this).toCoin(amount);
-  //   }
-  // })
+  CoinDescriptor<TezosProviderConfig>({
+    network: CoinTypeUtils.id(CoinType.tezos),
+    coin: CoinType.tezos,
+    chainId: TronChainId,
+    endpoint: environment.rpcEndpoint(CoinType.tezos),
+    currencyName: CoinTypeUtils.networkName(CoinType.tezos),
+    currencySymbol: CoinTypeUtils.symbol(CoinType.tezos),
+    iconUri: icon(CoinType.tezos),
+    config: TezosCoinConfig,
+    gas: new BigNumber(11000),
+    fee: new BigNumber(1300),
+    digits: 6,
+    toUnits(amount: BigNumber): BigNumber {
+      return new UnitConverter(this).toUnits(amount);
+    },
+    toCoin(amount: BigNumber): BigNumber {
+      return new UnitConverter(this).toCoin(amount);
+    }
+  })
 ];
 
 export interface UpcomingCoin {
