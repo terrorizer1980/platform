@@ -38,6 +38,7 @@ export class WalletConnectService {
         switchMap(() => {
           const result = new Subject();
           const uri = this.connector.uri;
+          console.log(uri);
           let ignoreClose = false;
           // display QR Code modal
           WalletConnectQRCodeModal.open(uri, () => {

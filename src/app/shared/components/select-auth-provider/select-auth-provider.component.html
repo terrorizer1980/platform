@@ -15,6 +15,7 @@
     <div class="list-group mt-4 list-group-flush">
       <div
         (click)="provider.active ? onSelect(provider) : null"
+        id="use-{{provider.id}}"
         class="provider list-group-item"
         [ngClass]="{ 'list-group-item-action': provider.active }"
         *ngFor="let provider of providers | async"
