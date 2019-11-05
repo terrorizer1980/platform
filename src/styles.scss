@@ -3,12 +3,10 @@
 @import "~bootstrap/scss/functions";
 @import "assets/sass/variables";
 @import "~bootstrap/scss/bootstrap";
-@import "~roboto-fontface/css/roboto/sass/roboto-fontface";
 @import "~font-awesome/scss/font-awesome";
 
 body {
   background-color: $light !important;
-  font-family: Roboto-Light;
 }
 
 .override {
