@@ -15,7 +15,11 @@ import {
   Subject,
   Subscription
 } from "rxjs";
-import { CoinProviderConfig, StakeAction } from "../../coin-provider-config";
+import {
+  CoinProviderConfig,
+  StakeAction,
+  StakeHolder
+} from "../../coin-provider-config";
 import { FormBuilder, FormGroup } from "@angular/forms";
 import BigNumber from "bignumber.js";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -34,8 +38,7 @@ export class UnstakingComponent implements OnInit, OnDestroy {
   @Input() config: CoinProviderConfig;
   @Input() timeFrame: Observable<number>;
   @Input() balance: Observable<BigNumber>;
-  @Input() staked: (validator: string) => Observable<BigNumber>;
-  @Input() validators: Observable<Array<BlockatlasValidator>>;
+  @Input() validators: Observable<Array<StakeHolder>>;
   @Input() price: Observable<BigNumber>;
   @Input() max: number;
   @Input() prepareTx: (
@@ -56,7 +59,7 @@ export class UnstakingComponent implements OnInit, OnDestroy {
   validatorSubs: Subscription;
   priceSubs: Subscription;
 
-  validator = new ReplaySubject<BlockatlasValidator>(1);
+  validator = new ReplaySubject<StakeHolder>(1);
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -117,7 +120,7 @@ export class UnstakingComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.max$ = this.validator.pipe(
-      switchMap(validator => this.staked(validator.id)),
+      map(validator => validator.amount),
       shareReplay(1)
     );
 
@@ -129,7 +132,7 @@ export class UnstakingComponent implements OnInit, OnDestroy {
             false,
             this.config,
             this.balance,
-            this.staked(validator.id),
+            of(validator.amount),
             this.max
           )
         ]);
@@ -154,7 +157,7 @@ export class UnstakingComponent implements OnInit, OnDestroy {
       });
   }
 
-  selectValidator(validator: BlockatlasValidator) {
+  selectValidator(validator: StakeHolder) {
     this.validator.next(validator);
     this.stakeForm.get("amount").setValue(this.stakeForm.get("amount").value);
   }

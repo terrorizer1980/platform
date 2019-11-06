@@ -7,6 +7,7 @@ import { CosmosConfigService } from "../../services/cosmos-config.service";
 import { CosmosProviderConfig } from "../../cosmos.descriptor";
 import BigNumber from "bignumber.js";
 import { BlockatlasValidator } from "@trustwallet/rpc/lib";
+import { StakeHolder } from "../../../../coin-provider-config";
 
 @Component({
   selector: "app-unstaking",
@@ -14,14 +15,11 @@ import { BlockatlasValidator } from "@trustwallet/rpc/lib";
   styleUrls: ["./unstaking.component.scss"]
 })
 export class UnstakingComponent {
-  staked = this.cosmos.getStakedToValidator.bind(this.cosmos);
   balance = this.cosmos
     .getBalanceCoins()
     .pipe(catchError(_ => of(new BigNumber(0))));
   prepareTx = this.cosmos.prepareStakeTx.bind(this.cosmos);
-  validators: Observable<
-    Array<BlockatlasValidator>
-  > = this.cosmos.getValidators();
+  validators: Observable<Array<StakeHolder>> = this.cosmos.getStakeHolders();
   price = this.cosmos.getPriceUSD();
   timeFrame = this.cosmos
     .getStakingInfo()
@@ -30,8 +28,7 @@ export class UnstakingComponent {
   constructor(
     @Inject(CosmosConfigService)
     public config: Observable<CosmosProviderConfig>,
-    public cosmos: CosmosService,
-    private activatedRoute: ActivatedRoute
+    public cosmos: CosmosService
   ) {}
 
   formatMax(max: BigNumber): string {

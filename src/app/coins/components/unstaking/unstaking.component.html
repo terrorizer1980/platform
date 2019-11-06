@@ -19,7 +19,7 @@
       <ng-template section>
         <app-block-between>
           <ng-template left>Market</ng-template>
-          <ng-template right>Current APY</ng-template>
+          <ng-template right>Balance</ng-template>
         </app-block-between>
       </ng-template>
       <div *content="let item" class="btn btn-outline-primary d-block selector">
@@ -28,15 +28,19 @@
             <app-label [image]="item.info.image" alt="item.info.name">
               <ng-template content>
                 <div class="text-dark">{{ item.info.name }}</div>
+                <small class="success text-nowrap text-left"
+                  >{{ item.details.reward.annual.toFixed(2) }}%</small
+                >
               </ng-template>
             </app-label>
           </ng-template>
           <ng-template right>
-            <small class="success text-nowrap"
-              >{{ item.details.reward.annual.toFixed(2) }}%
-              <span class="ml-1"
-                ><i class="mr-0 text-muted fa fa-chevron-down"></i></span
-            ></small>
+            <span class="text-dark">
+              {{ item.amount }} {{ item.coin.currencySymbol }}
+            </span>
+            <span class="ml-1"
+              ><i class="mr-0 text-muted fa fa-chevron-down"></i
+            ></span>
           </ng-template>
         </app-block-between>
       </div>
@@ -46,13 +50,16 @@
             <app-label [image]="item.info.image" alt="item.info.name">
               <ng-template content>
                 <div class="text-dark">{{ item.info.name }}</div>
+                <small class="success text-nowrap"
+                  >{{ item.details.reward.annual.toFixed(2) }}%
+                </small>
               </ng-template>
             </app-label>
           </ng-template>
           <ng-template right>
-            <small class="success text-nowrap"
-              >{{ item.details.reward.annual.toFixed(2) }}%
-            </small>
+            <div class="text-dark">
+              {{ item.amount }} {{ item.coin.currencySymbol }}
+            </div>
           </ng-template>
         </app-block-between>
       </div>
