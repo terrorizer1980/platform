@@ -1,35 +1,12 @@
-import {
-  AfterViewInit,
-  Component,
-  ContentChild,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  Output,
-  TemplateRef
-} from "@angular/core";
-import {
-  combineLatest,
-  forkJoin,
-  Observable,
-  of,
-  Subscription,
-  throwError
-} from "rxjs";
-import { BlockatlasValidator } from "@trustwallet/rpc/lib/blockatlas/models/BlockatlasValidator";
-import { ActivatedRoute, Router } from "@angular/router";
-import { catchError, first, map, switchMap } from "rxjs/operators";
-import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
-import { CoinService } from "../../services/coin.service";
-import BigNumber from "bignumber.js";
+import { AfterViewInit, Component, ContentChild, EventEmitter, Input, Output, TemplateRef } from "@angular/core";
+import { combineLatest, forkJoin, Observable, of, throwError } from "rxjs";
+import { catchError, first, switchMap } from "rxjs/operators";
 import { SelectAuthProviderComponent } from "../../../shared/components/select-auth-provider/select-auth-provider.component";
 import { AuthProvider } from "../../../auth/services/auth-provider";
 import { Errors } from "../../../shared/consts";
 import { DialogsService } from "../../../shared/services/dialogs.service";
 import { AuthService } from "../../../auth/services/auth.service";
-import { fromPromise } from "rxjs/internal-compatibility";
 import { CoinProviderConfig } from "../../coin-provider-config";
-import { ContentDirective } from "../../../shared/directives/content.directive";
 import { WithdrawDirective } from "./directives/withdraw.directive";
 import { StakeDirective } from "./directives/stake.directive";
 
@@ -37,6 +14,7 @@ export interface DetailsValidatorInterface {
   additionals: AdditionalInfo[];
   hasProvider: boolean;
   unstakeEnabled: boolean;
+  unstakeVisible: boolean;
   config: CoinProviderConfig;
 }
 
@@ -52,6 +30,7 @@ export interface AdditionalInfo {
 })
 export class DetailsComponent implements AfterViewInit {
   @Input() isUnstakeEnabled: Observable<boolean>;
+  @Input() isUnstakeVisible: Observable<boolean>;
   @Input() releaseDate: Observable<string>;
   @Input() hasProvider: Observable<boolean>;
   @Input() config: Observable<CoinProviderConfig>;
@@ -113,6 +92,7 @@ export class DetailsComponent implements AfterViewInit {
     this.details$ = forkJoin({
       additionals: this.additionals.pipe(first()),
       unstakeEnabled: this.isUnstakeEnabled.pipe(first()),
+      unstakeVisible: this.isUnstakeVisible.pipe(first()),
       hasProvider: this.hasProvider,
       config: this.config.pipe(first())
     });

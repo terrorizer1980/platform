@@ -25,8 +25,8 @@ import { WithdrawPopupComponent } from "../withdraw-popup/withdraw-popup.compone
 })
 export class DetailsComponent {
   isLoading = false;
-
   isUnstakeEnabled = this.tron.isUnstakeEnabled();
+  isUnstakeVisible = of(true);
   hasProvider = this.tron.hasProvider();
   validators: Observable<StakeHolder[]> = this.tron.getStakeHolders().pipe(
     map(stakeHolders => {

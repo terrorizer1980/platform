@@ -44,12 +44,14 @@
         context: { $implicit: details }
       "
     ></ng-container>
-    <ng-container
-      *ngTemplateOutlet="
+    <ng-container *ngIf="details.unstakeVisible">
+      <ng-container
+        *ngTemplateOutlet="
         withdrawTemplate ? withdrawTemplate : defaultWihdrawButton;
         context: { $implicit: details }
       "
-    ></ng-container>
+      ></ng-container>
+    </ng-container>
   </div>
   <div
     class="row row-container ml-3 mr-3" [class.row-first]="i == 0"

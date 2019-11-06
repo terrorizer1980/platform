@@ -6,7 +6,6 @@ import { combineLatest, Observable, of } from "rxjs";
 import { CosmosProviderConfig } from "../../cosmos.descriptor";
 import { StakeHolder } from "../../../../coin-provider-config";
 import BigNumber from "bignumber.js";
-import { CosmosUnbond } from "@trustwallet/rpc/lib/cosmos/models/CosmosUnbond";
 import { BlockatlasValidator, CosmosUtils } from "@trustwallet/rpc";
 import moment from "moment";
 import { ActivatedRoute, Router } from "@angular/router";
@@ -24,6 +23,7 @@ interface PendingWithdrawals {
 })
 export class DetailsComponent {
   isUnstakeEnabled = this.cosmos.isUnstakeEnabled();
+  isUnstakeVisible = of(false);
   hasProvider = this.cosmos.hasProvider();
   validators: Observable<StakeHolder[]> = this.cosmos.getStakeHolders().pipe(
     map(stakeHolders => {

@@ -17,6 +17,7 @@ import { DialogsService } from "../../../../../shared/services/dialogs.service";
 export class DetailsComponent {
   isLoading = false;
   isUnstakeEnabled = this.tezos.isUnstakeEnabled();
+  isUnstakeVisible = of(false);
   hasProvider = this.tezos.hasProvider();
   validators: Observable<StakeHolder[]> = this.tezos.getStakeHolders().pipe(
     tap(list => console.log(list)),
