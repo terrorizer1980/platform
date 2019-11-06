@@ -70,7 +70,7 @@ export class DetailsComponent {
   ]).pipe(
     map(([info, staked, config]) => [
       {
-        name: "Supply Balance",
+        name: "Staked Balance",
         value: `${staked.toFormat(2, BigNumber.ROUND_DOWN)} ${
           config.currencySymbol
         }`
@@ -80,7 +80,7 @@ export class DetailsComponent {
         value: 0.01
       },
       {
-        name: "Withdraw Time",
+        name: "Lock Time",
         value: `${info.timeFrame.day} days`
       }
     ])

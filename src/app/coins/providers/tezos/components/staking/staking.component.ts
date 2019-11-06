@@ -25,10 +25,6 @@ export class StakingComponent {
   validators: Observable<
     Array<BlockatlasValidator>
   > = this.tezos.getValidators();
-  balanceUsd = this.tezos.getBalanceUSD().pipe(
-    map(balance => balance.toFormat(2)),
-    catchError(_ => of(new BigNumber(0)))
-  );
   isLoading = false;
 
   constructor(

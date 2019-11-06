@@ -20,7 +20,7 @@
 >
   <ng-template section>
     <app-block-between>
-      <ng-template left>Delegator / APY</ng-template>
+      <ng-template left>Delegator / APR</ng-template>
       <ng-template right>Amount</ng-template>
     </app-block-between>
   </ng-template>
@@ -28,7 +28,7 @@
     <app-block-between>
       <ng-template left>
         <app-label [image]="item.info.image">
-          <ng-template>
+          <ng-template content>
             <span>{{ item.info.name }}</span>
             <span class="success"
               >{{ item.details.reward.annual | number: "1.2-2" }}%</span

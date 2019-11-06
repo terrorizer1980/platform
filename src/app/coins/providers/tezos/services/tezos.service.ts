@@ -190,7 +190,14 @@ export class TezosService implements CoinService {
     amount: BigNumber
   ): Observable<any> {
     return this.getAddress().pipe(
-      switchMap(address => this.stake(address, addressTo))
+      switchMap(address => {
+        switch (action) {
+          case StakeAction.STAKE:
+            return this.stake(address, addressTo);
+          case StakeAction.UNSTAKE:
+            return this.unstake(address);
+        }
+      })
     );
   }
 
@@ -232,6 +239,10 @@ export class TezosService implements CoinService {
         )
       )
     );
+  }
+
+  private unstake(fromAccount: string) {
+    return this.stake(fromAccount, null);
   }
 
   private stake(

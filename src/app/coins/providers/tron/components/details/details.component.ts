@@ -59,7 +59,7 @@ export class DetailsComponent {
     map(([info, staked, config]) => {
       return [
         {
-          name: "Supply Balance",
+          name: "Staked Balance",
           value: `${staked.toFormat(2, BigNumber.ROUND_DOWN)} ${
             config.currencySymbol
           }`
@@ -69,7 +69,7 @@ export class DetailsComponent {
           value: 1
         },
         {
-          name: "Withdraw Time",
+          name: "Lock Time",
           value: `${info.lockTime} days`
         }
       ];
@@ -90,7 +90,6 @@ export class DetailsComponent {
   }
 
   unstake(active: boolean, config: TronProviderConfig) {
-    console.log(123);
     if (this.isLoading || !active) {
       return;
     }
@@ -106,8 +105,8 @@ export class DetailsComponent {
           tap(() => (this.isLoading = false), e => (this.isLoading = false)),
           switchMap(_ => this.config)
         )
-        .subscribe(config => {
-          this.congratulate(config);
+        .subscribe(cfg => {
+          this.congratulate(cfg);
         });
     });
   }
