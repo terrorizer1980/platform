@@ -1,24 +1,11 @@
 <ng-container *ngIf="config | async as config">
-  <app-content header="Freeze {{ config.currencyName }}">
-    <ng-template content>
-      <app-freeze
-        [config]="config"
-        [formatMax]="formatMax"
-        [hasProvider]="hasProvider"
-        [balance]="balance"
-        [prepareTx]="prepareFreezeTx"
-        [max]="1"
-        [price]="price"
-      ></app-freeze>
-    </ng-template>
-  </app-content>
-  <app-content header="Stake {{ config.currencyName }}" class="d-block mt-3">
+  <app-content header="Stake {{ config.currencyName }}" class="d-block">
     <ng-template content>
       <app-shared-staking
         [config]="config"
         [formatMax]="formatMax"
         [hasProvider]="hasProvider"
-        [balance]="balanceFrozen"
+        [balance]="balance"
         [info]="info"
         [prepareTx]="prepareVoteTx"
         [max]="1"

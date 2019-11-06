@@ -46,6 +46,9 @@ export class WalletConnectService {
               result.error(Errors.REJECTED_BY_USER);
             }
           });
+          // hack to make QR code window above ng-bootstrap windows
+          document.getElementById("walletconnect-qrcode-modal").style.zIndex =
+            "9999999999";
           this.connector.on("connect", (error, payload) => {
             if (error) {
               result.error(error);

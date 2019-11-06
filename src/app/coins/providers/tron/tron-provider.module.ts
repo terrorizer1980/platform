@@ -12,15 +12,15 @@ import { DetailsComponent } from "./components/details/details.component";
 import { StakingComponent } from "./components/staking/staking.component";
 import { ReactiveFormsModule } from "@angular/forms";
 import { CoinsComponentsModule } from "../../components/coins-components.module";
-import { FreezeComponent } from "./components/freeze/freeze.component";
 import { WithdrawPopupComponent } from "./components/withdraw-popup/withdraw-popup.component";
+import { StakingStatusComponent } from "./components/staking-status/staking-status.component";
 
 @NgModule({
   declarations: [
     DetailsComponent,
     StakingComponent,
-    FreezeComponent,
-    WithdrawPopupComponent
+    WithdrawPopupComponent,
+    StakingStatusComponent
   ],
   imports: [
     SharedModule,

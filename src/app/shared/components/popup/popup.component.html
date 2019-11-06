@@ -5,6 +5,7 @@
       aria-label="Close"
       (click)="activeModal.dismiss('Cross click')"
       aria-hidden="true"
+      *ngIf="closable"
     />
   </div>
   <div class="pb-4 text-center">
