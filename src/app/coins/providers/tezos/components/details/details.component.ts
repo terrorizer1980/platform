@@ -6,7 +6,11 @@ import { combineLatest, Observable, of } from "rxjs";
 import { TezosConfigService } from "../../services/tezos-config.service";
 import { TezosProviderConfig } from "../../tezos.descriptor";
 import BigNumber from "bignumber.js";
-import { CoinProviderConfig, StakeAction, StakeHolder } from "../../../../coin-provider-config";
+import {
+  CoinProviderConfig,
+  StakeAction,
+  StakeHolder
+} from "../../../../coin-provider-config";
 import { DialogsService } from "../../../../../shared/services/dialogs.service";
 
 @Component({
@@ -73,7 +77,8 @@ export class DetailsComponent {
   }
 
   unstake() {
-    this.tezos.prepareStakeTx(StakeAction.UNSTAKE, null, null)
+    this.tezos
+      .prepareStakeTx(StakeAction.UNSTAKE, null, null)
       .pipe(
         tap(() => (this.isLoading = false), e => (this.isLoading = false)),
         switchMap(_ => this.config)
