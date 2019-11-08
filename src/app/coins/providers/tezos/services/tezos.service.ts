@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { first, map, switchMap, tap } from "rxjs/operators";
+import { first, map, switchMap } from "rxjs/operators";
 import { CoinService } from "../../../services/coin.service";
 import { StakeAction, StakeHolderList } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
@@ -12,15 +12,9 @@ import { ProviderUtils } from "../../provider-utils";
 import { CoinAtlasService } from "../../../services/atlas/coin-atlas.service";
 import { TezosConfigService } from "./tezos-config.service";
 import { TezosProviderConfig } from "../tezos.descriptor";
-import { BlockatlasValidator } from "@trustwallet/rpc";
-import { from, Observable, of, combineLatest, forkJoin } from "rxjs";
+import { BlockatlasDelegation, BlockatlasValidator, TezosContract, TezosHead } from "@trustwallet/rpc";
+import { combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import { CoinType } from "@trustwallet/types";
-import {
-  BlockatlasDelegation,
-  TezosContract,
-  TezosHead,
-  TezosOperationResult
-} from "@trustwallet/rpc";
 
 export const TezosServiceInjectable = [
   TezosConfigService,
@@ -201,7 +195,7 @@ export class TezosService implements CoinService {
     );
   }
 
-  broadcastTx(tx: string): Observable<TezosOperationResult> {
+  broadcastTx(tx: string): Observable<string> {
     return this.tezosRpc.rpc.pipe(
       switchMap(rpc => from(rpc.broadcastTransaction(tx)))
     );
@@ -248,7 +242,7 @@ export class TezosService implements CoinService {
   private stake(
     fromAccount: string,
     toAccount: string
-  ): Observable<TezosOperationResult> {
+  ): Observable<string> {
     return combineLatest([
       this.config,
       this.getHead(),
