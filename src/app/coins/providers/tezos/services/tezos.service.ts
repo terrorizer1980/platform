@@ -1,9 +1,18 @@
 import { Inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { first, map, switchMap, tap } from "rxjs/operators";
+import { combineLatest, forkJoin, from, interval, Observable, of } from "rxjs";
+import { first, map, skipWhile, switchMap } from "rxjs/operators";
+import {
+  BlockatlasDelegation,
+  BlockatlasValidator,
+  TezosContract,
+  TezosHead,
+  TezosOperation
+} from "@trustwallet/rpc";
+import { CoinType } from "@trustwallet/types";
 import { CoinService } from "../../../services/coin.service";
-import { StakeAction, StakeHolderList } from "../../../coin-provider-config";
+import { StakeAction, StakeHolderList, TX_WAIT_CHECK_INTERVAL } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
 import { TezosRpcService } from "./tezos-rpc.service";
 import { TezosUnboundInfoService } from "./tezos-unbound-info.service";
@@ -12,15 +21,8 @@ import { ProviderUtils } from "../../provider-utils";
 import { CoinAtlasService } from "../../../services/atlas/coin-atlas.service";
 import { TezosConfigService } from "./tezos-config.service";
 import { TezosProviderConfig } from "../tezos.descriptor";
-import { BlockatlasValidator } from "@trustwallet/rpc";
-import { from, Observable, of, combineLatest, forkJoin } from "rxjs";
-import { CoinType } from "@trustwallet/types";
-import {
-  BlockatlasDelegation,
-  TezosContract,
-  TezosHead,
-  TezosOperationResult
-} from "@trustwallet/rpc";
+
+
 
 export const TezosServiceInjectable = [
   TezosConfigService,
@@ -201,9 +203,24 @@ export class TezosService implements CoinService {
     );
   }
 
-  broadcastTx(tx: string): Observable<TezosOperationResult> {
+  broadcastTx(tx: string): Observable<string> {
     return this.tezosRpc.rpc.pipe(
-      switchMap(rpc => from(rpc.broadcastTransaction(tx)))
+      switchMap(rpc => from(rpc.broadcastTransaction(tx))),
+    );
+  }
+
+  getOperations(txBlock: string): Observable<TezosOperation[]> {
+    return this.tezosRpc.rpc.pipe(
+      switchMap(rpc => from(rpc.getBlockOperations(txBlock)))
+    );
+  }
+
+  waitForDelegation(fromAccount: string, toAccount: string): Observable<TezosContract> {
+    console.log(`waiting for deletation ${toAccount}`);
+    return interval(TX_WAIT_CHECK_INTERVAL).pipe(
+      switchMap(() => this.getAccountOnce(fromAccount)),
+      skipWhile(account => account.delegate !== toAccount),
+      first()
     );
   }
 
@@ -248,7 +265,7 @@ export class TezosService implements CoinService {
   private stake(
     fromAccount: string,
     toAccount: string
-  ): Observable<TezosOperationResult> {
+  ): Observable<string> {
     return combineLatest([
       this.config,
       this.getHead(),
@@ -295,7 +312,10 @@ export class TezosService implements CoinService {
         };
       }),
       switchMap(tx => this.authService.signTransaction(CoinType.tezos, tx)),
-      switchMap(result => this.broadcastTx(result))
+      switchMap(result => this.broadcastTx(result)),
+      switchMap(txHash => this.waitForDelegation(fromAccount, toAccount)
+        .pipe(map((_) => txHash))
+      )
     );
   }
 }

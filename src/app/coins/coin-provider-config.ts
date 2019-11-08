@@ -64,4 +64,4 @@ export class UnitConverter<T extends CoinProviderConfig> {
 // CONSTS
 export const BALANCE_REFRESH_INTERVAL = 60000;
 export const STAKE_REFRESH_INTERVAL = 115000;
-export const TX_WAIT_CHECK_INTERVAL = 2 * 1000;
+export const TX_WAIT_CHECK_INTERVAL = 10 * 1000;
