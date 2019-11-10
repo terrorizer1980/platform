@@ -12,7 +12,12 @@ import { ProviderUtils } from "../../provider-utils";
 import { CoinAtlasService } from "../../../services/atlas/coin-atlas.service";
 import { TezosConfigService } from "./tezos-config.service";
 import { TezosProviderConfig } from "../tezos.descriptor";
-import { BlockatlasDelegation, BlockatlasValidator, TezosContract, TezosHead } from "@trustwallet/rpc";
+import {
+  BlockatlasDelegation,
+  BlockatlasValidator,
+  TezosContract,
+  TezosHead
+} from "@trustwallet/rpc";
 import { combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import { CoinType } from "@trustwallet/types";
 
@@ -85,8 +90,12 @@ export class TezosService implements CoinService {
 
   getBalanceUSD(): Observable<BigNumber> {
     return this.balance$.pipe(
-      switchMap(balance => forkJoin([of(balance), this.getPriceUSD()])),
-      map(([balance, price]) => balance.multipliedBy(price))
+      switchMap(balance =>
+        forkJoin([of(balance), this.getPriceUSD(), this.getStakedUSD()])
+      ),
+      map(([balance, price, staked]) =>
+        balance.multipliedBy(price).minus(staked)
+      )
     );
   }
 
@@ -239,10 +248,7 @@ export class TezosService implements CoinService {
     return this.stake(fromAccount, null);
   }
 
-  private stake(
-    fromAccount: string,
-    toAccount: string
-  ): Observable<string> {
+  private stake(fromAccount: string, toAccount: string): Observable<string> {
     return combineLatest([
       this.config,
       this.getHead(),
