@@ -107,17 +107,26 @@ export class CosmosService implements CoinService {
   private getTxPayload(
     addressFrom: string,
     addressTo: string,
-    amount: BigNumber
+    amount: BigNumber | null = null
   ): any {
     return this.config.pipe(
-      map(cfg => ({
-        delegatorAddress: addressFrom,
-        validatorAddress: addressTo,
-        amount: {
-          denom: "uatom",
-          amount: amount.toFixed()
-        }
-      }))
+      map(cfg => {
+        const cosmosAmount =
+          amount != null
+            ? {
+                amount: {
+                  denom: "uatom",
+                  amount: amount.toFixed()
+                }
+              }
+            : {};
+
+        return {
+          delegatorAddress: addressFrom,
+          validatorAddress: addressTo,
+          ...cosmosAmount
+        };
+      })
     );
   }
 
@@ -215,40 +224,72 @@ export class CosmosService implements CoinService {
   }
 
   private stake(
-    account: CosmosAccount,
     to: string,
     amount: BigNumber
-  ): Observable<string> {
-    return combineLatest([
-      this.getTxPayload(account.address, to, amount),
-      this.getCosmosTxSkeleton(account)
-    ]).pipe(
+  ): Observable<CosmosBroadcastResult> {
+    return this.getAddress().pipe(
+      switchMap(address => this.getAccountOnce(address)),
+      switchMap(account =>
+        combineLatest([
+          this.getTxPayload(account.address, to, amount),
+          this.getCosmosTxSkeleton(account)
+        ])
+      ),
       map(([payload, txSkeleton]) => ({
         ...txSkeleton,
         ["stakeMessage"]: {
           ...payload
         }
       })),
-      switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx))
+      switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx)),
+      switchMap(tx => this.broadcastTx(tx))
     );
   }
 
-  private unstake(
-    account: CosmosAccount,
+  public unstake(
     to: string,
     amount: BigNumber
-  ): Observable<string> {
-    return combineLatest([
-      this.getTxPayload(account.address, to, amount),
-      this.getCosmosTxSkeleton(account)
-    ]).pipe(
+  ): Observable<CosmosBroadcastResult> {
+    return this.getAddress().pipe(
+      switchMap(address => this.getAccountOnce(address)),
+      switchMap(account =>
+        combineLatest([
+          this.getTxPayload(account.address, to, amount),
+          this.getCosmosTxSkeleton(account)
+        ])
+      ),
       map(([payload, txSkeleton]) => ({
         ...txSkeleton,
         ["unstakeMessage"]: {
           ...payload
         }
       })),
-      switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx))
+      switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx)),
+      switchMap(tx => this.broadcastTx(tx))
+    );
+  }
+
+  public withdraw(to: string): Observable<CosmosBroadcastResult> {
+    return this.getAddress().pipe(
+      switchMap(address => this.getAccountOnce(address)),
+      switchMap(account =>
+        combineLatest([
+          this.getTxPayload(account.address, to),
+          this.getCosmosTxSkeleton(account)
+        ])
+      ),
+      map(([payload, txSkeleton]) => ({
+        ...txSkeleton,
+        ["withdrawStakeRewardMessage"]: {
+          ...payload
+        }
+      })),
+      switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx)),
+      switchMap(tx => {
+        const txJson = JSON.parse(tx);
+        txJson.mode = "block";
+        return this.broadcastTx(JSON.stringify(txJson));
+      })
     );
   }
 
@@ -286,22 +327,16 @@ export class CosmosService implements CoinService {
     addressTo: string,
     amount: BigNumber
   ): Observable<CosmosTx> {
-    return this.getAddress().pipe(
-      switchMap(address => {
-        return this.getAccountOnce(address);
-      }),
-      switchMap((account: CosmosAccount) => {
-        if (action === StakeAction.STAKE) {
-          return this.stake(account, addressTo, amount);
-        } else {
-          return this.unstake(account, addressTo, amount);
-        }
-      }),
-      switchMap(result => {
-        return this.broadcastTx(result);
-      }),
-      switchMap(result => this.waitForTx(result.txhash))
-    );
+    if (action === StakeAction.STAKE) {
+      return this.stake(addressTo, amount).pipe(
+        switchMap(result => this.waitForTx(result.txhash))
+      );
+    } else {
+      return this.withdraw(addressTo).pipe(
+        switchMap(_ => this.unstake(addressTo, amount)),
+        switchMap(result => this.waitForTx(result.txhash))
+      );
+    }
   }
 
   getStakedToValidator(validator: string): Observable<BigNumber> {

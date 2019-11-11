@@ -1,0 +1,17 @@
+<app-popup [closable]="false">
+  <ng-template content>
+    <h4>Withdraw</h4>
+    <ul class="list-group list-group-flush text-left pl-4 pr-4">
+      <li class="list-group-item">
+        <span *ngIf="!steps[0]"><i class="fa fa-spinner fa-spin"></i></span>
+        <span *ngIf="steps[0]"><i class="fa fa-check"></i></span>
+        Signing unstake transaction
+      </li>
+      <li class="list-group-item">
+        <span *ngIf="!steps[1]"><i class="fa fa-spinner fa-spin"></i></span>
+        <span *ngIf="steps[1]"><i class="fa fa-check"></i></span>
+        Signing withdraw rewards transaction
+      </li>
+    </ul>
+  </ng-template>
+</app-popup>
