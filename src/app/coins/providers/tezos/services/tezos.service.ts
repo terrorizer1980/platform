@@ -184,7 +184,10 @@ export class TezosService implements CoinService {
   }
 
   isUnstakeEnabled(): Observable<boolean> {
-    return of(false);
+    return this.getAddress().pipe(
+      switchMap(address => this.getAccountOnce(address)),
+      map(account => account.delegate != null)
+    );
   }
 
   prepareStakeTx(
