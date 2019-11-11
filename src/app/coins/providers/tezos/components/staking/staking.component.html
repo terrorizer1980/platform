@@ -20,7 +20,7 @@
         </ng-template>
 
         <ng-template action let-isLoading="isLoading" let-stake="stake">
-          <loading-button (click)="stake()" [loading]="isLoading">
+          <loading-button (action)="stake()" [loading]="isLoading">
             Stake
           </loading-button>
         </ng-template>

@@ -17,11 +17,19 @@ export class LoadingButtonComponent implements AfterViewInit {
   @Input() disabled = false;
   @Input() classes: string;
   @Input() spinnerColor: string;
+  @Output() action: EventEmitter<any> = new EventEmitter();
 
   classCondition = {};
-
   loader: LoadersCSS = "ball-beat";
   constructor() {}
+
+  performAction() {
+    if (this.loading || this.disabled) {
+      return;
+    }
+
+    this.action.emit(null);
+  }
 
   ngAfterViewInit(): void {
     this.classCondition = {

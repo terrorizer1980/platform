@@ -101,7 +101,7 @@
 
     <div class="col-12 text-center p-0 mt-3">
       <loading-button
-        (click)="unStake(stakeForm.invalid || !stakeForm.controls.amount.value)"
+        (action)="unStake(stakeForm.invalid || !stakeForm.controls.amount.value)"
         [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
         [loading]="isLoading"
       >
