@@ -1,4 +1,4 @@
-import { Component, Inject } from "@angular/core";
+import { Component, Inject, OnDestroy } from "@angular/core";
 import { Observable, of, throwError, timer } from "rxjs";
 import { CosmosService } from "../../services/cosmos.service";
 import { catchError, map, switchMap, tap } from "rxjs/operators";
@@ -16,7 +16,7 @@ import { DialogsService } from "../../../../../shared/services/dialogs.service";
   templateUrl: "./unstaking.component.html",
   styleUrls: ["./unstaking.component.scss"]
 })
-export class UnstakingComponent {
+export class UnstakingComponent implements OnDestroy {
   unstakingStatusRef: NgbModalRef;
   balance = this.cosmos
     .getBalanceCoins()
@@ -61,6 +61,12 @@ export class UnstakingComponent {
 
   formatMax(max: BigNumber): string {
     return max.toFormat(2, BigNumber.ROUND_DOWN);
+  }
+
+  ngOnDestroy(): void {
+    if (this.unstakingStatusRef) {
+      this.unstakingStatusRef.close();
+    }
   }
 
   constructor(

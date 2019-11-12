@@ -1,0 +1,15 @@
+<app-popup [closable]="false">
+  <ng-template content>
+    <h4>Staking</h4>
+    <ul class="list-group list-group-flush text-left pl-4 pr-4">
+      <li class="list-group-item" style="border-bottom: none;">
+        <span *ngIf="!steps[0]"><i class="fa fa-spinner fa-spin"></i></span>
+        <span *ngIf="steps[0]"><i class="fa fa-check"></i></span>
+        Signing transaction
+      </li>
+      <li class="list-group-item text-muted" style="border-top: none;">
+        Please wait. It takes up to 5 minutes for transaction to be broadcasted.
+      </li>
+    </ul>
+  </ng-template>
+</app-popup>

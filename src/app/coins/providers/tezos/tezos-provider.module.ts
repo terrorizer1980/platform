@@ -12,9 +12,10 @@ import { DetailsComponent } from "./components/details/details.component";
 import { StakingComponent } from "./components/staking/staking.component";
 import { ReactiveFormsModule } from "@angular/forms";
 import { CoinsComponentsModule } from "../../components/coins-components.module";
+import { StakingStatusComponent } from "./components/staking-status/staking-status.component";
 
 @NgModule({
-  declarations: [DetailsComponent, StakingComponent],
+  declarations: [DetailsComponent, StakingComponent, StakingStatusComponent],
   imports: [
     SharedModule,
     RouterDataModule,

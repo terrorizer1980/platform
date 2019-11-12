@@ -20,18 +20,25 @@ export class CoinAccountInfoComponent {
   fiatBalance$: Observable<string>;
   fiatStaked$: Observable<string>;
 
-  constructor(private coinAtlasService: CoinAtlasService,
-              private authService: AuthService,
-              private exchangeRateService: ExchangeRateService) {
+  constructor(
+    private coinAtlasService: CoinAtlasService,
+    private authService: AuthService,
+    private exchangeRateService: ExchangeRateService
+  ) {
     const delegations$ = this.getDelegationsBatch();
 
     this.fiatBalance$ = delegations$.pipe(
       map(({ batch, coins }) => {
         const balances = batch.map(val => {
-          const coin = coins.find(c => CoinTypeUtils.symbol(c.coin) === val.coin.symbol);
+          const coin = coins.find(
+            c => CoinTypeUtils.symbol(c.coin) === val.coin.symbol
+          );
           return coin.toCoin(val.balance).multipliedBy(coin.price);
         });
-        const total = balances.reduce((acc, val) => acc.plus(val), new BigNumber(0));
+        const total = balances.reduce(
+          (acc, val) => acc.plus(val),
+          new BigNumber(0)
+        );
         return total.toFormat(2);
       }),
       catchError(_ => of("0.00")),
@@ -41,16 +48,21 @@ export class CoinAccountInfoComponent {
     this.fiatStaked$ = delegations$.pipe(
       map(({ batch, coins }) => {
         // Group delegations by coin symbol
-        const delegationsMap = batch
-          .reduce((acc, del) => {
-            return { ...acc, [del.coin.symbol]: del.delegations };
-          }, {});
+        const delegationsMap = batch.reduce((acc, del) => {
+          return { ...acc, [del.coin.symbol]: del.delegations };
+        }, {});
 
         // Convert the delegation map to an array of values
         const values = Object.keys(delegationsMap).map(coinSymbol => {
           const delegations = delegationsMap[coinSymbol] || [];
-          const coin = coins.find(c => CoinTypeUtils.symbol(c.coin) === coinSymbol);
-          return delegations.reduce((acc, del) => acc.plus(coin.toCoin(del.value).multipliedBy(coin.price)), new BigNumber(0));
+          const coin = coins.find(
+            c => CoinTypeUtils.symbol(c.coin) === coinSymbol
+          );
+          return delegations.reduce(
+            (acc, del) =>
+              acc.plus(coin.toCoin(del.value).multipliedBy(coin.price)),
+            new BigNumber(0)
+          );
         });
 
         return values
@@ -62,13 +74,16 @@ export class CoinAccountInfoComponent {
     );
   }
 
-  private getDelegationsBatch(): Observable<{batch: BlockatlasDelegationBatch[], coins: SupportedCoin[]}> {
+  private getDelegationsBatch(): Observable<{
+    batch: BlockatlasDelegationBatch[];
+    coins: SupportedCoin[];
+  }> {
     return this.getSupportedCoins().pipe(
       switchMap(coins =>
         forkJoin({
           coins: of(coins),
           batch: this.coinAtlasService.getValidatorsBatch(coins)
-        }),
+        })
       ),
       shareReplay(1)
     );
@@ -76,12 +91,14 @@ export class CoinAccountInfoComponent {
 
   private getSupportedCoins(): Observable<SupportedCoin[]> {
     return combineLatest(
-      Coins.map(desc => forkJoin({
-        toCoin: of(desc.toCoin.bind(desc)),
-        coin: of(desc.coin),
-        address: this.getAddress(desc.coin),
-        price: this.exchangeRateService.getRate(desc.coin)
-      }))
+      Coins.map(desc =>
+        forkJoin({
+          toCoin: of(desc.toCoin.bind(desc)),
+          coin: of(desc.coin),
+          address: this.getAddress(desc.coin),
+          price: this.exchangeRateService.getRate(desc.coin)
+        })
+      )
     ).pipe(
       map(coins => coins.filter(c => c.address != null)),
       shareReplay(1)
@@ -89,9 +106,9 @@ export class CoinAccountInfoComponent {
   }
 
   private getAddress(coin: CoinType): Observable<string> {
-    return this.authService.getAddressFromAuthorized(coin).pipe(
-      catchError(_ => of(null))
-    );
+    return this.authService
+      .getAddressFromAuthorized(coin)
+      .pipe(catchError(_ => of(null)));
   }
 }
 
