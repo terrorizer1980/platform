@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { first, map, switchMap } from "rxjs/operators";
+import { catchError, first, map, switchMap } from "rxjs/operators";
 import { CoinService } from "../../../services/coin.service";
 import { StakeAction, StakeHolderList } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
@@ -184,13 +184,11 @@ export class TezosService implements CoinService {
   }
 
   isUnstakeEnabled(): Observable<boolean> {
-    return of(false);
-    /*
     return this.getAddress().pipe(
       switchMap(address => this.getAccountOnce(address)),
-      map(account => account.delegate != null)
+      map(account => account.delegate != null),
+      catchError(() => of(false))
     );
-     */
   }
 
   prepareStakeTx(

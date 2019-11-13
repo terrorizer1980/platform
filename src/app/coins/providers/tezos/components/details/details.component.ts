@@ -23,7 +23,6 @@ export class DetailsComponent {
   isUnstakeEnabled = this.tezos.isUnstakeEnabled();
   hasProvider = this.tezos.hasProvider();
   validators: Observable<StakeHolder[]> = this.tezos.getStakeHolders().pipe(
-    tap(list => console.log(list)),
     map(stakeHolders => {
       return stakeHolders.map(sh => {
         sh.amount = new BigNumber(sh.amount);

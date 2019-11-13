@@ -1,5 +1,5 @@
 import { Component, Inject, OnDestroy } from "@angular/core";
-import { Observable, of, throwError, timer } from "rxjs";
+import { combineLatest, Observable, of, throwError, timer } from "rxjs";
 import { TezosService } from "../../services/tezos.service";
 import { TezosConfigService } from "../../services/tezos-config.service";
 import { TezosProviderConfig } from "../../tezos.descriptor";
@@ -19,8 +19,11 @@ import { StakingStatusComponent } from "../staking-status/staking-status.compone
 export class StakingComponent implements OnDestroy {
   stakingStatusRef: NgbModalRef;
   hasProvider = this.tezos.hasProvider();
-  balance = this.tezos.getBalanceCoins().pipe(
-    map(balance => balance.toFormat(2)),
+  balance = combineLatest([
+    this.config,
+    this.tezos.getBalanceCoins()
+  ]).pipe(
+    map(([config, balance]) => balance.toFormat(config.digits)),
     catchError(_ => of(new BigNumber(0)))
   );
   info = this.tezos.getStakingInfo();
