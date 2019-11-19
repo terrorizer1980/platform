@@ -64,10 +64,11 @@ export class CoinAccountInfoComponent {
             new BigNumber(0)
           );
         });
-
-        return values
-          .reduce((acc, val) => acc.plus(val), new BigNumber(0))
-          .toFormat(2);
+        const total = values.reduce(
+          (acc, val) => acc.plus(val),
+          new BigNumber(0)
+        );
+        return total.toFormat(2);
       }),
       catchError(_ => of("0.00")),
       shareReplay(1)
