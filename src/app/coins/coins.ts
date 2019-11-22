@@ -76,7 +76,7 @@ export const Coins: CoinProviderConfig[] = [
     iconUri: icon(CoinType.tezos),
     config: TezosCoinConfig,
     gas: new BigNumber(11000),
-    fee: new BigNumber(1300),
+    fee: new BigNumber(1500),
     digits: 6,
     toUnits(amount: BigNumber): BigNumber {
       return new UnitConverter(this).toUnits(amount);

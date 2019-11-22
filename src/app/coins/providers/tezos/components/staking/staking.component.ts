@@ -19,6 +19,9 @@ import { StakingStatusComponent } from "../staking-status/staking-status.compone
 export class StakingComponent implements OnDestroy {
   stakingStatusRef: NgbModalRef;
   hasProvider = this.tezos.hasProvider();
+  price = this.tezos.getPriceUSD();
+  validators: Observable<Array<BlockatlasValidator>> = this.tezos.getValidators();
+  isLoading = false;
   balance = combineLatest([
     this.config,
     this.tezos.getBalanceCoins()
@@ -53,11 +56,6 @@ export class StakingComponent implements OnDestroy {
       })
     );
   };
-  price = this.tezos.getPriceUSD();
-  validators: Observable<
-    Array<BlockatlasValidator>
-  > = this.tezos.getValidators();
-  isLoading = false;
 
   constructor(
     @Inject(TezosConfigService)

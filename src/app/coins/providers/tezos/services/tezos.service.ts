@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { catchError, first, map, switchMap } from "rxjs/operators";
+import { catchError, first, map, switchMap, tap } from "rxjs/operators";
 import { CoinService } from "../../../services/coin.service";
 import { StakeAction, StakeHolderList } from "../../../coin-provider-config";
 import { ExchangeRateService } from "../../../../shared/services/exchange-rate.service";
@@ -204,7 +204,8 @@ export class TezosService implements CoinService {
           case StakeAction.UNSTAKE:
             return this.unstake(address);
         }
-      })
+      }),
+      tap(hash => console.log(`Tezos tx hash: ${hash}`))
     );
   }
 
@@ -259,10 +260,10 @@ export class TezosService implements CoinService {
       this.getManagerKey(fromAccount),
       this.getAccountOnce(fromAccount)
     ]).pipe(
-      map(([config, head, key, account]) => {
+      map(([config, head, managerKey, account]) => {
         let reveal = [];
         let counter = account.counter.toNumber();
-        if (key == null) {
+        if (managerKey == null) {
           reveal = [
             {
               source: fromAccount,
