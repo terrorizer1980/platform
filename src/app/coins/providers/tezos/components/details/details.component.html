@@ -8,6 +8,21 @@
       (stake)="stake()"
       (unstake)="unstake()"
     >
+      <ng-template withdraw let-details>
+        <loading-button
+          *ngIf="details.hasProvider"
+          [disabled]="!details.unstakeEnabled"
+          [loading]="isLoading"
+          classes="btn btn-outline-primary btn-lg col-12 withdraw"
+          spinnerColor="#3375bb"
+          (action)="unstake(details.unstakeEnabled, details.config)"
+        >
+          <div>Withdraw</div>
+          <div *ngIf="insufficientBalance | async" class="text-muted withdraw-locked">
+            Insufficient balance (min 0.0016 XTZ)
+          </div>
+        </loading-button>
+      </ng-template>
     </app-shared-details>
   </ng-template>
 </app-content>

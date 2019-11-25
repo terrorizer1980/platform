@@ -184,10 +184,20 @@ export class TezosService implements CoinService {
   }
 
   isUnstakeEnabled(): Observable<boolean> {
-    return this.getAddress().pipe(
+    const hasDelegation = this.getAddress().pipe(
       switchMap(address => this.getAccountOnce(address)),
       map(account => account.delegate != null),
       catchError(() => of(false))
+    );
+
+    const hasMinimumBalance = combineLatest(
+      [this.config, this.getBalanceUnits()
+    ]).pipe(
+      map(([config, balance]) => balance.comparedTo(config.fee) > 0)
+    );
+
+    return combineLatest([hasDelegation, hasMinimumBalance]).pipe(
+      map(([del, bal]) => del && bal)
     );
   }
 

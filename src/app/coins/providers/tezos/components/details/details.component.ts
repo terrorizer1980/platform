@@ -22,6 +22,12 @@ export class DetailsComponent {
   isLoading = false;
   isUnstakeEnabled = this.tezos.isUnstakeEnabled();
   hasProvider = this.tezos.hasProvider();
+  insufficientBalance = combineLatest([
+    this.config,
+    this.tezos.getBalanceUnits()
+  ]).pipe(
+    map(([config, balance]) => balance.comparedTo(config.fee) <= 0)
+  );
   validators: Observable<StakeHolder[]> = this.tezos.getStakeHolders().pipe(
     map(stakeHolders => {
       return stakeHolders.map(sh => {
