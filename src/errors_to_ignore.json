@@ -1,1 +1,10 @@
-["rejectedByUser"]
+{
+  "display": [
+    "rejectedByUser"
+  ],
+  "report": [
+    "rejectedByUser",
+    "wallet_coin_not_supported"
+  ]
+}
+

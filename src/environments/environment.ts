@@ -5,7 +5,7 @@ import { CoinType, CoinTypeUtils } from "@trustwallet/types";
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
+  production: true,
   dbName: "trustwallet",
   walletConnectBridge: "https://bridge.walletconnect.org",
   rpcEndpoint: (coin: CoinType) =>
