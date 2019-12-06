@@ -12,14 +12,11 @@ import { ProviderUtils } from "../../provider-utils";
 import { CoinAtlasService } from "../../../services/atlas/coin-atlas.service";
 import { TezosConfigService } from "./tezos-config.service";
 import { TezosProviderConfig } from "../tezos.descriptor";
-import {
-  BlockatlasDelegation,
-  BlockatlasValidator,
-  TezosContract,
-  TezosHead
-} from "@trustwallet/rpc";
+import { BlockatlasDelegation, BlockatlasValidator, TezosContract, TezosHead } from "@trustwallet/rpc";
 import { combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import { CoinType } from "@trustwallet/types";
+import * as Sentry from "@sentry/browser";
+import { Severity } from "@sentry/browser";
 
 export const TezosServiceInjectable = [
   TezosConfigService,
@@ -214,8 +211,7 @@ export class TezosService implements CoinService {
           case StakeAction.UNSTAKE:
             return this.unstake(address);
         }
-      }),
-      tap(hash => console.log(`Tezos tx hash: ${hash}`))
+      })
     );
   }
 
@@ -310,7 +306,21 @@ export class TezosService implements CoinService {
         };
       }),
       switchMap(tx => this.authService.signTransaction(CoinType.tezos, tx)),
-      switchMap(result => this.broadcastTx(result))
+      tap(hash => {
+        const message = `Tezos Tx signed. Encoded: ${hash}. Address: ${fromAccount}`;
+        console.log(message);
+        Sentry.captureMessage(message, Severity.Info);
+      }),
+      switchMap(result => this.broadcastTx(result)),
+      tap(hash => {
+        const message = `Tezos Tx broadcasted. Hash: ${hash}. Address: ${fromAccount}`;
+        console.log(message);
+        Sentry.captureMessage(message, Severity.Info);
+      }, error => {
+        const message = `Tezos broadcasted failed! Error: ${JSON.stringify(error)}. Address: ${fromAccount}`;
+        console.log(message);
+        Sentry.captureMessage(message, Severity.Error);
+      }),
     );
   }
 }
