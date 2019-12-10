@@ -36,7 +36,7 @@
           </ng-template>
           <ng-template right>
             <span class="text-dark">
-              {{ item.amount }} {{ item.coin.currencySymbol }}
+              {{ item.amount.toFixed(2) }} {{ item.coin.currencySymbol }}
             </span>
             <span class="ml-1"
               ><i class="mr-0 text-muted fa fa-chevron-down"></i
@@ -58,7 +58,7 @@
           </ng-template>
           <ng-template right>
             <div class="text-dark">
-              {{ item.amount }} {{ item.coin.currencySymbol }}
+              {{ item.amount.toFixed(2) }} {{ item.coin.currencySymbol }}
             </div>
           </ng-template>
         </app-block-between>
@@ -94,6 +94,10 @@
           <div *ngIf="stakeForm.controls.amount.errors?.min">
             Minimum deposit value is
             {{ stakeForm.controls.amount.errors?.min }}
+          </div>
+          <div *ngIf="stakeForm.controls.amount.errors?.restriction">
+            You don't have balance to cover the withdraw fees
+            ({{ stakeForm.controls.amount.errors?.restriction }} {{config.currencySymbol}})
           </div>
         </div>
       </div>
