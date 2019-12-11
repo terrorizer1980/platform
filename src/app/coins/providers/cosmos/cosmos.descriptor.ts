@@ -6,7 +6,7 @@ import {
 import { CosmosConfigService } from "./services/cosmos-config.service";
 import { CosmosProviderModule } from "./cosmos-provider.module";
 import { Type } from "@angular/core";
-import { Observable } from "rxjs";
+import { Observable, of } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import { map } from "rxjs/operators";
 
@@ -27,7 +27,8 @@ export function CosmosChainId(
   http: HttpClient,
   endpoint: string
 ): Observable<string> {
-  return http.get(`${endpoint}/node_info`).pipe(map((res: any) => res.network));
+  return of("cosmoshub-3");
+  // return http.get(`${endpoint}/node_info`).pipe(map((res: any) => res.network));
 }
 
 export interface CosmosProviderConfig
