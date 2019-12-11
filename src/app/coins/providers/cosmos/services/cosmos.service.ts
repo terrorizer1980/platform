@@ -136,7 +136,7 @@ export class CosmosService implements CoinService {
         combineLatest([config.chainId(this.http, config.endpoint), of(config)])
       ),
       map(([chain, config]) => ({
-        typePrefix: "auth/StdTx",
+        typePrefix: "cosmos-sdk/StdTx",
         accountNumber: account.accountNumber,
         sequence: account.sequence,
         chainId: chain,
