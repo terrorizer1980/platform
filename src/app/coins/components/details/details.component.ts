@@ -55,6 +55,7 @@ export class DetailsComponent implements AfterViewInit {
   @Input() releaseDate: Observable<string>;
   @Input() hasProvider: Observable<boolean>;
   @Input() config: Observable<CoinProviderConfig>;
+  @Input() balance: Observable<BigNumber>;
   @Input() additionals: Observable<AdditionalInfo[]>;
   @Output() stake = new EventEmitter();
   @Output() unstake = new EventEmitter();

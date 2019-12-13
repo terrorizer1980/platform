@@ -12,7 +12,12 @@ import { ProviderUtils } from "../../provider-utils";
 import { CoinAtlasService } from "../../../services/atlas/coin-atlas.service";
 import { TezosConfigService } from "./tezos-config.service";
 import { TezosProviderConfig } from "../tezos.descriptor";
-import { BlockatlasDelegation, BlockatlasValidator, TezosContract, TezosHead } from "@trustwallet/rpc";
+import {
+  BlockatlasDelegation,
+  BlockatlasValidator,
+  TezosContract,
+  TezosHead
+} from "@trustwallet/rpc";
 import { combineLatest, forkJoin, from, Observable, of } from "rxjs";
 import { CoinType } from "@trustwallet/types";
 import * as Sentry from "@sentry/browser";
@@ -187,11 +192,10 @@ export class TezosService implements CoinService {
       catchError(() => of(false))
     );
 
-    const hasMinimumBalance = combineLatest(
-      [this.config, this.getBalanceUnits()
-    ]).pipe(
-      map(([config, balance]) => balance.comparedTo(config.fee) > 0)
-    );
+    const hasMinimumBalance = combineLatest([
+      this.config,
+      this.getBalanceUnits()
+    ]).pipe(map(([config, balance]) => balance.comparedTo(config.fee) > 0));
 
     return combineLatest([hasDelegation, hasMinimumBalance]).pipe(
       map(([del, bal]) => del && bal)
@@ -312,15 +316,20 @@ export class TezosService implements CoinService {
         Sentry.captureMessage(message, Severity.Info);
       }),
       switchMap(result => this.broadcastTx(result)),
-      tap(hash => {
-        const message = `Tezos Tx broadcasted. Hash: ${hash}. Address: ${fromAccount}`;
-        console.log(message);
-        Sentry.captureMessage(message, Severity.Info);
-      }, error => {
-        const message = `Tezos broadcasted failed! Error: ${JSON.stringify(error)}. Address: ${fromAccount}`;
-        console.log(message);
-        Sentry.captureMessage(message, Severity.Error);
-      }),
+      tap(
+        hash => {
+          const message = `Tezos Tx broadcasted. Hash: ${hash}. Address: ${fromAccount}`;
+          console.log(message);
+          Sentry.captureMessage(message, Severity.Info);
+        },
+        error => {
+          const message = `Tezos broadcasted failed! Error: ${JSON.stringify(
+            error
+          )}. Address: ${fromAccount}`;
+          console.log(message);
+          Sentry.captureMessage(message, Severity.Error);
+        }
+      )
     );
   }
 }

@@ -25,6 +25,7 @@ interface PendingWithdrawals {
 export class DetailsComponent {
   isUnstakeEnabled = this.cosmos.isUnstakeEnabled();
   hasProvider = this.cosmos.hasProvider();
+  balance = this.cosmos.getBalanceCoins();
   validators: Observable<StakeHolder[]> = this.cosmos.getStakeHolders().pipe(
     map(stakeHolders => {
       return stakeHolders.map(sh => {

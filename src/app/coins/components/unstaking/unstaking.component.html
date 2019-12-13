@@ -96,8 +96,10 @@
             {{ stakeForm.controls.amount.errors?.min }}
           </div>
           <div *ngIf="stakeForm.controls.amount.errors?.restriction">
-            You don't have balance to cover the withdraw fees
-            ({{ stakeForm.controls.amount.errors?.restriction }} {{config.currencySymbol}})
+            You don't have balance to cover the withdraw fees ({{
+              stakeForm.controls.amount.errors?.restriction
+            }}
+            {{ config.currencySymbol }})
           </div>
         </div>
       </div>
@@ -105,7 +107,9 @@
 
     <div class="col-12 text-center p-0 mt-3">
       <loading-button
-        (action)="unStake(stakeForm.invalid || !stakeForm.controls.amount.value)"
+        (action)="
+          unStake(stakeForm.invalid || !stakeForm.controls.amount.value)
+        "
         [disabled]="stakeForm.invalid || !stakeForm.controls.amount.value"
         [loading]="isLoading"
       >

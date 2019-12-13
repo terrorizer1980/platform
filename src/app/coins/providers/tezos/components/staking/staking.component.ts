@@ -20,12 +20,11 @@ export class StakingComponent implements OnDestroy {
   stakingStatusRef: NgbModalRef;
   hasProvider = this.tezos.hasProvider();
   price = this.tezos.getPriceUSD();
-  validators: Observable<Array<BlockatlasValidator>> = this.tezos.getValidators();
+  validators: Observable<
+    Array<BlockatlasValidator>
+  > = this.tezos.getValidators();
   isLoading = false;
-  balance = combineLatest([
-    this.config,
-    this.tezos.getBalanceCoins()
-  ]).pipe(
+  balance = combineLatest([this.config, this.tezos.getBalanceCoins()]).pipe(
     map(([config, balance]) => balance.toFormat(config.digits)),
     catchError(_ => of(new BigNumber(0)))
   );
