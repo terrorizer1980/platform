@@ -13,7 +13,7 @@ export class SentryErrorHandler implements ErrorHandler {
     if (!this.injector.get(ErrorsService).isIgnored(error, IgnoreType.report)) {
       console.error(`Captured error: ${error}`);
       if (environment.production) {
-        Sentry.captureException(error);
+        // Sentry.captureException(error);
       }
     }
   }

@@ -12,14 +12,12 @@ import { CoinTypesInjector } from "../../coin-types-injector";
 import { CosmosProviderConfig } from "./cosmos.descriptor";
 import { UnstakingComponent } from "./components/unstaking/unstaking.component";
 import { CoinsComponentsModule } from "../../components/coins-components.module";
-import { UnstakingStatusComponent } from "./components/unstaking-status/unstaking-status.component";
 
 @NgModule({
   declarations: [
     DetailsComponent,
     StakingComponent,
     UnstakingComponent,
-    UnstakingStatusComponent
   ],
   imports: [
     SharedModule,

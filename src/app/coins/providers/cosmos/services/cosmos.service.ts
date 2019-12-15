@@ -11,7 +11,7 @@ import {
 } from "rxjs";
 import { HttpClient } from "@angular/common/http";
 import BigNumber from "bignumber.js";
-import { first, map, skipWhile, switchMap } from "rxjs/operators";
+import { catchError, first, map, skipWhile, switchMap } from "rxjs/operators";
 import { CosmosAccount, CosmosBroadcastResult } from "@trustwallet/rpc";
 import { CosmosDelegation } from "@trustwallet/rpc/src/cosmos/models/CosmosDelegation";
 import { BlockatlasValidator } from "@trustwallet/rpc/src/blockatlas/models/BlockatlasValidator";
@@ -104,55 +104,6 @@ export class CosmosService implements CoinService {
     );
   }
 
-  private getTxPayload(
-    addressFrom: string,
-    addressTo: string,
-    amount: BigNumber | null = null
-  ): any {
-    return this.config.pipe(
-      map(cfg => {
-        const cosmosAmount =
-          amount != null
-            ? {
-                amount: {
-                  denom: "uatom",
-                  amount: amount.toFixed()
-                }
-              }
-            : {};
-
-        return {
-          delegatorAddress: addressFrom,
-          validatorAddress: addressTo,
-          ...cosmosAmount
-        };
-      })
-    );
-  }
-
-  private getCosmosTxSkeleton(account: CosmosAccount): Observable<any> {
-    return this.config.pipe(
-      switchMap(config =>
-        combineLatest([config.chainId(this.http, config.endpoint), of(config)])
-      ),
-      map(([chain, config]) => ({
-        typePrefix: "cosmos-sdk/StdTx",
-        accountNumber: account.accountNumber,
-        sequence: account.sequence,
-        chainId: chain,
-        fee: {
-          amounts: [
-            {
-              denom: "uatom",
-              amount: new BigNumber(config.fee).toFixed()
-            }
-          ],
-          gas: config.gas.toFixed()
-        }
-      }))
-    );
-  }
-
   getAddressDelegations(address: string): Observable<CosmosDelegation[]> {
     return this.cosmosRpc.rpc.pipe(
       switchMap(rpc => from(rpc.listDelegations(address)))
@@ -227,21 +178,11 @@ export class CosmosService implements CoinService {
     to: string,
     amount: BigNumber
   ): Observable<CosmosBroadcastResult> {
-    return this.getAddress().pipe(
-      switchMap(address => this.getAccountOnce(address)),
-      switchMap(account =>
-        combineLatest([
-          this.getTxPayload(account.address, to, amount),
-          this.getCosmosTxSkeleton(account)
-        ])
-      ),
-      map(([payload, txSkeleton]) => ({
-        ...txSkeleton,
-        ["stakeMessage"]: {
-          ...payload
-        }
-      })),
+    return this.buildStakeTx(to, amount, true).pipe(
       switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx)),
+      catchError( _ => this.buildStakeTx(to, amount)
+        .pipe(switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx)))
+      ),
       switchMap(tx => this.broadcastTx(tx))
     );
   }
@@ -250,47 +191,150 @@ export class CosmosService implements CoinService {
     to: string,
     amount: BigNumber
   ): Observable<CosmosBroadcastResult> {
-    return this.getAddress().pipe(
-      switchMap(address => this.getAccountOnce(address)),
-      switchMap(account =>
-        combineLatest([
-          this.getTxPayload(account.address, to, amount),
-          this.getCosmosTxSkeleton(account)
-        ])
-      ),
-      map(([payload, txSkeleton]) => ({
-        ...txSkeleton,
-        ["unstakeMessage"]: {
-          ...payload
-        }
-      })),
+    return this.buildUnstakeTx(to, amount, true).pipe(
       switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx)),
+      catchError( _ => this.buildUnstakeTx(to, amount)
+        .pipe(switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx)))
+      ),
       switchMap(tx => this.broadcastTx(tx))
     );
   }
 
-  public withdraw(to: string): Observable<CosmosBroadcastResult> {
-    return this.getAddress().pipe(
-      switchMap(address => this.getAccountOnce(address)),
-      switchMap(account =>
-        combineLatest([
-          this.getTxPayload(account.address, to),
-          this.getCosmosTxSkeleton(account)
-        ])
-      ),
-      map(([payload, txSkeleton]) => ({
-        ...txSkeleton,
-        ["withdrawStakeRewardMessage"]: {
-          ...payload
+  buildStakeTx(validator: string, amount: BigNumber, oldFormat: boolean = false): Observable<any> {
+    return combineLatest([
+      this.config,
+      this.getCurrentAccount(),
+      this.getChainId()
+    ]).pipe(
+      map(([config, account, chain]) => {
+        if (oldFormat) {
+          return {
+            typePrefix: "cosmos-sdk/StdTx",
+            accountNumber: account.accountNumber,
+            sequence: account.sequence,
+            chainId: chain,
+            fee: {
+              amounts: [
+                {
+                  denom: "uatom",
+                  amount: new BigNumber(config.fee).toFixed()
+                }
+              ],
+              gas: config.gas.toFixed()
+            },
+            stakeMessage: {
+              delegatorAddress: account.address,
+              validatorAddress: validator,
+              amount: {
+                denom: "uatom",
+                amount: amount.toFixed()
+              }
+            }
+          };
         }
-      })),
-      switchMap(tx => this.authService.signTransaction(CoinType.cosmos, tx)),
-      switchMap(tx => {
-        const txJson = JSON.parse(tx);
-        txJson.mode = "block";
-        return this.broadcastTx(JSON.stringify(txJson));
+        return {
+          typePrefix: "cosmos-sdk/StdTx",
+          accountNumber: account.accountNumber,
+          sequence: account.sequence,
+          chainId: chain,
+          fee: {
+            amounts: [
+              {
+                denom: "uatom",
+                amount: new BigNumber(config.fee).toFixed()
+              }
+            ],
+            gas: config.gas.toFixed()
+          },
+          messages: [
+            {
+              stakeMessage: {
+                delegatorAddress: account.address,
+                validatorAddress: validator,
+                amount: {
+                  denom: "uatom",
+                  amount: amount.toFixed()
+                }
+              }
+            }
+          ]
+        };
       })
     );
+  }
+
+  buildUnstakeTx(validator: string, amount: BigNumber, oldFormat: boolean = false): Observable<any> {
+    return combineLatest([
+      this.config,
+      this.getCurrentAccount(),
+      this.getChainId()
+    ]).pipe(
+      map(([config, account, chain]) => {
+        if (oldFormat) {
+          return {
+            typePrefix: "cosmos-sdk/StdTx",
+            accountNumber: account.accountNumber,
+            sequence: account.sequence,
+            chainId: chain,
+            fee: {
+              amounts: [
+                {
+                  denom: "uatom",
+                  amount: new BigNumber(config.fee).toFixed()
+                }
+              ],
+              gas: config.gas.toFixed()
+            },
+            unstakeMessage: {
+              delegatorAddress: account.address,
+              validatorAddress: validator,
+              amount: {
+                denom: "uatom",
+                amount: amount.toFixed()
+              }
+            }
+          };
+        }
+
+        return {
+          typePrefix: "cosmos-sdk/StdTx",
+          accountNumber: account.accountNumber,
+          sequence: account.sequence,
+          chainId: chain,
+          fee: {
+            amounts: [
+              {
+                denom: "uatom",
+                amount: new BigNumber(config.fee).toFixed()
+              }
+            ],
+            gas: config.gas.toFixed()
+          },
+          messages: [
+            {
+              withdrawStakeRewardMessage: {
+                delegatorAddress: account.address,
+                validatorAddress: validator,
+              },
+            },
+            {
+              unstakeMessage: {
+                delegatorAddress: account.address,
+                validatorAddress: validator,
+                amount: {
+                  denom: "uatom",
+                  amount: amount.toFixed()
+                }
+              }
+            }
+          ]
+        };
+      })
+    );
+  }
+
+  getCurrentAccount(): Observable<CosmosAccount> {
+    return this.getAddress().pipe(switchMap(address => this.getAccountOnce(address)));
   }
 
   getStakePendingBalance(): Observable<BigNumber> {
@@ -316,7 +360,6 @@ export class CosmosService implements CoinService {
   broadcastTx(tx: string): Observable<CosmosBroadcastResult> {
     return this.cosmosRpc.rpc.pipe(
       switchMap(rpc => {
-        console.log("broadcast tx");
         return from(rpc.broadcastTransaction(tx));
       })
     );
@@ -332,8 +375,7 @@ export class CosmosService implements CoinService {
         switchMap(result => this.waitForTx(result.txhash))
       );
     } else {
-      return this.withdraw(addressTo).pipe(
-        switchMap(_ => this.unstake(addressTo, amount)),
+      return this.unstake(addressTo, amount).pipe(
         switchMap(result => this.waitForTx(result.txhash))
       );
     }
@@ -376,16 +418,22 @@ export class CosmosService implements CoinService {
   waitForTx(txhash: string): Observable<CosmosTx> {
     console.log(`waiting for tx ${txhash}`);
     return interval(TX_WAIT_CHECK_INTERVAL).pipe(
-      switchMap(() => this.getStakingTransactions()),
-      map(txs => txs.find(tx => tx.txhash === txhash)),
+      switchMap((_) => this.getTransaction(txhash)),
       skipWhile(tx => !tx),
       first()
     );
   }
 
-  getStakingTransactions(): Observable<CosmosTx[]> {
-    return combineLatest([this.cosmosRpc.rpc, this.getAddress()]).pipe(
-      switchMap(([rpc, address]) => rpc.listDelegationsTransactions(address))
+  getTransaction(txhash: string): Observable<CosmosTx> {
+    return this.cosmosRpc.rpc.pipe(
+      switchMap((rpc) => from(rpc.getTransaction(txhash))),
+      catchError((_) => of(null))
+    );
+  }
+
+  getChainId(): Observable<string> {
+    return this.config.pipe(
+      switchMap((cfg) => cfg.chainId(this.http, cfg.endpoint))
     );
   }
 }
