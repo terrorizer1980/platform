@@ -6,5 +6,5 @@ export const environment = {
   walletConnectBridge: "https://bridge.walletconnect.org",
   rpcEndpoint: (coin: CoinType) =>
     `https://${CoinTypeUtils.id(coin)}-rpc.trustwalletapp.com`,
-  blockatlasEndpoint: "https://blockatlas.trustwalletapp.com"
+  blockatlasEndpoint: "https://blockatlas.trustwallet.com"
 };
