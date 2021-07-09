@@ -46,7 +46,7 @@
     "i": "^0.3.6",
     "loaders.css": "^0.1.2",
     "localforage": "^1.7.3",
-    "moment": "^2.24.0",
+    "moment": "^2.29.1",
     "nanoid": "^2.1.2",
     "ngforage": "^5.0.1",
     "ngx-loaders-css": "^1.0.2",
